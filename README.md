@@ -116,7 +116,7 @@ hitsanat/
     ├── testing/               # Layered test strategy (Vitest, Docker, Playwright)
     ├── ci-cd/                 # GitHub Actions, local-ci gates, deployment
     ├── team/                  # 5-person ownership lanes, git workflows, CODEOWNERS
-    ├── deployment/            # Free-tier cloud guide (Vercel, Render, Supabase)
+    ├── deployment/            # Cloud deployment guide (Vercel & Railway)
     ├── adr/                   # Architecture Decision Records (ADR-0001 to ADR-0017)
     ├── development/           # Local setup, coding standards & contributor handbook
     └── roadmap/               # 5 Release phases, task assignments & traceability
@@ -148,10 +148,10 @@ The complete engineering documentation suite is available under [`docs/`](docs/R
 | :--- | :--- |
 | **Frontend Applications** | Next.js 15 (App Router), React 19, Tailwind CSS, shadcn/ui (preset `b1D0f7S7`), TanStack Query v5, React Hook Form |
 | **Backend REST API** | Node.js 24, Express.js, TypeScript, Better Auth, Zod, OpenAPI 3.1 / Swagger UI |
-| **Persistence & ORM** | PostgreSQL 15 (Supabase), Drizzle ORM, Drizzle Kit |
+| **Persistence & ORM** | PostgreSQL 15 (Railway Private Network), Drizzle ORM, Drizzle Kit |
 | **Calendar Engine** | `ethiopian-calendar-new` (bidirectional Gregorian $\leftrightarrow$ Ethiopian conversion) |
 | **Quality & Tooling** | Turborepo, Biome, Vitest, Playwright, Docker Compose |
-| **Cloud Hosting** | Vercel (Edge frontends), Render (API web service), Supabase (PostgreSQL Pooler) |
+| **Cloud Hosting** | Vercel (Edge frontends), Railway (Always-on Express API, Telegram Worker, PostgreSQL 15) |
 
 ---
 
@@ -242,24 +242,23 @@ graph LR
         Browser[Leadership Admin & Public Browsers]
     end
 
-    subgraph Vercel
-        VercelAdmin[admin-hitsanat.vercel.app]
-        VercelPortfolio[hitsanat.vercel.app]
+    subgraph Vercel Edge Network
+        VercelAdmin[admin.hitsanat.org<br/>Next.js 15]
+        VercelPortfolio[hitsanat.org<br/>Next.js 15]
     end
 
-    subgraph Render
-        RenderApi[api-hitsanat.onrender.com<br/>Express API]
-    end
-
-    subgraph Supabase
-        SupabaseDb[(PostgreSQL 15 Pooler<br/>Port 6543)]
+    subgraph Railway Canvas [Always-On / Private Network]
+        RailwayApi[api.hitsanat.org<br/>Express.js REST API]
+        RailwayBot[Telegram Bot Worker]
+        RailwayDb[(PostgreSQL 15 Database)]
     end
 
     Browser --> VercelAdmin
     Browser --> VercelPortfolio
-    VercelAdmin --> RenderApi
-    VercelPortfolio --> RenderApi
-    RenderApi --> SupabaseDb
+    VercelAdmin --> RailwayApi
+    VercelPortfolio --> RailwayApi
+    RailwayApi -->|Private Network| RailwayDb
+    RailwayBot -->|Private Network| RailwayDb
 ```
 
 ---
