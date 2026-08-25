@@ -36,8 +36,8 @@ mindmap
 ## 2. Granular Non-Functional Requirements
 
 ### 2.1 Performance & Latency
-- **NFR-01.1 (API Latency):** Under standard load, 95% of API requests (`p95`) must resolve in $< 400\text{ ms}$, excluding network transit.
-- **NFR-01.2 (Cold Start Tolerance):** On the Render free-tier instance, cold-start response time must not exceed $45\text{ seconds}$, with health-check ping mechanisms in place to keep the service warm during critical operating windows (e.g., Saturday & Sunday mornings).
+- **NFR-01.1 (API Latency):** Under standard load, 95% of API requests (`p95`) must resolve in $< 200\text{ ms}$, excluding client network transit.
+- **NFR-01.2 (Always-On Availability):** Hosted on Railway with 24/7 continuous uptime, ensuring zero cold-start delay during critical operating windows (e.g., Saturday & Sunday mornings) with $p95$ API latency $< 100\text{ ms}$.
 - **NFR-01.3 (Frontend Bundle Size):** Next.js initial JavaScript bundle for mobile clients must remain $< 180\text{ KB}$ gzipped.
 - **NFR-01.4 (Database Query Performance):** All transactional queries must complete in $< 50\text{ ms}$. Complex aggregation queries for periodic reports must complete in $< 300\text{ ms}$.
 

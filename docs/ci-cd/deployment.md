@@ -1,7 +1,7 @@
 # CI/CD: Continuous Deployment & Release Pipeline
 
 ## Hitsanat Kifl Children's Ministry Management System
-**Document Version:** 2.1  
+**Document Version:** 2.2  
 
 ---
 
@@ -13,25 +13,25 @@ sequenceDiagram
     actor Dev as Developer / Lead
     participant GitHub as GitHub Actions (CI)
     participant Vercel as Vercel (Frontend Hosting)
-    participant Render as Render (API Hosting)
-    participant Supabase as Supabase PostgreSQL
+    participant Railway as Railway (Backend, Bot & DB)
 
     Dev->>GitHub: Merges Approved PR into main
-    GitHub->>GitHub: Runs Full Quality Pipeline
+    GitHub->>GitHub: Runs Full Quality Pipeline (pnpm prepare)
     
     par Frontend Deployments
         GitHub->>Vercel: Triggers Production Build
-        Vercel-->>Vercel: Deploys apps/admin to admin-hitsanat.vercel.app
-        Vercel-->>Vercel: Deploys apps/portfolio to hitsanat.vercel.app
-    and Backend API Deployment
-        GitHub->>Render: Triggers Webhook Deploy
-        Render->>Supabase: Runs pnpm db:migrate (Automatic Migration)
-        Render-->>Render: Starts Express Server at api-hitsanat.onrender.com
+        Vercel-->>Vercel: Deploys apps/admin to admin.hitsanat.org
+        Vercel-->>Vercel: Deploys apps/portfolio to hitsanat.org
+    and Backend & Database Deployment
+        GitHub->>Railway: Triggers Auto-Deploy via GitHub Integration
+        Railway->>Railway: Runs pnpm db:migrate (Automatic DB Migration)
+        Railway-->>Railway: Starts Express Server at api.hitsanat.org & Telegram Worker
     end
 ```
 
 ---
 
-## 2. Preview Environments
-- **Vercel Previews:** Every Pull Request automatically receives isolated preview URLs for `apps/admin` and `apps/portfolio` to facilitate visual review.
-- **Rollback Strategy:** Vercel and Render provide instant 1-click rollbacks to the last known healthy deployment if runtime regressions occur.
+## 2. Preview Environments & Rollback Safety
+- **Vercel Previews:** Every Pull Request automatically receives isolated preview URLs for `apps/admin` and `apps/portfolio` to facilitate UI review.
+- **Railway Ephemeral PR Environments:** Railway automatically provisions isolated preview backend containers if required for complex feature testing.
+- **Rollback Strategy:** Both Vercel and Railway provide instant 1-click rollbacks to the last known healthy deployment if runtime regressions occur.

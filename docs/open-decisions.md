@@ -1,7 +1,7 @@
 # Open Architecture Decisions & Ambiguity Registry
 
 ## Hitsanat Kifl Children's Ministry Management System
-**Document Version:** 2.1  
+**Document Version:** 2.2  
 **Status:** Authoritative Ambiguity & Trade-off Record  
 
 ---
@@ -14,22 +14,21 @@ In accordance with the Source-of-Truth governance rules, all unresolved technica
 
 ### OD-01: Telegram Bot Deployment Platform & Runtime Model
 
-- **Problem:** Where and how should the standalone Telegram Bot worker service (`apps/telegram`) be hosted within the free-tier infrastructure budget?
-- **Source of Ambiguity:** Section 21 of the system specifications explicitly designates the Telegram deployment provider as an `OPEN DECISION / TO BE DEFINED`.
+- **Problem:** Where and how should the standalone Telegram Bot worker service (`apps/telegram`) be hosted within the infrastructure budget?
+- **Source of Ambiguity:** Section 21 of the system specifications designated the Telegram deployment provider as an `OPEN DECISION`.
 - **Affected Modules:** `apps/telegram`, `apps/api/src/modules/announcements`, `packages/domain/announcements`.
-- **Possible Options:**
-  1. **Option A (Render Background Worker):** Deploy as a background worker on Render (Note: Render background workers require a paid plan on Render).
-  2. **Option B (Fly.io Free Tier):** Deploy as a single small container on Fly.io's free allowance ($3\times 256\text{ MB}$ VMs).
-  3. **Option C (Railway / Zeabur Free Tier):** Deploy as a persistent lightweight Node.js container on Railway/Zeabur free credit.
-  4. **Option D (Serverless Webhook Handler inside Express API):** Convert Telegram integration to an incoming/outgoing webhook route inside `apps/api` instead of a separate long-polling bot worker.
-- **Recommended Option:** **Option D** for free-tier simplicity during initial phases, or **Option B** if strict physical decoupling of the bot process is mandatory.
-- **Decision Status:** `OPEN / TO BE DEFINED by Lead & PM`
+- **Options Evaluated:**
+  1. **Option A (Render Background Worker):** Paid add-on on Render.
+  2. **Option B (Railway Multi-Service Canvas):** Deploy `apps/telegram` alongside `apps/api` inside Railway project with private network access to PostgreSQL.
+  3. **Option C (Serverless Webhook Handler inside Express API):** Convert Telegram integration to an incoming/outgoing webhook route inside `apps/api`.
+- **Resolved Decision:** **Option B (Railway Multi-Service)**. Railway natively runs the Telegram worker service side-by-side with the Express API connected to the internal PostgreSQL instance.
+- **Decision Status:** `RESOLVED (Adopted Option B via Railway)`
 
 ---
 
 ### OD-02: Public Swagger API Documentation Production Exposure
 
-- **Problem:** Should `/api/docs` (Swagger UI) remain publicly accessible in the production cloud environment (`api-hitsanat.onrender.com`), or should it be restricted?
+- **Problem:** Should `/api/docs` (Swagger UI) remain publicly accessible in the production cloud environment (`api.hitsanat.org`), or should it be restricted?
 - **Source of Ambiguity:** Section 12 states: *"Swagger must be available in development. Production exposure must be controlled according to the security requirements. Do not expose sensitive internal information through Swagger."*
 - **Affected Modules:** `apps/api/src/shared/docs`, `apps/api/src/server.ts`.
 - **Possible Options:**
@@ -47,21 +46,21 @@ In accordance with the Source-of-Truth governance rules, all unresolved technica
 - **Source of Ambiguity:** Data models specify `photo_url` for members and children, but the cloud storage bucket provider is not locked in v2.1.
 - **Affected Modules:** `members`, `children`, `packages/ui`.
 - **Possible Options:**
-  1. **Option A (Supabase Storage):** Utilize the 1 GB free bucket storage included with the Supabase project.
+  1. **Option A (Railway S3-Compatible Storage / MinIO):** Self-host MinIO or use a lightweight S3-compatible bucket.
   2. **Option B (Cloudinary Free Tier):** Utilize Cloudinary for automated image optimization, facial cropping, and delivery.
   3. **Option C (Base64 / Local Storage):** Strongly discouraged.
-- **Recommended Option:** **Option A** (Supabase Storage) keeps all persistence and bucket authorization within the existing Supabase infrastructure.
-- **Decision Status:** `PROPOSED (Option A)`
+- **Recommended Option:** **Option B** (Cloudinary Free Tier) provides automated responsive image resizing and CDN caching for mobile devices.
+- **Decision Status:** `PROPOSED (Option B)`
 
 ---
 
-### OD-04: Automated Saturday Keep-Alive Ping Source for Render Free Tier
+### OD-04: Weekend Cold-Start Delays & Availability
 
-- **Problem:** Render free-tier web services sleep after 15 minutes of inactivity. How should the `/health` keep-alive ping be automated on weekend mornings?
-- **Source of Ambiguity:** Free-tier operational mitigation requires an external trigger to ensure zero cold-start delay for leaders on Saturday 8:00 AM.
-- **Affected Modules:** `apps/api`, `.github/workflows/`.
-- **Possible Options:**
-  1. **Option A (GitHub Actions Scheduled Cron):** A simple GitHub Actions cron workflow running every 10 minutes on Saturdays and Sundays between 5:00 AM and 11:00 AM UTC.
-  2. **Option B (Free External Uptime Monitor):** Use UptimeRobot or Cron-Job.org free accounts pointing to `https://api-hitsanat.onrender.com/health`.
-- **Recommended Option:** **Option B** (UptimeRobot / Cron-Job.org) provides resilient external pinging independent of GitHub Actions runner quotas.
-- **Decision Status:** `PROPOSED (Option B)`
+- **Problem:** Preventing cold starts for ministry leaders arriving on Saturday/Sunday mornings at Gibi Gubae.
+- **Source of Ambiguity:** Free-tier platforms like Render sleep after 15 minutes of inactivity.
+- **Affected Modules:** `apps/api`, `apps/admin`.
+- **Options Evaluated:**
+  1. **Option A (External Keep-Alive Pings on Render):** Cron pings every 10 minutes.
+  2. **Option B (Always-On Hosting on Railway):** Railway runs continuous 24/7 instances without sleeping.
+- **Resolved Decision:** **Option B (Railway Always-On)** completely eliminates the cold-start problem. All requests respond immediately in $<50\text{ ms}$.
+- **Decision Status:** `RESOLVED (Adopted Option B via Railway)`

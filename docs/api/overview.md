@@ -2,7 +2,7 @@
 
 ## Hitsanat Kifl Children's Ministry Management System
 **Document Version:** 2.1  
-**Base URL:** `https://api-hitsanat.onrender.com/api/v1` (Production) / `http://localhost:4000/api/v1` (Development)  
+**Base URL:** `https://api.hitsanat.org/api/v1` (Production) / `http://localhost:4000/api/v1` (Development)  
 **API Specification:** RESTful JSON + OpenAPI 3.1 (Swagger UI at `/api/docs`)  
 
 ---
