@@ -1,0 +1,37 @@
+# GitHub CODEOWNERS for Hitsanat Kifl Monorepo
+# Format: <path> <owners>
+
+# ============================================================
+# CORE / OVERALL LEAD
+# Architecture, Database, Core backend, Shared packages, Security, CI/CD
+# ============================================================
+*                   @hitsanat/core-leads
+/.github/           @hitsanat/core-leads
+/docker/            @hitsanat/core-leads
+/docker-compose.yml @hitsanat/core-leads
+/packages/database/ @hitsanat/core-leads
+/packages/schemas/  @hitsanat/core-leads
+/packages/calendar/ @hitsanat/core-leads
+/packages/config/   @hitsanat/core-leads
+/packages/typescript-config/ @hitsanat/core-leads
+/packages/biome-config/      @hitsanat/core-leads
+/turbo.json         @hitsanat/core-leads
+/biome.json         @hitsanat/core-leads
+/package.json       @hitsanat/core-leads
+/pnpm-workspace.yaml @hitsanat/core-leads
+/tests/integration/ @hitsanat/core-leads
+
+# ============================================================
+# FRONTEND TEAM
+# apps/portfolio, apps/admin, packages/ui
+# ============================================================
+/apps/portfolio/    @hitsanat/frontend-team @hitsanat/core-leads
+/apps/admin/        @hitsanat/frontend-team @hitsanat/core-leads
+/packages/ui/       @hitsanat/frontend-team @hitsanat/core-leads
+/tests/e2e/         @hitsanat/frontend-team @hitsanat/core-leads
+
+# ============================================================
+# BACKEND TEAM
+# apps/api
+# ============================================================
+/apps/api/          @hitsanat/backend-team @hitsanat/core-leads
