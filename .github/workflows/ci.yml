@@ -50,7 +50,7 @@ jobs:
           cache: "pnpm"
 
       - name: Install Dependencies
-        run: pnpm install --frozen-lockfile || pnpm install
+        run: pnpm install --frozen-lockfile --ignore-scripts || pnpm install --ignore-scripts
 
       - name: Install Playwright Browsers
         run: pnpm exec playwright install --with-deps chromium
