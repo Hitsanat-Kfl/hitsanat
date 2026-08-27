@@ -1,20 +1,40 @@
 {
-  "name": "Hitsanat",
+  "name": "hitsanat",
   "private": true,
   "scripts": {
-    "build": "turbo run build",
     "dev": "turbo run dev",
-    "lint": "turbo run lint",
-    "format": "prettier --write \"**/*.{ts,tsx,md}\"",
-    "check-types": "turbo run check-types"
+    "build": "turbo run build",
+    "lint": "biome lint .",
+    "format": "biome format --write .",
+    "format:check": "biome format .",
+    "typecheck": "turbo run typecheck",
+    "test": "vitest run",
+    "test:unit": "vitest run --exclude 'tests/integration/**' --exclude 'tests/e2e/**'",
+    "test:integration": "vitest run tests/integration",
+    "test:e2e": "playwright test",
+    "prepare": "pnpm format:check && pnpm lint && pnpm typecheck && pnpm test:unit && pnpm test:integration && pnpm build && pnpm test:e2e"
   },
   "devDependencies": {
-    "prettier": "3.9.6",
-    "turbo": "^2.10.11",
-    "typescript": "7.0.2"
+    "@axe-core/playwright": "^4.10.1",
+    "@biomejs/biome": "1.9.4",
+    "@playwright/test": "^1.50.1",
+    "@testing-library/dom": "^10.4.0",
+    "@testing-library/react": "^16.2.0",
+    "@types/node": "^22.13.5",
+    "@types/react": "^19.0.10",
+    "@types/react-dom": "^19.0.4",
+    "@vitejs/plugin-react": "^4.3.4",
+    "dotenv": "^16.4.7",
+    "jsdom": "^26.0.0",
+    "postgres": "^3.4.5",
+    "react": "^19.0.0",
+    "react-dom": "^19.0.0",
+    "turbo": "^2.4.4",
+    "typescript": "^5.7.3",
+    "vitest": "^3.0.7"
   },
-  "packageManager": "pnpm@11.23.0",
+  "packageManager": "pnpm@9.15.9",
   "engines": {
-    "node": ">=24"
+    "node": ">=20"
   }
 }

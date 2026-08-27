@@ -1,0 +1,19 @@
+# Multi-stage Dockerfile for @repo/portfolio
+FROM node:22-alpine AS base
+ENV PNPM_HOME="/pnpm"
+ENV PATH="$PNPM_HOME:$PATH"
+RUN corepack enable && corepack prepare pnpm@9.15.9 --activate
+
+FROM base AS builder
+WORKDIR /app
+COPY . .
+RUN pnpm install --frozen-lockfile || pnpm install
+RUN pnpm --filter @repo/portfolio build
+
+FROM base AS runner
+WORKDIR /app
+ENV NODE_ENV=production
+COPY --from=builder /app /app
+WORKDIR /app/apps/portfolio
+EXPOSE 3000
+CMD ["pnpm", "start"]
