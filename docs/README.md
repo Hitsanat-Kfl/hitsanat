@@ -40,7 +40,7 @@ docs/
 │   ├── module-architecture.md                 # Structure of apps/api/src/modules/
 │   ├── data-architecture.md                   # Relational modeling, Gregorian storage, audit logs
 │   ├── security-architecture.md               # Better Auth, Scoped guards, PII protection
-│   └── deployment-architecture.md             # Free-tier cloud topology (Vercel, Render, Supabase)
+│   └── deployment-architecture.md             # Cloud topology (Vercel & Railway)
 │
 ├── database/                                  # Database Design & Modeling
 │   ├── database-design.md                     # PostgreSQL principles, UUIDs, soft-deletes
@@ -108,7 +108,7 @@ docs/
 │   ├── github-actions.md                      # Complete .github/workflows/ci.yml pipeline
 │   ├── local-ci.md                            # pnpm prepare local verification command
 │   ├── branch-protection.md                   # GitHub branch protection rules for main
-│   └── deployment.md                          # CD pipeline to Vercel and Render
+│   └── deployment.md                          # CD pipeline to Vercel and Railway
 │
 ├── team/                                      # Governance & Development Workflow
 │   ├── ownership.md                           # 5-person team structure (Core, Israel, Frontend)
@@ -117,10 +117,9 @@ docs/
 │   └── codeowners.md                          # GitHub CODEOWNERS path ownership rules
 │
 ├── deployment/                                # Hosting & Operations
-│   ├── overview.md                            # Free-tier cloud map & cost summary ($0/mo)
+│   ├── overview.md                            # Cloud map & cost summary (~$3/mo)
 │   ├── vercel.md                              # Vercel setup for apps/admin & apps/portfolio
-│   ├── render.md                              # Render setup for apps/api & cold-start keep-alive
-│   ├── supabase.md                            # Supabase PostgreSQL connection & pooler setup
+│   ├── railway.md                             # Railway setup for apps/api, telegram & PostgreSQL
 │   ├── docker.md                              # Docker Compose local PostgreSQL config
 │   └── environment-variables.md               # Complete environment variables taxonomy
 │

@@ -1,19 +1,21 @@
 # Hitsanat Kifl — Children's Ministry Management System
 
-> **Repository Foundation & Engineering Infrastructure**
+> **Repository Foundation & System Engineering Infrastructure**
 
 ---
 
 ## 🌟 Tech Stack
 
-- **Monorepo:** [pnpm Workspaces](https://pnpm.io/) + [Turborepo](https://turbo.build/)
-- **Frontend Applications:** [Next.js 15 (App Router)](https://nextjs.org/), [React 19](https://react.dev/), [Tailwind CSS](https://tailwindcss.com/), [shadcn/ui](https://ui.shadcn.com/), [TanStack Query](https://tanstack.com/query)
-- **Backend API:** [Express.js](https://expressjs.com/), [TypeScript](https://www.typescriptlang.org/), [Drizzle ORM](https://orm.drizzle.team/), [Swagger / OpenAPI](https://swagger.io/)
-- **Database:** [PostgreSQL](https://www.postgresql.org/) / [Supabase PostgreSQL](https://supabase.com/)
-- **Code Quality:** [Biome](https://biomejs.dev/) (Linter & Formatter)
-- **Testing:** [Vitest](https://vitest.dev/), [React Testing Library](https://testing-library.com/), [Playwright](https://playwright.dev/), [@axe-core/playwright](https://www.deque.com/axe/)
-- **Infrastructure:** Docker & Docker Compose, GitHub Actions CI
-- **Calendar:** Ethiopian Calendar (`ethiopian-calendar-new`)
+| Layer | Technologies & Tools |
+| :--- | :--- |
+| **Monorepo** | [pnpm Workspaces](https://pnpm.io/) + [Turborepo](https://turbo.build/) |
+| **Frontend Applications** | [Next.js 15 (App Router)](https://nextjs.org/), [React 19](https://react.dev/), [Tailwind CSS](https://tailwindcss.com/), [shadcn/ui](https://ui.shadcn.com/), [TanStack Query](https://tanstack.com/query) |
+| **Backend REST API** | [Express.js](https://expressjs.com/), [TypeScript](https://www.typescriptlang.org/), [Drizzle ORM](https://orm.drizzle.team/), [OpenAPI 3.0 / Swagger UI](https://swagger.io/) |
+| **Database** | [PostgreSQL 16](https://www.postgresql.org/) / [Supabase PostgreSQL](https://supabase.com/) |
+| **Calendar Engine** | [Ethiopian Calendar](https://www.npmjs.com/package/ethiopian-calendar-new) (`ethiopian-calendar-new`) |
+| **Code Quality** | [Biome](https://biomejs.dev/) (Linter & Formatter) |
+| **Testing** | [Vitest](https://vitest.dev/), [React Testing Library](https://testing-library.com/), [Playwright](https://playwright.dev/), [@axe-core/playwright](https://www.deque.com/axe/) |
+| **Infrastructure** | Docker & Docker Compose, GitHub Actions CI |
 
 ---
 
@@ -21,8 +23,8 @@
 
 ```text
 ├── apps/
-│   ├── portfolio/       # Public portal (Next.js, port 3000)
-│   ├── admin/           # Admin console (Next.js, port 3002)
+│   ├── portfolio/       # Public portal (Next.js 15, port 3000)
+│   ├── admin/           # Admin console (Next.js 15, port 3002)
 │   └── api/             # REST API (Express.js, port 3001)
 ├── packages/
 │   ├── database/        # Drizzle ORM client, schemas, migrations
@@ -37,7 +39,7 @@
 │   ├── integration/     # PostgreSQL integration tests
 │   └── fixtures/        # Test seed data & fixtures
 ├── docker/              # Dockerfiles for API, Portfolio, and Admin
-├── docs/                # Technical and architecture documentation
+├── docs/                # Comprehensive technical & architecture documentation
 └── .github/             # CI workflows, CODEOWNERS, and PR templates
 ```
 
@@ -45,16 +47,33 @@ For full details, see [docs/development/repository-structure.md](file:///C:/User
 
 ---
 
+## 📚 Documentation Index
+
+The complete engineering documentation suite is available under [`docs/`](file:///C:/Users/hp/Desktop/Hitsanat/docs/README.md):
+
+| Documentation Section | Description |
+| :--- | :--- |
+| [**System Overview & Index**](file:///C:/Users/hp/Desktop/Hitsanat/docs/README.md) | High-level master documentation index and architecture map |
+| [**Architecture Decision Records (ADRs)**](file:///C:/Users/hp/Desktop/Hitsanat/docs/adr/README.md) | Authoritative ADRs establishing technical constraints |
+| [**Repository Structure Guide**](file:///C:/Users/hp/Desktop/Hitsanat/docs/development/repository-structure.md) | Monorepo layout, dependencies, and boundary rules |
+| [**Roles & Scoped RBAC Matrix**](file:///C:/Users/hp/Desktop/Hitsanat/docs/requirements/roles-and-permissions.md) | Scoped access controls across Executive, Sub-Departments, and Families |
+| [**REST API Specifications**](file:///C:/Users/hp/Desktop/Hitsanat/docs/api/endpoints.md) | Exhaustive REST endpoint catalog across business modules |
+| [**Team Ownership & Lanes**](file:///C:/Users/hp/Desktop/Hitsanat/docs/team/ownership.md) | Multi-lane ownership architecture and review guidelines |
+
+---
+
 ## 🚀 Quick Start
 
 ### 1. Prerequisites
-- Node.js >= 20
-- pnpm >= 9.0 (`corepack enable && corepack prepare pnpm@latest --activate`)
-- Docker & Docker Compose (optional for local PostgreSQL)
+- **Node.js**: `>= 20.x`
+- **pnpm**: `>= 9.x` (`corepack enable && corepack prepare pnpm@latest --activate`)
+- **Docker**: Docker Desktop (for local PostgreSQL database)
 
 ### 2. Setup
 ```bash
 # Clone the repository and install dependencies
+git clone https://github.com/Hitsanat-Kfl/hitsanat.git
+cd hitsanat
 pnpm install
 
 # Copy environment template

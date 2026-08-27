@@ -50,7 +50,10 @@ jobs:
           cache: "pnpm"
 
       - name: Install Dependencies
-        run: pnpm install --frozen-lockfile || pnpm install
+        run: pnpm install --frozen-lockfile --ignore-scripts || pnpm install --ignore-scripts
+
+      - name: Install Playwright Browsers
+        run: pnpm exec playwright install --with-deps chromium
 
       - name: Biome Format & Lint Check
         run: |
@@ -68,9 +71,6 @@ jobs:
 
       - name: Build Applications & Packages
         run: pnpm build
-
-      - name: Install Playwright Browsers
-        run: pnpm exec playwright install --with-deps chromium
 
       - name: Run Playwright E2E & Accessibility Tests
         run: pnpm test:e2e
