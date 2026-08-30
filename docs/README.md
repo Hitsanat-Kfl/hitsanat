@@ -111,7 +111,7 @@ docs/
 │   └── deployment.md                          # CD pipeline to Vercel and Railway
 │
 ├── team/                                      # Governance & Development Workflow
-│   ├── ownership.md                           # 5-person team structure (Core, Israel, Frontend)
+│   ├── ownership.md                           # 4-person team structure (Core, Israel, Frontend)
 │   ├── git-workflow.md                        # Feature branch lifecycle & commit standards
 │   ├── contribution-workflow.md               # Step-by-step PR guide & review checklists
 │   └── codeowners.md                          # GitHub CODEOWNERS path ownership rules

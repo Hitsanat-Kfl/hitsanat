@@ -3,7 +3,7 @@
 ## Hitsanat Kifl Children's Ministry Management System
 **Name:** Abrham
 **Role:** Core / Overall Lead + Backend Developer
-**ADR Reference:** ADR-0016 (Five-Contributor Multi-Lane Team Ownership)
+**ADR Reference:** ADR-0016 (Four-Contributor Multi-Lane Team Ownership)
 
 ---
 

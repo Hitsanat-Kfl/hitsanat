@@ -1,4 +1,4 @@
-# ADR-0016: Five-Contributor Multi-Lane Team Ownership Model
+# ADR-0016: Four-Contributor Multi-Lane Team Ownership Model
 
 **Status:** Accepted  
 **Deciders:** Project Manager, Abrham (Core Lead), Development Team  
@@ -7,7 +7,7 @@
 ---
 
 ## Context
-The development team consists of 5 contributors with varied experience levels:
+The development team consists of 4 contributors with varied experience levels:
 - 1 Core/Overall Lead (Abrham)
 - 1 Supporting Backend Contributor (Israel)
 - 2 Frontend Contributors

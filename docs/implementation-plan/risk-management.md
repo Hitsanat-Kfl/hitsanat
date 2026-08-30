@@ -121,7 +121,7 @@
 
 ### RISK-010: Team Velocity Variability
 
-- **Risk:** With 5 contributors at different skill levels, task completion speed may vary significantly. Backend Support tasks are designed to be simpler, but may still take longer than expected.
+- **Risk:** With 4 contributors at different skill levels, task completion speed may vary significantly. Backend Support tasks are designed to be simpler, but may still take longer than expected.
 - **Impact:** Medium
 - **Probability:** High
 - **Mitigation:**
