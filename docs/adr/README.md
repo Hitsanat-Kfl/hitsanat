@@ -22,5 +22,5 @@
 | [**ADR-0013**](./ADR-0013-swagger-openapi-documentation.md) | OpenAPI 3.1 Contract Generation via Zod and Swagger UI | Accepted | API / Documentation |
 | [**ADR-0014**](./ADR-0014-biome-code-quality-tooling.md) | Biome as the Single Unified Tool for Formatting and Linting | Accepted | Tooling / Quality |
 | [**ADR-0015**](./ADR-0015-local-prepare-ci-quality-gate.md) | Local `pnpm prepare` Quality Gate Matching GitHub Actions | Accepted | CI/CD / Quality |
-| [**ADR-0016**](./ADR-0016-five-contributor-lane-ownership-model.md) | Five-Contributor Multi-Lane Team Ownership Model | Accepted | Governance / Team |
+| [**ADR-0016**](./ADR-0016-five-contributor-lane-ownership-model.md) | Four-Contributor Multi-Lane Team Ownership Model | Accepted | Governance / Team |
 | [**ADR-0017**](./ADR-0017-free-tier-deployment-topology.md) | Resilient Cloud Deployment Topology (Vercel & Railway) | Accepted | Deployment / Cloud |

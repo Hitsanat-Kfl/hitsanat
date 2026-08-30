@@ -1,0 +1,911 @@
+{
+  "metadata": {
+    "generated": "2026-08-28",
+    "total_tasks": 94,
+    "already_created": ["CORE-001 to CORE-012"],
+    "list_ids": {
+      "phase_01": "901525373845",
+      "phase_02": "901525373846",
+      "phase_03": "901525373847",
+      "phase_04": "901525373848",
+      "phase_05": "901525373849",
+      "phase_06": "901525373850",
+      "phase_07": "901525373851",
+      "phase_08": "901525373852",
+      "phase_09": "901525373853",
+      "phase_10": "901525373854"
+    }
+  },
+  "tasks": [
+    {
+      "task_id": "CORE-013",
+      "name": "CORE-013 — DB Migration: Planning Tables",
+      "list_id": "901525373845",
+      "lane": "Core",
+      "owner": "Abrham",
+      "phase": "Phase 1 — Engineering Foundation",
+      "priority": "high",
+      "description": "Create Drizzle schemas and generate migrations for 6 planning tables: annual_master_plans, plan_goals, plan_activities, plan_distributions, weekly_plans, plan_progress_records.\n\nDocumentation: docs/database/entities.md Section 3, docs/planning/annual-master-plan.md\n\nAcceptance Criteria:\n- 6 tables created in migration\n- Weight calculation fields included\n- Quarterly distribution columns defined\n- Progress roll-up fields specified\n\nGit Branch: feature/core-013-migration-planning"
+    },
+    {
+      "task_id": "CORE-014",
+      "name": "CORE-014 — DB Migration: Attendance & Event Tables",
+      "list_id": "901525373845",
+      "lane": "Core",
+      "owner": "Abrham",
+      "phase": "Phase 1 — Engineering Foundation",
+      "priority": "high",
+      "description": "Create Drizzle schemas and generate migrations for attendance and event tables. Separate attendance tables per ADR-0001.\n\nDocumentation: docs/database/entities.md Section 4, docs/adr/ADR-0001.md\n\nAcceptance Criteria:\n- Separate attendance tables per ADR-0001\n- Auto-seeding fields per ADR-0002\n- Session type constraints applied\n\nGit Branch: feature/core-014-migration-attendance-events"
+    },
+    {
+      "task_id": "CORE-015",
+      "name": "CORE-015 — DB Migration: Academic & Announcement Tables",
+      "list_id": "901525373845",
+      "lane": "Core",
+      "owner": "Abrham",
+      "phase": "Phase 1 — Engineering Foundation",
+      "priority": "high",
+      "description": "Create Drizzle schemas and generate migrations for academic_assessments, student_scores, announcements, audit_logs.\n\nDocumentation: docs/database/entities.md Section 5\n\nAcceptance Criteria:\n- 4 tables created in migration\n- Assessment type check constraint applied\n- Audit log JSONB field included\n\nGit Branch: feature/core-015-migration-academic-announcements"
+    },
+    {
+      "task_id": "CORE-016",
+      "name": "CORE-016 — Shared Package: packages/domain",
+      "list_id": "901525373845",
+      "lane": "Core",
+      "owner": "Abrham",
+      "phase": "Phase 1 — Engineering Foundation",
+      "priority": "high",
+      "description": "Implement packages/domain with core business entities, value objects, and calculation engine interfaces.\n\nDocumentation: docs/architecture/domain-model.md, docs/planning/annual-master-plan.md, docs/planning/progress-tracking.md\n\nAcceptance Criteria:\n- Package compiles without errors\n- Planning weight engine interface defined\n- Progress roll-up engine interface defined\n- Unit tests pass\n- Biome passes\n\nGit Branch: feature/core-016-domain-package"
+    },
+    {
+      "task_id": "CORE-017",
+      "name": "CORE-017 — Shared Package: packages/permissions",
+      "list_id": "901525373845",
+      "lane": "Core",
+      "owner": "Abrham",
+      "phase": "Phase 1 — Engineering Foundation",
+      "priority": "high",
+      "description": "Implement packages/permissions with RBAC constants, role taxonomy, permission matrix, and scope evaluation helpers.\n\nDocumentation: docs/requirements/roles-and-permissions.md, docs/adr/ADR-0005.md, docs/adr/ADR-0007.md\n\nAcceptance Criteria:\n- Role constants defined (SUPER_ADMIN, CHAIRPERSON, etc.)\n- Permission matrix implemented\n- Scope evaluation helper functional\n- Unit tests pass\n- Biome passes\n\nGit Branch: feature/core-017-permissions-package"
+    },
+    {
+      "task_id": "CORE-018",
+      "name": "CORE-018 — Module Skeleton: All API Modules",
+      "list_id": "901525373845",
+      "lane": "Core",
+      "owner": "Abrham",
+      "phase": "Phase 1 — Engineering Foundation",
+      "priority": "high",
+      "description": "Create the directory structure and placeholder files for all 11 API modules.\n\nDocumentation: docs/architecture/module-architecture.md, docs/backend/modules.md\n\nAcceptance Criteria:\n- All 11 module directories created\n- Each module has domain/, application/, infrastructure/, presentation/\n- Placeholder README in each module\n- Import boundaries enforced\n\nGit Branch: feature/core-018-module-skeleton"
+    },
+    {
+      "task_id": "BES-001",
+      "name": "BES-001 — Seed Script: Sub-Departments",
+      "list_id": "901525373845",
+      "lane": "Backend Support",
+      "owner": "Israel",
+      "phase": "Phase 1 — Engineering Foundation",
+      "priority": "high",
+      "description": "Create seed script to populate sub_departments with the 5 fixed departments (TIMIHRT, MEZMUR, KUTITR, EKD, KINETIBEB).\n\nDocumentation: docs/requirements/functional-requirements.md FR-03.1, docs/database/entities.md Section 1.2\n\nAcceptance Criteria:\n- 5 sub-departments seeded\n- Amharic names correct (ትምህርት, መዝሙር, ቁጥር, እቅድ, ቅንጥብጥብ)\n- English names correct (Timihrt, Mezmur, Kutitr, Ekd, Kinetibeb)\n- Seed is idempotent (ON CONFLICT DO NOTHING)\n\nGit Branch: feature/bes-001-seed-sub-departments"
+    },
+    {
+      "task_id": "BES-002",
+      "name": "BES-002 — Shared Package: packages/validation",
+      "list_id": "901525373845",
+      "lane": "Backend Support",
+      "owner": "Israel",
+      "phase": "Phase 1 — Engineering Foundation",
+      "priority": "high",
+      "description": "Implement packages/validation with shared Zod schemas for common API request/response patterns.\n\nDocumentation: docs/api/overview.md, docs/api/error-handling.md\n\nAcceptance Criteria:\n- Common validation schemas defined (pagination, error response, UUID, date range)\n- Unit tests pass\n- Biome passes\n- Package compiles\n\nGit Branch: feature/bes-002-validation-package"
+    },
+    {
+      "task_id": "CORE-019",
+      "name": "CORE-019 — Better Auth Configuration",
+      "list_id": "901525373846",
+      "lane": "Core",
+      "owner": "Abrham",
+      "phase": "Phase 2 — Authentication & Authorization",
+      "priority": "high",
+      "description": "Configure Better Auth in packages/auth with PostgreSQL adapter, session cookies, and email/password provider.\n\nDocumentation: docs/architecture/security-architecture.md, docs/backend/authentication.md, docs/adr/ADR-0007.md\n\nAcceptance Criteria:\n- Better Auth configured with PostgreSQL adapter\n- Session cookies configured (httpOnly, secure, sameSite)\n- Auth tables created (users, sessions, accounts)\n- Unit tests pass\n\nGit Branch: feature/core-019-better-auth-configuration"
+    },
+    {
+      "task_id": "CORE-020",
+      "name": "CORE-020 — Auth Database Tables",
+      "list_id": "901525373846",
+      "lane": "Core",
+      "owner": "Abrham",
+      "phase": "Phase 2 — Authentication & Authorization",
+      "priority": "high",
+      "description": "Create Drizzle schemas and migrations for Better Auth tables: users, sessions, accounts, verification_tokens.\n\nDocumentation: docs/backend/authentication.md\n\nAcceptance Criteria:\n- Auth tables created in migration\n- Role field included on users table\n- Session table has proper indexes\n- Migration runs cleanly\n\nGit Branch: feature/core-020-auth-database-tables"
+    },
+    {
+      "task_id": "CORE-021",
+      "name": "CORE-021 — Scoped RBAC Middleware",
+      "list_id": "901525373846",
+      "lane": "Core",
+      "owner": "Abrham",
+      "phase": "Phase 2 — Authentication & Authorization",
+      "priority": "high",
+      "description": "Implement requireAuth() and requireScopePermission(resource, action, subDeptScope?) middleware.\n\nDocumentation: docs/requirements/roles-and-permissions.md, docs/adr/ADR-0005.md, docs/adr/ADR-0007.md\n\nAcceptance Criteria:\n- requireAuth() validates session cookies\n- requireScopePermission() checks global roles first\n- Falls back to sub-department scoped roles\n- Returns HTTP 403 with FORBIDDEN_INSUFFICIENT_SCOPE on failure\n- Non-leadership members denied access (ADR-0007, BR-033)\n- Unit tests cover all permission scenarios\n\nGit Branch: feature/core-021-scoped-rbac-middleware"
+    },
+    {
+      "task_id": "CORE-022",
+      "name": "CORE-022 — Auth API Endpoints",
+      "list_id": "901525373846",
+      "lane": "Core",
+      "owner": "Abrham",
+      "phase": "Phase 2 — Authentication & Authorization",
+      "priority": "high",
+      "description": "Implement auth endpoints: sign-in, sign-up, sign-out, session.\n\nDocumentation: docs/api/authentication.md, docs/api/endpoints.md\n\nAcceptance Criteria:\n- Sign-in creates session cookie\n- Sign-up creates user account\n- Sign-out invalidates session\n- Session endpoint returns current user with roles\n- Integration tests verify all flows\n\nGit Branch: feature/core-022-auth-api-endpoints"
+    },
+    {
+      "task_id": "BES-003",
+      "name": "BES-003 — Auth Integration Tests",
+      "list_id": "901525373846",
+      "lane": "Backend Support",
+      "owner": "Israel",
+      "phase": "Phase 2 — Authentication & Authorization",
+      "priority": "high",
+      "description": "Write comprehensive integration tests for the auth system.\n\nDocumentation: docs/requirements/roles-and-permissions.md, docs/requirements/business-rules.md BR-033, docs/adr/ADR-0007.md\n\nAcceptance Criteria:\n- Sign-in/sign-out flow tested\n- Session persistence tested\n- Role-based access tested\n- Scope isolation tested (Timihrt lead cannot access Mezmur data)\n- Non-leader lockout tested (ADR-0007)\n\nGit Branch: feature/bes-003-auth-integration-tests"
+    },
+    {
+      "task_id": "BES-004",
+      "name": "BES-004 — OpenAPI Auth Documentation",
+      "list_id": "901525373846",
+      "lane": "Backend Support",
+      "owner": "Israel",
+      "phase": "Phase 2 — Authentication & Authorization",
+      "priority": "medium",
+      "description": "Update Swagger/OpenAPI specification with auth endpoint documentation.\n\nDocumentation: docs/api/swagger.md, docs/api/openapi.md\n\nAcceptance Criteria:\n- All auth endpoints documented\n- Request/response schemas defined\n- Error responses documented\n- Security scheme defined\n\nGit Branch: feature/bes-004-openapi-auth"
+    },
+    {
+      "task_id": "FE1-001",
+      "name": "FE1-001 — Auth Layout & Navigation Shell",
+      "list_id": "901525373846",
+      "lane": "Frontend 1",
+      "owner": "Eyob",
+      "phase": "Phase 2 — Authentication & Authorization",
+      "priority": "high",
+      "description": "Build the admin app's navigation shell, sidebar, header, and route structure.\n\nDocumentation: docs/requirements/roles-and-permissions.md, docs/adr/ADR-0007.md\n\nAcceptance Criteria:\n- Sidebar navigation renders with correct items\n- Navigation filtered by user role\n- Header shows user name and role\n- Mobile responsive (hamburger menu)\n- Accessible (WCAG 2.1 AA)\n\nGit Branch: feature/fe1-001-auth-layout-navigation"
+    },
+    {
+      "task_id": "FE1-002",
+      "name": "FE1-002 — Admin Login Page",
+      "list_id": "901525373846",
+      "lane": "Frontend 1",
+      "owner": "Eyob",
+      "phase": "Phase 2 — Authentication & Authorization",
+      "priority": "high",
+      "description": "Build the admin login page with email/password form.\n\nDocumentation: docs/requirements/functional-requirements.md, docs/api/endpoints.md\n\nAcceptance Criteria:\n- Login form with email and password fields\n- Error message display on invalid credentials\n- Redirect to dashboard on successful login\n- Loading state during authentication\n- Accessible (WCAG 2.1 AA)\n- Mobile-responsive\n\nGit Branch: feature/fe1-002-admin-login"
+    },
+    {
+      "task_id": "FE2-001",
+      "name": "FE2-001 — Admin Route Guards",
+      "list_id": "901525373846",
+      "lane": "Frontend 2",
+      "owner": "TBD",
+      "phase": "Phase 2 — Authentication & Authorization",
+      "priority": "high",
+      "description": "Implement protected route wrapper that redirects unauthenticated users and enforces role-based access.\n\nDocumentation: docs/requirements/roles-and-permissions.md, docs/requirements/business-rules.md BR-033, docs/adr/ADR-0007.md\n\nAcceptance Criteria:\n- Unauthenticated users redirected to login\n- Authenticated users with no leadership role denied access (ADR-0007)\n- Session refresh on navigation\n- E2E test verifies guard behavior\n\nGit Branch: feature/fe2-001-route-guards"
+    },
+    {
+      "task_id": "CORE-023",
+      "name": "CORE-023 — Member API: Stage 1 Registration",
+      "list_id": "901525373847",
+      "lane": "Core",
+      "owner": "Abrham",
+      "phase": "Phase 3 — Organization Structure",
+      "priority": "high",
+      "description": "Implement POST /api/v1/members/stage-1 endpoint for Secretary member creation.\n\nDocumentation: docs/api/endpoints.md, docs/requirements/functional-requirements.md FR-01.1, docs/requirements/business-rules.md BR-001\n\nAcceptance Criteria:\n- Endpoint creates member with Stage 1 fields only\n- Phone number uniqueness enforced\n- Zod validation on all required fields\n- Returns created member with UUID\n- Integration test verifies creation\n\nGit Branch: feature/core-023-member-stage1-registration"
+    },
+    {
+      "task_id": "CORE-024",
+      "name": "CORE-024 — Member API: Stage 2 Enrichment",
+      "list_id": "901525373847",
+      "lane": "Core",
+      "owner": "Abrham",
+      "phase": "Phase 3 — Organization Structure",
+      "priority": "high",
+      "description": "Implement PUT /api/v1/members/:id/stage-2 endpoint for sub-department and family assignment.\n\nDocumentation: docs/api/endpoints.md, docs/requirements/functional-requirements.md FR-01.1, FR-01.2, docs/requirements/business-rules.md BR-002\n\nAcceptance Criteria:\n- Endpoint updates member with Stage 2 fields\n- Sub-department assignment creates sub_department_members records\n- Family allocation creates family_members record\n- Photo URL stored\n- Telegram username stored\n\nGit Branch: feature/core-024-member-stage2-enrichment"
+    },
+    {
+      "task_id": "CORE-025",
+      "name": "CORE-025 — Family API: CRUD & Parent Assignment",
+      "list_id": "901525373847",
+      "lane": "Core",
+      "owner": "Abrham",
+      "phase": "Phase 3 — Organization Structure",
+      "priority": "high",
+      "description": "Implement family endpoints with Father/Mother assignment enforcement (BR-004).\n\nDocumentation: docs/api/endpoints.md, docs/requirements/functional-requirements.md FR-02.1 through FR-02.4, docs/requirements/business-rules.md BR-004, BR-005\n\nAcceptance Criteria:\n- Family creation with name and academic year\n- Father assignment (male member, max 1)\n- Mother assignment (female member, max 1)\n- Member allocation to family\n- Family roster retrieval\n- Integration tests verify BR-004 constraint\n\nGit Branch: feature/core-025-family-crud"
+    },
+    {
+      "task_id": "BES-005",
+      "name": "BES-005 — Member API: List, Detail, Update",
+      "list_id": "901525373847",
+      "lane": "Backend Support",
+      "owner": "Israel",
+      "phase": "Phase 3 — Organization Structure",
+      "priority": "high",
+      "description": "Implement member list, detail, and update endpoints.\n\nDocumentation: docs/api/endpoints.md, docs/requirements/functional-requirements.md FR-01.1 through FR-01.4, docs/requirements/business-rules.md BR-002, BR-003\n\nAcceptance Criteria:\n- List endpoint supports pagination, search, filtering\n- Detail endpoint returns member with sub-departments and family\n- Update endpoint modifies member fields\n- RBAC enforced (Secretary can update all, leaders see own scope)\n\nGit Branch: feature/bes-005-member-list-detail-update"
+    },
+    {
+      "task_id": "BES-006",
+      "name": "BES-006 — Sub-Department API: List & Rosters",
+      "list_id": "901525373847",
+      "lane": "Backend Support",
+      "owner": "Israel",
+      "phase": "Phase 3 — Organization Structure",
+      "priority": "high",
+      "description": "Implement sub-department list and roster endpoints.\n\nDocumentation: docs/api/endpoints.md, docs/requirements/functional-requirements.md FR-03.1, FR-03.2\n\nAcceptance Criteria:\n- List returns all 5 sub-departments\n- Roster returns members with scoped roles\n- Sub-department leaders see only own roster\n- Chairperson sees all rosters\n\nGit Branch: feature/bes-006-subdepartment-list-rosters"
+    },
+    {
+      "task_id": "BES-007",
+      "name": "BES-007 — Organization Integration Tests",
+      "list_id": "901525373847",
+      "lane": "Backend Support",
+      "owner": "Israel",
+      "phase": "Phase 3 — Organization Structure",
+      "priority": "high",
+      "description": "Write integration tests covering the full member lifecycle.\n\nDocumentation: docs/testing/integration.md, docs/requirements/business-rules.md BR-001 through BR-005\n\nAcceptance Criteria:\n- Full lifecycle tested (Stage 1 → Stage 2 → sub-dept → family)\n- BR-001 (2-stage registration) verified\n- BR-002 (multi-department) verified\n- BR-004 (family constraints) verified\n- BR-005 (dual family roles) verified\n\nGit Branch: feature/bes-007-organization-integration-tests"
+    },
+    {
+      "task_id": "BES-008",
+      "name": "BES-008 — OpenAPI Organization Documentation",
+      "list_id": "901525373847",
+      "lane": "Backend Support",
+      "owner": "Israel",
+      "phase": "Phase 3 — Organization Structure",
+      "priority": "medium",
+      "description": "Update Swagger/OpenAPI with member, family, and sub-department documentation.\n\nDocumentation: docs/api/swagger.md\n\nAcceptance Criteria:\n- All organization endpoints documented\n- Request/response schemas defined\n- Error responses documented\n\nGit Branch: feature/bes-008-openapi-organization"
+    },
+    {
+      "task_id": "FE1-003",
+      "name": "FE1-003 — Member List Page",
+      "list_id": "901525373847",
+      "lane": "Frontend 1",
+      "owner": "Eyob",
+      "phase": "Phase 3 — Organization Structure",
+      "priority": "high",
+      "description": "Build the paginated member list page with search and filtering.\n\nDocumentation: docs/requirements/functional-requirements.md FR-01.3, FR-01.4, docs/api/endpoints.md\n\nAcceptance Criteria:\n- Paginated member list\n- Search by name or phone\n- Filter by sub-department\n- Loading skeleton\n- Empty state\n- Mobile-responsive\n\nGit Branch: feature/fe1-003-member-list"
+    },
+    {
+      "task_id": "FE1-004",
+      "name": "FE1-004 — Member Detail Page",
+      "list_id": "901525373847",
+      "lane": "Frontend 1",
+      "owner": "Eyob",
+      "phase": "Phase 3 — Organization Structure",
+      "priority": "high",
+      "description": "Build the member detail view with profile, sub-departments, and family.\n\nDocumentation: docs/requirements/functional-requirements.md FR-01.4, docs/api/endpoints.md\n\nAcceptance Criteria:\n- Member profile display (name, phone, photo, etc.)\n- Sub-department assignments listed\n- Family members listed\n- Edit button for authorized users\n- Back navigation to list\n\nGit Branch: feature/fe1-004-member-detail"
+    },
+    {
+      "task_id": "FE1-005",
+      "name": "FE1-005 — Sub-Department Roster View",
+      "list_id": "901525373847",
+      "lane": "Frontend 1",
+      "owner": "Eyob",
+      "phase": "Phase 3 — Organization Structure",
+      "priority": "high",
+      "description": "Build the sub-department roster view showing members per department.\n\nDocumentation: docs/requirements/functional-requirements.md FR-03.2, docs/api/endpoints.md\n\nAcceptance Criteria:\n- List of 5 sub-departments\n- Click to view roster\n- Roster shows members with scoped roles\n- RBAC enforced (leaders see only own)\n\nGit Branch: feature/fe1-005-subdepartment-roster"
+    },
+    {
+      "task_id": "FE2-002",
+      "name": "FE2-002 — Member Registration Wizard UI",
+      "list_id": "901525373847",
+      "lane": "Frontend 2",
+      "owner": "TBD",
+      "phase": "Phase 3 — Organization Structure",
+      "priority": "high",
+      "description": "Build the 2-stage member registration wizard.\n\nDocumentation: docs/requirements/functional-requirements.md FR-01.1, FR-01.2, docs/requirements/business-rules.md BR-001, BR-002\n\nAcceptance Criteria:\n- Stage 1 modal with all mandatory fields\n- Form validation (Zod via React Hook Form)\n- Stage 2 multi-department selection\n- Family allocation dropdown\n- Photo upload field\n- Success/error feedback\n- Mobile-responsive\n\nGit Branch: feature/fe2-002-member-registration-wizard"
+    },
+    {
+      "task_id": "FE2-003",
+      "name": "FE2-003 — Member Edit Form",
+      "list_id": "901525373847",
+      "lane": "Frontend 2",
+      "owner": "TBD",
+      "phase": "Phase 3 — Organization Structure",
+      "priority": "high",
+      "description": "Build the member edit form for authorized users.\n\nDocumentation: docs/requirements/functional-requirements.md FR-01.4\n\nAcceptance Criteria:\n- Pre-populated form with current member data\n- All editable fields per role\n- Form validation\n- Save/cancel buttons\n- Optimistic UI update\n\nGit Branch: feature/fe2-003-member-edit"
+    },
+    {
+      "task_id": "CORE-026",
+      "name": "CORE-026 — Child API: Registration & CRUD",
+      "list_id": "901525373848",
+      "lane": "Core",
+      "owner": "Abrham",
+      "phase": "Phase 4 — Member Management",
+      "priority": "high",
+      "description": "Implement child endpoints with Kutr group and collection location constraints.\n\nDocumentation: docs/api/endpoints.md, docs/requirements/functional-requirements.md FR-04.1 through FR-04.4, docs/requirements/business-rules.md BR-012, BR-013\n\nAcceptance Criteria:\n- Child registration with all fields (FR-04.1)\n- Kutr group constrained to 'Kutr 1' or 'Kutr 2' (BR-012)\n- Collection location constrained to 5 routes (BR-013)\n- Birthday month query available\n- Reclassification endpoint works\n- Integration tests verify constraints\n\nGit Branch: feature/core-026-child-crud"
+    },
+    {
+      "task_id": "CORE-027",
+      "name": "CORE-027 — Child-Parent Linking API",
+      "list_id": "901525373848",
+      "lane": "Core",
+      "owner": "Abrham",
+      "phase": "Phase 4 — Member Management",
+      "priority": "high",
+      "description": "Implement child-parent linking with strict cardinality enforcement (BR-010).\n\nDocumentation: docs/api/endpoints.md, docs/requirements/business-rules.md BR-010, BR-011\n\nAcceptance Criteria:\n- Link parent to child with relation type (Father/Mother)\n- Composite unique constraint enforced (BR-010)\n- Cannot add duplicate Father or Mother\n- Sibling association works\n- Unlink parent from child\n- Integration tests verify cardinality constraint\n\nGit Branch: feature/core-027-child-parent-linking"
+    },
+    {
+      "task_id": "BES-009",
+      "name": "BES-009 — Parent API: CRUD",
+      "list_id": "901525373848",
+      "lane": "Backend Support",
+      "owner": "Israel",
+      "phase": "Phase 4 — Member Management",
+      "priority": "high",
+      "description": "Implement parent CRUD endpoints.\n\nDocumentation: docs/api/endpoints.md, docs/requirements/functional-requirements.md FR-05.1, FR-05.2, docs/requirements/business-rules.md BR-011\n\nAcceptance Criteria:\n- Parent creation with contact details\n- Parent list and detail retrieval\n- Parent update\n- Validation on required fields (BR-011)\n\nGit Branch: feature/bes-009-parent-crud"
+    },
+    {
+      "task_id": "BES-010",
+      "name": "BES-010 — Children & Parents Integration Tests",
+      "list_id": "901525373848",
+      "lane": "Backend Support",
+      "owner": "Israel",
+      "phase": "Phase 4 — Member Management",
+      "priority": "high",
+      "description": "Write integration tests for child registration, parent linking, and cardinality constraints.\n\nDocumentation: docs/testing/integration.md, docs/requirements/business-rules.md BR-010, BR-011, BR-012, BR-013\n\nAcceptance Criteria:\n- Child registration tested\n- Parent linking tested\n- BR-010 cardinality constraint tested\n- BR-012 Kutr classification tested\n- BR-013 collection routes tested\n- Sibling association tested\n\nGit Branch: feature/bes-010-children-parents-integration"
+    },
+    {
+      "task_id": "BES-011",
+      "name": "BES-011 — OpenAPI Children & Parents Documentation",
+      "list_id": "901525373848",
+      "lane": "Backend Support",
+      "owner": "Israel",
+      "phase": "Phase 4 — Member Management",
+      "priority": "medium",
+      "description": "Update Swagger/OpenAPI with children, parents, and child-parents documentation.\n\nDocumentation: docs/api/swagger.md\n\nAcceptance Criteria:\n- All children endpoints documented\n- All parents endpoints documented\n- Child-parents linking documented\n- Error responses documented\n\nGit Branch: feature/bes-011-openapi-children-parents"
+    },
+    {
+      "task_id": "FE2-004",
+      "name": "FE2-004 — Child Registration Form",
+      "list_id": "901525373848",
+      "lane": "Frontend 2",
+      "owner": "TBD",
+      "phase": "Phase 4 — Member Management",
+      "priority": "high",
+      "description": "Build the child registration form with Kutr classification and collection routes.\n\nDocumentation: docs/requirements/functional-requirements.md FR-04.1, docs/requirements/business-rules.md BR-012, BR-013\n\nAcceptance Criteria:\n- Form with all child registration fields\n- Kutr group radio selection (Kutr 1 / Kutr 2)\n- Collection location dropdown (5 routes)\n- Photo upload field\n- Form validation (Zod)\n- Success/error feedback\n- Mobile-responsive\n\nGit Branch: feature/fe2-004-child-registration"
+    },
+    {
+      "task_id": "FE2-005",
+      "name": "FE2-005 — Parent Linking Dialog",
+      "list_id": "901525373848",
+      "lane": "Frontend 2",
+      "owner": "TBD",
+      "phase": "Phase 4 — Member Management",
+      "priority": "high",
+      "description": "Build parent linking dialog to link/unlink parents to children.\n\nDocumentation: docs/requirements/functional-requirements.md FR-05.2, docs/requirements/business-rules.md BR-010\n\nAcceptance Criteria:\n- Dialog to link parent to child\n- Relation type selection (Father/Mother)\n- Duplicate prevention feedback\n- Unlink capability\n- Current parent links displayed\n\nGit Branch: feature/fe2-005-parent-linking"
+    },
+    {
+      "task_id": "FE2-006",
+      "name": "FE2-006 — Child List & Detail UI",
+      "list_id": "901525373848",
+      "lane": "Frontend 2",
+      "owner": "TBD",
+      "phase": "Phase 4 — Member Management",
+      "priority": "high",
+      "description": "Build child list page and detail view with filtering.\n\nDocumentation: docs/requirements/functional-requirements.md FR-04.2, FR-04.3\n\nAcceptance Criteria:\n- Paginated child list\n- Filter by Kutr group\n- Filter by collection location\n- Child detail shows profile, parents, group\n- Birthday milestone indicator\n\nGit Branch: feature/fe2-006-child-list-detail"
+    },
+    {
+      "task_id": "CORE-028",
+      "name": "CORE-028 — Planning Domain: Weight Calculation Engine",
+      "list_id": "901525373849",
+      "lane": "Core",
+      "owner": "Abrham",
+      "phase": "Phase 5 — Planning",
+      "priority": "high",
+      "description": "Implement the 3-factor weight calculation engine in packages/domain.\n\nDocumentation: docs/planning/annual-master-plan.md, docs/requirements/functional-requirements.md FR-08.3, docs/requirements/business-rules.md BR-030\n\nAcceptance Criteria:\n- Weight formula implemented exactly per FR-08.3\n- Sum of all weights = 100.00%\n- Handles edge cases (zero budget, zero people, zero time)\n- Unit tests cover all 25 master activities\n- Matches baseline totals (Budget: 3500, People: 112, Time: 45)\n\nGit Branch: feature/core-028-weight-calculation-engine"
+    },
+    {
+      "task_id": "CORE-029",
+      "name": "CORE-029 — Planning Domain: Progress Roll-Up Engine",
+      "list_id": "901525373849",
+      "lane": "Core",
+      "owner": "Abrham",
+      "phase": "Phase 5 — Planning",
+      "priority": "high",
+      "description": "Implement the bottom-up progress roll-up engine (Weekly → Monthly → Quarterly → Annual).\n\nDocumentation: docs/planning/progress-tracking.md, docs/requirements/business-rules.md BR-032\n\nAcceptance Criteria:\n- Weekly progress aggregates to monthly\n- Monthly aggregates to quarterly\n- Quarterly aggregates to annual\n- Weighted contribution calculated correctly\n- Unit tests verify aggregation math\n\nGit Branch: feature/core-029-progress-rollup-engine"
+    },
+    {
+      "task_id": "CORE-030",
+      "name": "CORE-030 — Planning API: Annual Master Plan",
+      "list_id": "901525373849",
+      "lane": "Core",
+      "owner": "Abrham",
+      "phase": "Phase 5 — Planning",
+      "priority": "high",
+      "description": "Implement annual plan CRUD with goal and activity management.\n\nDocumentation: docs/api/endpoints.md, docs/planning/annual-master-plan.md\n\nAcceptance Criteria:\n- Annual plan creation with goals and activities\n- Activity weight auto-calculated via engine\n- Plan status lifecycle (Draft → Distributed → Active → Completed → Archived)\n- RBAC: Ekd creates, Chairperson approves\n\nGit Branch: feature/core-030-annual-plan-api"
+    },
+    {
+      "task_id": "CORE-031",
+      "name": "CORE-031 — Planning API: Plan Distribution",
+      "list_id": "901525373849",
+      "lane": "Core",
+      "owner": "Abrham",
+      "phase": "Phase 5 — Planning",
+      "priority": "high",
+      "description": "Implement plan distribution to sub-departments per BR-031.\n\nDocumentation: docs/planning/plan-distribution.md, docs/requirements/business-rules.md BR-031\n\nAcceptance Criteria:\n- Activity distributed to one or more sub-departments\n- Distribution creates plan_distributions records\n- Sub-departments cannot create independent plans (BR-031)\n- Status tracking (Assigned → In_Progress → Completed)\n\nGit Branch: feature/core-031-plan-distribution"
+    },
+    {
+      "task_id": "CORE-032",
+      "name": "CORE-032 — Planning API: Weekly Plans & Progress",
+      "list_id": "901525373849",
+      "lane": "Core",
+      "owner": "Abrham",
+      "phase": "Phase 5 — Planning",
+      "priority": "high",
+      "description": "Implement weekly execution items and progress recording.\n\nDocumentation: docs/planning/weekly-planning.md, docs/planning/progress-tracking.md\n\nAcceptance Criteria:\n- Weekly plan creation from distribution\n- Progress recording with actual results\n- Roll-up triggered on progress submission\n- Status updates flow upward (BR-032)\n\nGit Branch: feature/core-032-weekly-plans-progress"
+    },
+    {
+      "task_id": "BES-012",
+      "name": "BES-012 — Planning API: Plan Queries & Analytics",
+      "list_id": "901525373849",
+      "lane": "Backend Support",
+      "owner": "Israel",
+      "phase": "Phase 5 — Planning",
+      "priority": "high",
+      "description": "Implement query endpoints for plan data.\n\nDocumentation: docs/api/endpoints.md, docs/planning/progress-tracking.md\n\nAcceptance Criteria:\n- Progress summary by goal\n- Distribution status by sub-department\n- Weight-adjusted completion metrics\n- Quarterly breakdown available\n\nGit Branch: feature/bes-012-plan-queries-analytics"
+    },
+    {
+      "task_id": "BES-013",
+      "name": "BES-013 — Planning Integration Tests",
+      "list_id": "901525373849",
+      "lane": "Backend Support",
+      "owner": "Israel",
+      "phase": "Phase 5 — Planning",
+      "priority": "high",
+      "description": "Write integration tests covering the full planning lifecycle.\n\nDocumentation: docs/testing/integration.md, docs/requirements/business-rules.md BR-030, BR-031, BR-032\n\nAcceptance Criteria:\n- Full planning lifecycle tested\n- BR-030 weight formula verified\n- BR-031 distribution constraint verified\n- BR-032 roll-up aggregation verified\n- Weight sum = 100.00% verified\n\nGit Branch: feature/bes-013-planning-integration-tests"
+    },
+    {
+      "task_id": "BES-014",
+      "name": "BES-014 — OpenAPI Planning Documentation",
+      "list_id": "901525373849",
+      "lane": "Backend Support",
+      "owner": "Israel",
+      "phase": "Phase 5 — Planning",
+      "priority": "medium",
+      "description": "Update Swagger/OpenAPI with planning endpoint documentation.\n\nDocumentation: docs/api/swagger.md\n\nAcceptance Criteria:\n- All planning endpoints documented\n- Weight formula documented\n- Roll-up logic documented\n- Error responses documented\n\nGit Branch: feature/bes-014-openapi-planning"
+    },
+    {
+      "task_id": "FE1-006",
+      "name": "FE1-006 — Planning Matrix UI",
+      "list_id": "901525373849",
+      "lane": "Frontend 1",
+      "owner": "Eyob",
+      "phase": "Phase 5 — Planning",
+      "priority": "high",
+      "description": "Build the interactive planning matrix displaying 25 activities with weights and quarterly distribution.\n\nDocumentation: docs/requirements/functional-requirements.md FR-08.2, FR-08.3, docs/planning/progress-tracking.md\n\nAcceptance Criteria:\n- Interactive table with 25 activities\n- Weight percentage displayed with visual bars\n- Quarterly distribution columns (Q1-Q4)\n- Budget, People, Time columns\n- Edit capability for authorized users (Ekd)\n- Responsive layout\n- Weight sum verification (100.00%)\n\nGit Branch: feature/fe1-006-planning-matrix"
+    },
+    {
+      "task_id": "FE2-007",
+      "name": "FE2-007 — Sub-Department Plan Execution UI",
+      "list_id": "901525373849",
+      "lane": "Frontend 2",
+      "owner": "TBD",
+      "phase": "Phase 5 — Planning",
+      "priority": "high",
+      "description": "Build the sub-department plan execution view with weekly tasks and progress recording.\n\nDocumentation: docs/requirements/functional-requirements.md FR-08.4, FR-08.5, docs/requirements/business-rules.md BR-032\n\nAcceptance Criteria:\n- Shows activities distributed to user's sub-department\n- Weekly task list\n- Progress recording form (actual result, status, challenges)\n- Roll-up progress indicator\n- Scoped to user's sub-department (RBAC)\n\nGit Branch: feature/fe2-007-plan-execution"
+    },
+    {
+      "task_id": "CORE-033",
+      "name": "CORE-033 — Attendance API: Session Management",
+      "list_id": "901525373850",
+      "lane": "Core",
+      "owner": "Abrham",
+      "phase": "Phase 6 — Operational Tracking",
+      "priority": "high",
+      "description": "Implement program session creation and listing.\n\nDocumentation: docs/api/endpoints.md, docs/requirements/functional-requirements.md FR-06.1\n\nAcceptance Criteria:\n- Session creation with type, date, time\n- Session list with filtering\n- Session types constrained per FR-06.1\n- RBAC enforced\n\nGit Branch: feature/core-033-session-management"
+    },
+    {
+      "task_id": "CORE-034",
+      "name": "CORE-034 — Attendance API: Auto-Seeding",
+      "list_id": "901525373850",
+      "lane": "Core",
+      "owner": "Abrham",
+      "phase": "Phase 6 — Operational Tracking",
+      "priority": "high",
+      "description": "Implement attendance auto-seeding when members/children are assigned to sessions.\n\nDocumentation: docs/adr/ADR-0002.md, docs/requirements/business-rules.md BR-020\n\nAcceptance Criteria:\n- Auto-creates Expected attendance rows for all assigned members/children\n- Handles both member and child attendance (person_type)\n- Idempotent (running twice doesn't duplicate)\n- Integration test verifies auto-seeding\n\nGit Branch: feature/core-034-attendance-auto-seeding"
+    },
+    {
+      "task_id": "CORE-035",
+      "name": "CORE-035 — Attendance API: Verification & Batch Confirm",
+      "list_id": "901525373850",
+      "lane": "Core",
+      "owner": "Abrham",
+      "phase": "Phase 6 — Operational Tracking",
+      "priority": "high",
+      "description": "Implement attendance verification and batch confirmation.\n\nDocumentation: docs/requirements/functional-requirements.md FR-06.3\n\nAcceptance Criteria:\n- Single record update (status, recorded_by, confirmed_at)\n- Batch update for entire session\n- Status constrained to Present/Absent/Excused\n- RBAC: Kutitr leaders can update all, others limited\n\nGit Branch: feature/core-035-attendance-verification"
+    },
+    {
+      "task_id": "CORE-036",
+      "name": "CORE-036 — Transport Route Assignment API",
+      "list_id": "901525373850",
+      "lane": "Core",
+      "owner": "Abrham",
+      "phase": "Phase 6 — Operational Tracking",
+      "priority": "high",
+      "description": "Implement transport route assignment with multi-member constraint.\n\nDocumentation: docs/requirements/functional-requirements.md FR-06.4, docs/requirements/business-rules.md BR-014, BR-022\n\nAcceptance Criteria:\n- Assign members to 5 collection routes\n- Enforce ≥2 members per route (BR-014)\n- RBAC: Kutitr exclusive authority (BR-022)\n\nGit Branch: feature/core-036-transport-route-assignment"
+    },
+    {
+      "task_id": "CORE-037",
+      "name": "CORE-037 — Event API: Creation & Program Assignment",
+      "list_id": "901525373850",
+      "lane": "Core",
+      "owner": "Abrham",
+      "phase": "Phase 6 — Operational Tracking",
+      "priority": "high",
+      "description": "Implement event creation and sub-department program assignment.\n\nDocumentation: docs/api/endpoints.md, docs/requirements/functional-requirements.md FR-09.1, FR-09.2, FR-09.3, docs/requirements/business-rules.md BR-014\n\nAcceptance Criteria:\n- Event creation (name, type, date, published status)\n- Program assignment to sub-departments\n- ≥2 members per program (BR-014)\n- Event types: Special, Extra_Training, Awdemerit, Adar\n\nGit Branch: feature/core-037-event-api"
+    },
+    {
+      "task_id": "BES-015",
+      "name": "BES-015 — Academic Assessment API",
+      "list_id": "901525373850",
+      "lane": "Backend Support",
+      "owner": "Israel",
+      "phase": "Phase 6 — Operational Tracking",
+      "priority": "high",
+      "description": "Implement academic assessment and scoring endpoints.\n\nDocumentation: docs/api/endpoints.md, docs/requirements/functional-requirements.md FR-07.1, FR-07.2, FR-07.3\n\nAcceptance Criteria:\n- Assessment creation (type, subject, max_score, period)\n- Score recording (child, score, recorded_by)\n- Score query by assessment or child\n- RBAC: Timihrt leaders manage assessments\n\nGit Branch: feature/bes-015-academic-assessment-api"
+    },
+    {
+      "task_id": "BES-016",
+      "name": "BES-016 — Event Attendance API",
+      "list_id": "901525373850",
+      "lane": "Backend Support",
+      "owner": "Israel",
+      "phase": "Phase 6 — Operational Tracking",
+      "priority": "high",
+      "description": "Implement event attendance recording (separate from regular attendance per ADR-0001).\n\nDocumentation: docs/adr/ADR-0001.md, docs/api/endpoints.md\n\nAcceptance Criteria:\n- Event attendance creation\n- Attendance status update\n- Separate from regular session attendance (ADR-0001)\n- RBAC enforced\n\nGit Branch: feature/bes-016-event-attendance-api"
+    },
+    {
+      "task_id": "BES-017",
+      "name": "BES-017 — Operational Integration Tests",
+      "list_id": "901525373850",
+      "lane": "Backend Support",
+      "owner": "Israel",
+      "phase": "Phase 6 — Operational Tracking",
+      "priority": "high",
+      "description": "Write integration tests for attendance lifecycle, transport, and events.\n\nDocumentation: docs/testing/integration.md, docs/requirements/business-rules.md BR-014, BR-020, BR-021, BR-022\n\nAcceptance Criteria:\n- Attendance lifecycle tested\n- BR-020 auto-seeding verified\n- BR-014 multi-member constraint verified\n- BR-022 Kutitr authority verified\n- ADR-0001 separate tables verified\n\nGit Branch: feature/bes-017-operational-integration-tests"
+    },
+    {
+      "task_id": "BES-018",
+      "name": "BES-018 — OpenAPI Operations Documentation",
+      "list_id": "901525373850",
+      "lane": "Backend Support",
+      "owner": "Israel",
+      "phase": "Phase 6 — Operational Tracking",
+      "priority": "medium",
+      "description": "Update Swagger/OpenAPI with attendance, transport, academic, and event documentation.\n\nDocumentation: docs/api/swagger.md\n\nAcceptance Criteria:\n- All operational endpoints documented\n- Auto-seeding behavior documented\n- Multi-member constraint documented\n- Error responses documented\n\nGit Branch: feature/bes-018-openapi-operations"
+    },
+    {
+      "task_id": "FE1-007",
+      "name": "FE1-007 — Attendance Checksheets UI",
+      "list_id": "901525373850",
+      "lane": "Frontend 1",
+      "owner": "Eyob",
+      "phase": "Phase 6 — Operational Tracking",
+      "priority": "high",
+      "description": "Build mobile-optimized attendance checksheets for Saturday morning attendance confirmation.\n\nDocumentation: docs/requirements/functional-requirements.md FR-06.3, docs/requirements/business-rules.md BR-020\n\nAcceptance Criteria:\n- Session selection dropdown\n- Member/child list with status toggles\n- Batch save capability\n- Mobile-optimized (touch-friendly)\n- Loading/saving states\n- Works on Saturday morning (7:30 AM)\n\nGit Branch: feature/fe1-007-attendance-checksheets"
+    },
+    {
+      "task_id": "FE1-008",
+      "name": "FE1-008 — Transport Dispatcher UI",
+      "list_id": "901525373850",
+      "lane": "Frontend 1",
+      "owner": "Eyob",
+      "phase": "Phase 6 — Operational Tracking",
+      "priority": "high",
+      "description": "Build the Saturday transport route dispatcher with 5 collection locations.\n\nDocumentation: docs/requirements/functional-requirements.md FR-06.2, docs/requirements/business-rules.md BR-014, BR-022\n\nAcceptance Criteria:\n- 5 route columns (Apartama, Gende Boy, Gende Je, Cobalt, Bate)\n- Drag-and-drop or multi-select member assignment\n- Minimum 2 members per route indicator\n- Mobile-responsive\n- RBAC: Kutitr exclusive authority\n\nGit Branch: feature/fe1-008-transport-dispatcher"
+    },
+    {
+      "task_id": "FE2-008",
+      "name": "FE2-008 — Event Management UI",
+      "list_id": "901525373850",
+      "lane": "Frontend 2",
+      "owner": "TBD",
+      "phase": "Phase 6 — Operational Tracking",
+      "priority": "high",
+      "description": "Build event creation and management interface.\n\nDocumentation: docs/requirements/functional-requirements.md FR-09.1, FR-09.2, docs/requirements/business-rules.md BR-014\n\nAcceptance Criteria:\n- Event list with filtering by type\n- Event creation form\n- Program assignment interface\n- Multi-member selection for programs\n- Published/draft status toggle\n\nGit Branch: feature/fe2-008-event-management"
+    },
+    {
+      "task_id": "FE2-009",
+      "name": "FE2-009 — Academic Score Entry UI",
+      "list_id": "901525373850",
+      "lane": "Frontend 2",
+      "owner": "TBD",
+      "phase": "Phase 6 — Operational Tracking",
+      "priority": "high",
+      "description": "Build the Timihrt gradebook interface for score entry.\n\nDocumentation: docs/requirements/functional-requirements.md FR-07.1, FR-07.2, FR-07.3\n\nAcceptance Criteria:\n- Assessment list\n- Score entry form (student, score)\n- Score summary per assessment\n- Kutr 1 vs Kutr 2 breakdown\n- RBAC: Timihrt leaders only\n\nGit Branch: feature/fe2-009-academic-score-entry"
+    },
+    {
+      "task_id": "CORE-038",
+      "name": "CORE-038 — Report Domain: Aggregation Logic",
+      "list_id": "901525373851",
+      "lane": "Core",
+      "owner": "Abrham",
+      "phase": "Phase 7 — Reporting & Dashboard",
+      "priority": "high",
+      "description": "Implement report aggregation logic consolidating data from all modules.\n\nDocumentation: docs/requirements/functional-requirements.md FR-10.1, FR-10.2, FR-10.3\n\nAcceptance Criteria:\n- Weekly, Monthly, Quarterly, Annual report aggregation\n- Performance metrics calculation (planned vs actual)\n- Unit tests verify aggregation accuracy\n\nGit Branch: feature/core-038-report-aggregation"
+    },
+    {
+      "task_id": "CORE-039",
+      "name": "CORE-039 — Report API: Generation & Retrieval",
+      "list_id": "901525373851",
+      "lane": "Core",
+      "owner": "Abrham",
+      "phase": "Phase 7 — Reporting & Dashboard",
+      "priority": "high",
+      "description": "Implement report generation and retrieval endpoints.\n\nDocumentation: docs/api/endpoints.md\n\nAcceptance Criteria:\n- Report generation from sub-department data\n- Report list with filtering by period and sub-department\n- Report detail with full metrics\n- RBAC: Ekd generates consolidated, others see own\n\nGit Branch: feature/core-039-report-api"
+    },
+    {
+      "task_id": "BES-019",
+      "name": "BES-019 — Report API: Sub-Department Submission",
+      "list_id": "901525373851",
+      "lane": "Backend Support",
+      "owner": "Israel",
+      "phase": "Phase 7 — Reporting & Dashboard",
+      "priority": "high",
+      "description": "Implement sub-department report submission endpoint.\n\nDocumentation: docs/requirements/functional-requirements.md FR-10.2, docs/api/endpoints.md\n\nAcceptance Criteria:\n- Sub-department submission with period, metrics, challenges\n- Submission status tracking\n- RBAC: Sub-department leaders submit own data\n- Ekd reviews all submissions\n\nGit Branch: feature/bes-019-report-submission"
+    },
+    {
+      "task_id": "BES-020",
+      "name": "BES-020 — Reporting Integration Tests",
+      "list_id": "901525373851",
+      "lane": "Backend Support",
+      "owner": "Israel",
+      "phase": "Phase 7 — Reporting & Dashboard",
+      "priority": "high",
+      "description": "Write integration tests for report generation, submission, and retrieval.\n\nDocumentation: docs/testing/integration.md\n\nAcceptance Criteria:\n- Report generation tested\n- Sub-department submission tested\n- Report retrieval tested\n- RBAC enforced on all endpoints\n\nGit Branch: feature/bes-020-reporting-integration-tests"
+    },
+    {
+      "task_id": "BES-021",
+      "name": "BES-021 — OpenAPI Reporting Documentation",
+      "list_id": "901525373851",
+      "lane": "Backend Support",
+      "owner": "Israel",
+      "phase": "Phase 7 — Reporting & Dashboard",
+      "priority": "medium",
+      "description": "Update Swagger/OpenAPI with reporting endpoint documentation.\n\nDocumentation: docs/api/swagger.md\n\nAcceptance Criteria:\n- All reporting endpoints documented\n- Report schema defined\n- Error responses documented\n\nGit Branch: feature/bes-021-openapi-reporting"
+    },
+    {
+      "task_id": "FE1-009",
+      "name": "FE1-009 — Executive Dashboard (Chairperson)",
+      "list_id": "901525373851",
+      "lane": "Frontend 1",
+      "owner": "Eyob",
+      "phase": "Phase 7 — Reporting & Dashboard",
+      "priority": "high",
+      "description": "Build the Chairperson executive dashboard with cross-departmental visibility.\n\nDocumentation: docs/requirements/functional-requirements.md FR-10.3, FR-10.4, docs/api/endpoints.md\n\nAcceptance Criteria:\n- Overall progress summary\n- Sub-department status cards\n- Planning completion percentage\n- Attendance summary\n- Key KPI widgets\n- Cross-departmental visibility (RBAC: Chairperson)\n- Responsive layout\n\nGit Branch: feature/fe1-009-executive-dashboard"
+    },
+    {
+      "task_id": "FE1-010",
+      "name": "FE1-010 — Report Generation UI",
+      "list_id": "901525373851",
+      "lane": "Frontend 1",
+      "owner": "Eyob",
+      "phase": "Phase 7 — Reporting & Dashboard",
+      "priority": "high",
+      "description": "Build report generation and viewing interface with period selection.\n\nDocumentation: docs/requirements/functional-requirements.md FR-10.2\n\nAcceptance Criteria:\n- Report period selector (Weekly/Monthly/Quarterly/Annual)\n- Report generation trigger\n- Report display with tables and charts\n- Export capability (PDF or print)\n- RBAC enforced\n\nGit Branch: feature/fe1-010-report-generation"
+    },
+    {
+      "task_id": "FE2-010",
+      "name": "FE2-010 — Sub-Department Dashboard",
+      "list_id": "901525373851",
+      "lane": "Frontend 2",
+      "owner": "TBD",
+      "phase": "Phase 7 — Reporting & Dashboard",
+      "priority": "high",
+      "description": "Build sub-department scoped dashboards showing only department-specific data.\n\nDocumentation: docs/requirements/functional-requirements.md FR-03.2, FR-10.4\n\nAcceptance Criteria:\n- Scoped to user's sub-department (RBAC)\n- Department-specific KPIs\n- Progress tracking for distributed activities\n- Attendance summary for department\n- Academic scores for Timihrt leaders\n\nGit Branch: feature/fe2-010-subdepartment-dashboard"
+    },
+    {
+      "task_id": "CORE-040",
+      "name": "CORE-040 — Announcement API: CRUD & Publishing",
+      "list_id": "901525373852",
+      "lane": "Core",
+      "owner": "Abrham",
+      "phase": "Phase 8 — Portfolio & Public Features",
+      "priority": "high",
+      "description": "Implement announcement CRUD and publishing workflow.\n\nDocumentation: docs/api/endpoints.md, docs/requirements/functional-requirements.md FR-11.1\n\nAcceptance Criteria:\n- Announcement CRUD (title, content, target_audience)\n- Target audience: Public, Members, Parents\n- Publish endpoint sets is_published=true, published_at\n- RBAC: Ekd and Chairperson can publish\n\nGit Branch: feature/core-040-announcement-api"
+    },
+    {
+      "task_id": "CORE-041",
+      "name": "CORE-041 — Public API: Stats & Events",
+      "list_id": "901525373852",
+      "lane": "Core",
+      "owner": "Abrham",
+      "phase": "Phase 8 — Portfolio & Public Features",
+      "priority": "high",
+      "description": "Implement public (no-auth) endpoints for stats and events.\n\nDocumentation: docs/requirements/functional-requirements.md FR-11.2, FR-11.3\n\nAcceptance Criteria:\n- Public stats (active members, enrolled children, completed events)\n- No PII exposed (FR-11.3)\n- Published events with countdown data\n- Published announcements\n- No authentication required\n- Rate limiting applied\n\nGit Branch: feature/core-041-public-api"
+    },
+    {
+      "task_id": "BES-022",
+      "name": "BES-022 — Telegram Bot Service",
+      "list_id": "901525373852",
+      "lane": "Backend Support",
+      "owner": "Israel",
+      "phase": "Phase 8 — Portfolio & Public Features",
+      "priority": "high",
+      "description": "Create apps/telegram standalone worker service.\n\nDocumentation: docs/architecture/system-architecture.md, docs/requirements/functional-requirements.md FR-12.1, FR-12.2\n\nAcceptance Criteria:\n- Standalone Node.js service\n- Polls for published announcements\n- Formats messages for Telegram\n- Posts to Hitsanat Kifl Telegram group\n- Handles connection errors gracefully\n- Docker configuration for Railway\n\nGit Branch: feature/bes-022-telegram-bot-service"
+    },
+    {
+      "task_id": "BES-023",
+      "name": "BES-023 — Portfolio Integration Tests",
+      "list_id": "901525373852",
+      "lane": "Backend Support",
+      "owner": "Israel",
+      "phase": "Phase 8 — Portfolio & Public Features",
+      "priority": "high",
+      "description": "Write integration tests for public API endpoints.\n\nDocumentation: docs/testing/integration.md\n\nAcceptance Criteria:\n- Public stats endpoint tested\n- Public events endpoint tested\n- Public announcements endpoint tested\n- No PII in public responses verified\n- Rate limiting tested\n\nGit Branch: feature/bes-023-portfolio-integration-tests"
+    },
+    {
+      "task_id": "BES-024",
+      "name": "BES-024 — OpenAPI Public & Announcement Documentation",
+      "list_id": "901525373852",
+      "lane": "Backend Support",
+      "owner": "Israel",
+      "phase": "Phase 8 — Portfolio & Public Features",
+      "priority": "medium",
+      "description": "Update Swagger/OpenAPI with public and announcement endpoint documentation.\n\nDocumentation: docs/api/swagger.md\n\nAcceptance Criteria:\n- Public endpoints documented\n- Announcement endpoints documented\n- Authentication requirements clear\n- Error responses documented\n\nGit Branch: feature/bes-024-openapi-public-announcements"
+    },
+    {
+      "task_id": "FE1-011",
+      "name": "FE1-011 — Portfolio Public Site",
+      "list_id": "901525373852",
+      "lane": "Frontend 1",
+      "owner": "Eyob",
+      "phase": "Phase 8 — Portfolio & Public Features",
+      "priority": "high",
+      "description": "Build the public portfolio site for hitsanatkifl.org.\n\nDocumentation: docs/requirements/functional-requirements.md FR-11.1 through FR-11.4, docs/architecture/system-architecture.md\n\nAcceptance Criteria:\n- Hero section with mission statement\n- Stats counters (animated)\n- Sub-department cards\n- Latest events with countdowns\n- Recent announcements\n- Mobile-responsive\n- SEO optimized\n\nGit Branch: feature/fe1-011-portfolio-public"
+    },
+    {
+      "task_id": "FE1-012",
+      "name": "FE1-012 — Portfolio E2E Tests",
+      "list_id": "901525373852",
+      "lane": "Frontend 1",
+      "owner": "Eyob",
+      "phase": "Phase 8 — Portfolio & Public Features",
+      "priority": "high",
+      "description": "Write Playwright E2E tests for public portfolio pages.\n\nDocumentation: docs/testing/e2e.md\n\nAcceptance Criteria:\n- Home page loads\n- Stats display correctly\n- Events section renders\n- Announcements section renders\n- Mobile viewport works\n- Performance benchmarks met\n\nGit Branch: feature/fe1-012-portfolio-e2e"
+    },
+    {
+      "task_id": "CORE-042",
+      "name": "CORE-042 — Cross-Module Integration Test Suite",
+      "list_id": "901525373853",
+      "lane": "Core",
+      "owner": "Abrham",
+      "phase": "Phase 9 — Integration, Security & Hardening",
+      "priority": "high",
+      "description": "Write comprehensive integration tests spanning multiple modules.\n\nDocumentation: docs/testing/integration.md\n\nAcceptance Criteria:\n- Member → family → child → attendance → planning → reports flow tested\n- All RBAC boundaries verified\n- All constraints enforced across modules\n\nGit Branch: feature/core-042-cross-module-integration"
+    },
+    {
+      "task_id": "CORE-043",
+      "name": "CORE-043 — Security Audit: Authentication & Authorization",
+      "list_id": "901525373853",
+      "lane": "Core",
+      "owner": "Abrham",
+      "phase": "Phase 9 — Hardening",
+      "priority": "high",
+      "description": "Perform security audit on auth and RBAC systems.\n\nDocumentation: docs/architecture/security-architecture.md, docs/testing/security.md\n\nAcceptance Criteria:\n- Session cookies properly configured\n- RBAC enforced on all protected endpoints\n- Scope isolation verified\n- No privilege escalation vectors found\n\nGit Branch: feature/core-043-security-audit-auth"
+    },
+    {
+      "task_id": "CORE-044",
+      "name": "CORE-044 — Security Audit: Data Protection",
+      "list_id": "901525373853",
+      "lane": "Core",
+      "owner": "Abrham",
+      "phase": "Phase 9 — Hardening",
+      "priority": "high",
+      "description": "Verify PII protection across the system.\n\nDocumentation: docs/architecture/security-architecture.md, docs/requirements/non-functional-requirements.md\n\nAcceptance Criteria:\n- Public API returns no PII\n- Sensitive data not logged\n- Database connections use TLS\n- No secrets in codebase\n\nGit Branch: feature/core-044-security-audit-data"
+    },
+    {
+      "task_id": "CORE-045",
+      "name": "CORE-045 — API Error Handling Standardization",
+      "list_id": "901525373853",
+      "lane": "Core",
+      "owner": "Abrham",
+      "phase": "Phase 9 — Hardening",
+      "priority": "high",
+      "description": "Standardize error handling per RFC 7807.\n\nDocumentation: docs/api/error-handling.md\n\nAcceptance Criteria:\n- All endpoints return RFC 7807 error format\n- Error codes consistent across modules\n- Validation errors return field-level details\n\nGit Branch: feature/core-045-error-handling"
+    },
+    {
+      "task_id": "CORE-046",
+      "name": "CORE-046 — Rate Limiting & Throttling",
+      "list_id": "901525373853",
+      "lane": "Core",
+      "owner": "Abrham",
+      "phase": "Phase 9 — Hardening",
+      "priority": "high",
+      "description": "Implement rate limiting on public and sensitive endpoints.\n\nDocumentation: docs/architecture/security-architecture.md\n\nAcceptance Criteria:\n- Public API endpoints rate-limited\n- Auth endpoints rate-limited\n- Rate limit headers returned\n\nGit Branch: feature/core-046-rate-limiting"
+    },
+    {
+      "task_id": "CORE-047",
+      "name": "CORE-047 — Code Quality Review",
+      "list_id": "901525373853",
+      "lane": "Core",
+      "owner": "Abrham",
+      "phase": "Phase 9 — Hardening",
+      "priority": "high",
+      "description": "Full codebase review for Biome compliance and TypeScript strictness.\n\nDocumentation: docs/development/coding-standards.md\n\nAcceptance Criteria:\n- Biome passes on all files\n- TypeScript strict mode enforced\n- Import boundaries respected\n\nGit Branch: feature/core-047-code-quality"
+    },
+    {
+      "task_id": "BES-025",
+      "name": "BES-025 — Performance Testing",
+      "list_id": "901525373853",
+      "lane": "Backend Support",
+      "owner": "Israel",
+      "phase": "Phase 9 — Hardening",
+      "priority": "high",
+      "description": "Perform load testing on critical endpoints.\n\nDocumentation: docs/testing/strategy.md, docs/requirements/non-functional-requirements.md\n\nAcceptance Criteria:\n- Member list responds < 200ms for 1000 records\n- Attendance batch confirm handles 50 records < 500ms\n- Planning matrix loads < 1s\n- Public stats responds < 100ms\n\nGit Branch: feature/bes-025-performance-testing"
+    },
+    {
+      "task_id": "CORE-048",
+      "name": "CORE-048 — Railway: API Service Deployment",
+      "list_id": "901525373854",
+      "lane": "Core",
+      "owner": "Abrham",
+      "phase": "Phase 10 — Deployment",
+      "priority": "high",
+      "description": "Deploy API to Railway with proper configuration.\n\nDocumentation: docs/deployment/railway.md, docs/architecture/deployment-architecture.md\n\nAcceptance Criteria:\n- API builds successfully on Railway\n- Health check endpoint responds\n- Swagger UI accessible\n- All environment variables configured\n\nGit Branch: feature/core-048-railway-api-deployment"
+    },
+    {
+      "task_id": "CORE-049",
+      "name": "CORE-049 — Railway: PostgreSQL Database",
+      "list_id": "901525373854",
+      "lane": "Core",
+      "owner": "Abrham",
+      "phase": "Phase 10 — Deployment",
+      "priority": "high",
+      "description": "Configure Railway-managed PostgreSQL.\n\nDocumentation: docs/deployment/railway.md, docs/database/design.md\n\nAcceptance Criteria:\n- PostgreSQL 15 running on Railway\n- Connection via internal hostname\n- TLS enabled\n- All migrations applied\n\nGit Branch: feature/core-049-railway-postgres"
+    },
+    {
+      "task_id": "CORE-050",
+      "name": "CORE-050 — Railway: Telegram Bot Service",
+      "list_id": "901525373854",
+      "lane": "Core",
+      "owner": "Abrham",
+      "phase": "Phase 10 — Deployment",
+      "priority": "high",
+      "description": "Deploy Telegram worker to Railway.\n\nDocumentation: docs/deployment/railway.md, docs/open-decisions.md OD-01\n\nAcceptance Criteria:\n- Telegram service builds and starts\n- Connects to PostgreSQL via private network\n- Posts announcements to Telegram group\n\nGit Branch: feature/core-050-railway-telegram"
+    },
+    {
+      "task_id": "CORE-051",
+      "name": "CORE-051 — Vercel: Portfolio Deployment",
+      "list_id": "901525373854",
+      "lane": "Core",
+      "owner": "Abrham",
+      "phase": "Phase 10 — Deployment",
+      "priority": "high",
+      "description": "Deploy Portfolio to Vercel.\n\nDocumentation: docs/deployment/vercel.md, docs/architecture/deployment-architecture.md\n\nAcceptance Criteria:\n- Portfolio builds on Vercel\n- Accessible at production URL\n- API URL points to production API\n\nGit Branch: feature/core-051-vercel-portfolio"
+    },
+    {
+      "task_id": "CORE-052",
+      "name": "CORE-052 — Vercel: Admin Deployment",
+      "list_id": "901525373854",
+      "lane": "Core",
+      "owner": "Abrham",
+      "phase": "Phase 10 — Deployment",
+      "priority": "high",
+      "description": "Deploy Admin app to Vercel.\n\nDocumentation: docs/deployment/vercel.md\n\nAcceptance Criteria:\n- Admin builds on Vercel\n- Accessible at production URL\n- API URL points to production API\n- Auth flow works in production\n\nGit Branch: feature/core-052-vercel-admin"
+    },
+    {
+      "task_id": "BES-026",
+      "name": "BES-026 — Deployment Documentation",
+      "list_id": "901525373854",
+      "lane": "Backend Support",
+      "owner": "Israel",
+      "phase": "Phase 10 — Deployment",
+      "priority": "medium",
+      "description": "Update deployment documentation with final production configuration.\n\nDocumentation: docs/deployment/overview.md, docs/deployment/environment-variables.md\n\nAcceptance Criteria:\n- Environment variables documented\n- Deployment steps documented\n- Rollback procedures documented\n- Monitoring setup documented\n\nGit Branch: feature/bes-026-deployment-documentation"
+    },
+    {
+      "task_id": "BES-027",
+      "name": "BES-027 — Production Verification Testing",
+      "list_id": "901525373854",
+      "lane": "Backend Support",
+      "owner": "Israel",
+      "phase": "Phase 10 — Deployment",
+      "priority": "high",
+      "description": "Run end-to-end smoke tests against production.\n\nDocumentation: docs/testing/e2e.md\n\nAcceptance Criteria:\n- Health check responds\n- Login flow works on production admin\n- Member registration works\n- Public portfolio loads\n- Event countdowns display\n- Announcements publish\n\nGit Branch: feature/bes-027-production-verification"
+    }
+  ]
+}

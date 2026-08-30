@@ -1,0 +1,1104 @@
+{
+  "info": {
+    "name": "Hitsanat Kifl API",
+    "description": "Complete API test collection for Hitsanat Kifl Children's Ministry Management System\n\nBase URL: {{baseUrl}}\n\nAuthentication:\n- Sign in via POST /api/v1/auth/sign-in/email\n- Session cookie (better-auth.session_token) is auto-managed",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:3001"
+    }
+  ],
+  "auth": {
+    "type": "apikey",
+    "apikey": [
+      {
+        "key": "key",
+        "value": "Cookie",
+        "type": "string"
+      },
+      {
+        "key": "value",
+        "value": "{{sessionCookie}}",
+        "type": "string"
+      },
+      {
+        "key": "in",
+        "value": "header",
+        "type": "string"
+      }
+    ]
+  },
+  "item": [
+    {
+      "name": "Health",
+      "item": [
+        {
+          "name": "GET /health",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/health",
+              "host": ["{{baseUrl}}"],
+              "path": ["health"]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status is 200', () => pm.response.to.have.status(200));",
+                  "pm.test('Response has status field', () => {",
+                  "  const json = pm.response.json();",
+                  "  pm.expect(json).to.have.property('status');",
+                  "});"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Authentication",
+      "item": [
+        {
+          "name": "POST /auth/sign-in/email",
+          "request": {
+            "method": "POST",
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/auth/sign-in/email",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "auth", "sign-in", "email"]
+            },
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"leader@hitsanat.org\",\n  \"password\": \"password123\"\n}"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status is 200 or 401', () => {",
+                  "  pm.expect([200, 401]).to.include(pm.response.code);",
+                  "});",
+                  "if (pm.response.code === 200) {",
+                  "  const cookies = pm.response.headers.filter(h => h.key === 'set-cookie');",
+                  "  if (cookies.length > 0) {",
+                  "    const sessionCookie = cookies[0].value.split(';')[0].split('=')[1];",
+                  "    pm.environment.set('sessionCookie', sessionCookie);",
+                  "  }",
+                  "}"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "POST /auth/sign-out",
+          "request": {
+            "method": "POST",
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/auth/sign-out",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "auth", "sign-out"]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status is 200', () => pm.response.to.have.status(200));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "GET /auth/session",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/auth/session",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "auth", "session"]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status is 200 or 401', () => {",
+                  "  pm.expect([200, 401]).to.include(pm.response.code);",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "POST /auth/change-password",
+          "request": {
+            "method": "POST",
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/auth/change-password",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "auth", "change-password"]
+            },
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"currentPassword\": \"password123\",\n  \"newPassword\": \"newpassword456\"\n}"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Members",
+      "item": [
+        {
+          "name": "GET /members",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/members?search=&subDept=&familyId=&yearOfStudy=&isActive=",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "members"],
+              "query": [
+                { "key": "search", "value": "", "description": "Search by name or phone" },
+                { "key": "subDept", "value": "", "description": "Filter by sub-department ID" },
+                { "key": "familyId", "value": "", "description": "Filter by family ID" },
+                { "key": "yearOfStudy", "value": "", "description": "Filter by year of study" },
+                { "key": "isActive", "value": "", "description": "Filter by active status" }
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status is 200', () => pm.response.to.have.status(200));",
+                  "pm.test('Response is array or paginated', () => {",
+                  "  const json = pm.response.json();",
+                  "  pm.expect(json).to.satisfy(v => Array.isArray(v) || v.data || v.items);",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "POST /members/stage-1",
+          "request": {
+            "method": "POST",
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/members/stage-1",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "members", "stage-1"]
+            },
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"fullName\": \"Test Member\",\n  \"christianName\": \"Test\",\n  \"phone\": \"+251911000001\",\n  \"yearOfStudy\": \"Year 1\",\n  \"academicDepartment\": \"Computer Science\",\n  \"campus\": \"Main\",\n  \"gender\": \"Male\"\n}"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status is 201 or 409', () => {",
+                  "  pm.expect([201, 409]).to.include(pm.response.code);",
+                  "});",
+                  "if (pm.response.code === 201) {",
+                  "  const json = pm.response.json();",
+                  "  pm.environment.set('memberId', json.id || json.data?.id);",
+                  "}"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "GET /members/:id",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/members/{{memberId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "members", "{{memberId}}"]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status is 200', () => pm.response.to.have.status(200));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "PUT /members/:id/stage-2",
+          "request": {
+            "method": "PUT",
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/members/{{memberId}}/stage-2",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "members", "{{memberId}}", "stage-2"]
+            },
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"subDepartments\": [],\n  \"familyId\": null,\n  \"photoUrl\": null,\n  \"telegramUsername\": null\n}"
+            }
+          }
+        },
+        {
+          "name": "POST /members/:id/roles",
+          "request": {
+            "method": "POST",
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/members/{{memberId}}/roles",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "members", "{{memberId}}", "roles"]
+            },
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"role\": \"SUB_DEPT_LEADER\",\n  \"subDepartmentId\": null\n}"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Children",
+      "item": [
+        {
+          "name": "GET /children",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/children?group=&location=&birthdayMonth=&search=",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "children"],
+              "query": [
+                { "key": "group", "value": "", "description": "Filter by Kutr group (Kutr 1 / Kutr 2)" },
+                { "key": "location", "value": "", "description": "Filter by collection location" },
+                { "key": "birthdayMonth", "value": "", "description": "Filter by birthday month" },
+                { "key": "search", "value": "", "description": "Search by name" }
+              ]
+            }
+          }
+        },
+        {
+          "name": "POST /children",
+          "request": {
+            "method": "POST",
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/children",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "children"]
+            },
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"fullName\": \"Test Child\",\n  \"birthday\": \"2018-01-15\",\n  \"gender\": \"Male\",\n  \"kutrGroup\": \"Kutr 1\",\n  \"collectionLocation\": \"Apartama\"\n}"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status is 201', () => pm.response.to.have.status(201));",
+                  "if (pm.response.code === 201) {",
+                  "  const json = pm.response.json();",
+                  "  pm.environment.set('childId', json.id || json.data?.id);",
+                  "}"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "GET /children/:id",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/children/{{childId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "children", "{{childId}}"]
+            }
+          }
+        },
+        {
+          "name": "POST /children/:id/parents",
+          "request": {
+            "method": "POST",
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/children/{{childId}}/parents",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "children", "{{childId}}", "parents"]
+            },
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"parentId\": \"{{parentId}}\",\n  \"relation\": \"Father\"\n}"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status is 201 or 409', () => {",
+                  "  pm.expect([201, 409]).to.include(pm.response.code);",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "PUT /children/:id/reclassify",
+          "request": {
+            "method": "PUT",
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/children/{{childId}}/reclassify",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "children", "{{childId}}", "reclassify"]
+            },
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"kutrGroup\": \"Kutr 2\"\n}"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Parents",
+      "item": [
+        {
+          "name": "GET /parents",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/parents?search=",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "parents"],
+              "query": [
+                { "key": "search", "value": "", "description": "Search by name or phone" }
+              ]
+            }
+          }
+        },
+        {
+          "name": "POST /parents",
+          "request": {
+            "method": "POST",
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/parents",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "parents"]
+            },
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"fullName\": \"Test Parent\",\n  \"phone\": \"+251911000010\",\n  \"email\": \"parent@test.com\",\n  \"address\": \"Addis Ababa\"\n}"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 201) {",
+                  "  const json = pm.response.json();",
+                  "  pm.environment.set('parentId', json.id || json.data?.id);",
+                  "}"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Families",
+      "item": [
+        {
+          "name": "GET /families",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/families",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "families"]
+            }
+          }
+        },
+        {
+          "name": "POST /families",
+          "request": {
+            "method": "POST",
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/families",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "families"]
+            },
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Test Family\",\n  \"academicYear\": \"2016-2017 E.C.\"\n}"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 201) {",
+                  "  const json = pm.response.json();",
+                  "  pm.environment.set('familyId', json.id || json.data?.id);",
+                  "}"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "GET /families/:id",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/families/{{familyId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "families", "{{familyId}}"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Sub-Departments",
+      "item": [
+        {
+          "name": "GET /sub-departments",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/sub-departments",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "sub-departments"]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status is 200', () => pm.response.to.have.status(200));",
+                  "pm.test('Returns 5 sub-departments', () => {",
+                  "  const json = pm.response.json();",
+                  "  const items = json.data || json.items || json;",
+                  "  if (Array.isArray(items)) {",
+                  "    pm.expect(items.length).to.be.at.least(5);",
+                  "  }",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "GET /sub-departments/:id/roster",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/sub-departments/{{subDeptId}}/roster",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "sub-departments", "{{subDeptId}}", "roster"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Attendance",
+      "item": [
+        {
+          "name": "GET /attendance/sessions",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/attendance/sessions",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "attendance", "sessions"]
+            }
+          }
+        },
+        {
+          "name": "GET /attendance/sessions/:sessionId/roster",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/attendance/sessions/{{sessionId}}/roster",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "attendance", "sessions", "{{sessionId}}", "roster"]
+            }
+          }
+        },
+        {
+          "name": "PUT /attendance/records/:recordId",
+          "request": {
+            "method": "PUT",
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/attendance/records/{{recordId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "attendance", "records", "{{recordId}}"]
+            },
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"status\": \"Present\",\n  \"recordedBy\": \"{{memberId}}\"\n}"
+            }
+          }
+        },
+        {
+          "name": "POST /attendance/sessions/:sessionId/batch-verify",
+          "request": {
+            "method": "POST",
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/attendance/sessions/{{sessionId}}/batch-verify",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "attendance", "sessions", "{{sessionId}}", "batch-verify"]
+            },
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"records\": [\n    { \"recordId\": \"...\", \"status\": \"Present\" }\n  ],\n  \"confirmedBy\": \"{{memberId}}\"\n}"
+            }
+          }
+        },
+        {
+          "name": "POST /attendance/transport-assignment",
+          "request": {
+            "method": "POST",
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/attendance/transport-assignment",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "attendance", "transport-assignment"]
+            },
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"sessionId\": \"{{sessionId}}\",\n  \"collectionLocation\": \"Apartama\",\n  \"memberIds\": [\"{{memberId}}\"]\n}"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Academic",
+      "item": [
+        {
+          "name": "GET /academic/assessments",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/academic/assessments",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "academic", "assessments"]
+            }
+          }
+        },
+        {
+          "name": "POST /academic/assessments",
+          "request": {
+            "method": "POST",
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/academic/assessments",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "academic", "assessments"]
+            },
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"type\": \"Midterm\",\n  \"subject\": \"Bible Study\",\n  \"maxScore\": 100,\n  \"period\": \"Semester 1\"\n}"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 201) {",
+                  "  const json = pm.response.json();",
+                  "  pm.environment.set('assessmentId', json.id || json.data?.id);",
+                  "}"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "POST /academic/scores",
+          "request": {
+            "method": "POST",
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/academic/scores",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "academic", "scores"]
+            },
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"assessmentId\": \"{{assessmentId}}\",\n  \"childId\": \"{{childId}}\",\n  \"score\": 85\n}"
+            }
+          }
+        },
+        {
+          "name": "GET /academic/scores?assessmentId=",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/academic/scores?assessmentId={{assessmentId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "academic", "scores"],
+              "query": [
+                { "key": "assessmentId", "value": "{{assessmentId}}" }
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Planning",
+      "item": [
+        {
+          "name": "GET /annual-plans",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/annual-plans",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "annual-plans"]
+            }
+          }
+        },
+        {
+          "name": "POST /annual-plans",
+          "request": {
+            "method": "POST",
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/annual-plans",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "annual-plans"]
+            },
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"title\": \"Annual Plan 2016 E.C.\",\n  \"academicYear\": \"2016-2017 E.C.\"\n}"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 201) {",
+                  "  const json = pm.response.json();",
+                  "  pm.environment.set('planId', json.id || json.data?.id);",
+                  "}"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "POST /annual-plans/:id/goals",
+          "request": {
+            "method": "POST",
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/annual-plans/{{planId}}/goals",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "annual-plans", "{{planId}}", "goals"]
+            },
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"title\": \"Spiritual Education\",\n  \"description\": \"Strengthen spiritual growth\"\n}"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 201) {",
+                  "  const json = pm.response.json();",
+                  "  pm.environment.set('goalId', json.id || json.data?.id);",
+                  "}"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "POST /annual-plans/goals/:goalId/activities",
+          "request": {
+            "method": "POST",
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/annual-plans/goals/{{goalId}}/activities",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "annual-plans", "goals", "{{goalId}}", "activities"]
+            },
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"title\": \"Bible Study Sessions\",\n  \"budget\": 500,\n  \"people\": 20,\n  \"time\": 10\n}"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 201) {",
+                  "  const json = pm.response.json();",
+                  "  pm.environment.set('activityId', json.id || json.data?.id);",
+                  "}"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "POST /annual-plans/activities/:activityId/distribute",
+          "request": {
+            "method": "POST",
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/annual-plans/activities/{{activityId}}/distribute",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "annual-plans", "activities", "{{activityId}}", "distribute"]
+            },
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"subDepartmentId\": \"{{subDeptId}}\",\n  \"description\": \"Weekly Bible study for Timihrt sub-department\"\n}"
+            }
+          }
+        },
+        {
+          "name": "GET /annual-plans/my-sub-department",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/annual-plans/my-sub-department",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "annual-plans", "my-sub-department"]
+            }
+          }
+        },
+        {
+          "name": "POST /annual-plans/weekly-tasks",
+          "request": {
+            "method": "POST",
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/annual-plans/weekly-tasks",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "annual-plans", "weekly-tasks"]
+            },
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"activityId\": \"{{activityId}}\",\n  \"weekNumber\": 1,\n  \"description\": \"Prepare study materials\"\n}"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 201) {",
+                  "  const json = pm.response.json();",
+                  "  pm.environment.set('weeklyTaskId', json.id || json.data?.id);",
+                  "}"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "POST /annual-plans/weekly-tasks/:id/progress",
+          "request": {
+            "method": "POST",
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/annual-plans/weekly-tasks/{{weeklyTaskId}}/progress",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "annual-plans", "weekly-tasks", "{{weeklyTaskId}}", "progress"]
+            },
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"actualResult\": \"Completed 3 sessions\",\n  \"progressPercentage\": 100,\n  \"challenges\": \"None\"\n}"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Events",
+      "item": [
+        {
+          "name": "GET /events",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/events?type=&upcoming=&published=",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "events"],
+              "query": [
+                { "key": "type", "value": "", "description": "Filter by event type" },
+                { "key": "upcoming", "value": "", "description": "Filter upcoming events" },
+                { "key": "published", "value": "", "description": "Filter by published status" }
+              ]
+            }
+          }
+        },
+        {
+          "name": "POST /events",
+          "request": {
+            "method": "POST",
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/events",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "events"]
+            },
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Timket Celebration\",\n  \"type\": \"Special\",\n  \"date\": \"2025-01-19\",\n  \"isPublished\": false\n}"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 201) {",
+                  "  const json = pm.response.json();",
+                  "  pm.environment.set('eventId', json.id || json.data?.id);",
+                  "}"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "POST /events/:id/assign-program",
+          "request": {
+            "method": "POST",
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/events/{{eventId}}/assign-program",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "events", "{{eventId}}", "assign-program"]
+            },
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"subDepartmentId\": \"{{subDeptId}}\",\n  \"programName\": \"Choir Performance\",\n  \"memberIds\": [\"{{memberId}}\", \"{{memberId2}}\"]\n}"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Reports",
+      "item": [
+        {
+          "name": "GET /reports",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/reports",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "reports"]
+            }
+          }
+        },
+        {
+          "name": "POST /reports/generate",
+          "request": {
+            "method": "POST",
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/reports/generate",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "reports", "generate"]
+            },
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"period\": \"Monthly\",\n  \"subDepartmentId\": \"{{subDeptId}}\",\n  \"startDate\": \"2025-01-01\",\n  \"endDate\": \"2025-01-31\"\n}"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Announcements",
+      "item": [
+        {
+          "name": "GET /announcements",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/announcements",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "announcements"]
+            }
+          }
+        },
+        {
+          "name": "POST /announcements",
+          "request": {
+            "method": "POST",
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/announcements",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "announcements"]
+            },
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"title\": \"Weekly Service Update\",\n  \"content\": \"This week's service will be held at the usual time.\",\n  \"targetAudience\": \"Members\",\n  \"isPublished\": true\n}"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Public (No Auth)",
+      "item": [
+        {
+          "name": "GET /public/stats",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/public/stats",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "public", "stats"]
+            },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status is 200', () => pm.response.to.have.status(200));",
+                  "pm.test('No PII in response', () => {",
+                  "  const json = pm.response.text();",
+                  "  pm.expect(json).to.not.match(/email|phone|password/i);",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "GET /public/events/upcoming",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/public/events/upcoming",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "public", "events", "upcoming"]
+            }
+          }
+        },
+        {
+          "name": "GET /public/announcements",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/public/announcements",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "public", "announcements"]
+            }
+          }
+        }
+      ]
+    }
+  ]
+}

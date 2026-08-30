@@ -2,11 +2,11 @@
 
 ## Hitsanat Kifl Children's Ministry Management System
 **Document Version:** 2.1  
-**Team Model:** 5-Person Multi-Lane Ownership Architecture (ADR-0016)  
+**Team Model:** 4-Person Multi-Lane Ownership Architecture (ADR-0016)  
 
 ---
 
-## 1. Five-Contributor Lane Structure
+## 1. Four-Contributor Lane Structure
 
 ```mermaid
 graph TD
