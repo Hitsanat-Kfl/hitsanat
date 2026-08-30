@@ -7,15 +7,19 @@
 
 ---
 
-## Services
+## What Docker Runs
 
-| Service | Container | Port | Description |
-|:--------|:----------|:-----|:------------|
-| `postgres` | hitsanat-postgres | 5432 | PostgreSQL 16 dev database (`hitsanat_dev`) |
-| `postgres_test` | hitsanat-postgres-test | 5433 | PostgreSQL 16 test database (`hitsanat_test`) |
-| `api` | hitsanat-api | 3001 | Express.js API (depends on postgres) |
-| `admin` | hitsanat-admin | 3002 | Next.js admin panel |
-| `portfolio` | hitsanat-portfolio | 3000 | Next.js public portfolio site |
+Docker runs the **entire project stack** — database, API, admin panel, and portfolio site. One command starts everything.
+
+| Service | Container | Port | URL | Description |
+|:--------|:----------|:-----|:----|:------------|
+| `postgres` | hitsanat-postgres | 5432 | — | PostgreSQL 16 dev database (`hitsanat_dev`) |
+| `postgres_test` | hitsanat-postgres-test | 5433 | — | PostgreSQL 16 test database (`hitsanat_test`) |
+| `api` | hitsanat-api | 3001 | http://localhost:3001 | Express.js API backend |
+| `admin` | hitsanat-admin | 3002 | http://localhost:3002 | Next.js admin panel |
+| `portfolio` | hitsanat-portfolio | 3000 | http://localhost:3000 | Next.js public website |
+
+All 5 services are defined in `docker-compose.yml`. Each app (`api`, `admin`, `portfolio`) has its own multi-stage Dockerfile in `docker/`.
 
 ---
 
@@ -24,14 +28,48 @@
 ```bash
 cd C:\Users\hp\Desktop\Hitsanat
 
-# Start everything
+# Start ALL services (database + API + admin + portfolio)
 docker compose up
 
 # Start in background
 docker compose up -d
 ```
 
-First run builds images from the multi-stage Dockerfiles in `docker/`. Subsequent starts are fast.
+First run builds images from the Dockerfiles in `docker/`. Subsequent starts are fast.
+
+To start only specific services:
+```bash
+# Only database + API (skip admin and portfolio)
+docker compose up postgres api
+
+# Only the database
+docker compose up postgres
+```
+
+---
+
+## Verify Everything is Running
+
+After `docker compose up`, check all 5 services:
+
+```bash
+docker compose ps
+```
+
+Expected output — all should show `Up`:
+```
+NAME                 STATUS       PORTS
+hitsanat-postgres    Up (healthy) 0.0.0.0:5432->5432/tcp
+hitsanat-postgres-test Up (healthy) 0.0.0.0:5433->5432/tcp
+hitsanat-api         Up           0.0.0.0:3001->3001/tcp
+hitsanat-admin       Up           0.0.0.0:3002->3002/tcp
+hitsanat-portfolio   Up           0.0.0.0:3000->3000/tcp
+```
+
+Open in browser:
+- Portfolio: http://localhost:3000
+- API health: http://localhost:3001/health
+- Admin: http://localhost:3002
 
 ---
 
