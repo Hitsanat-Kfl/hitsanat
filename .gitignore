@@ -45,3 +45,7 @@ pnpm-debug.log*
 # OpenCode
 opencode.json
 .opencode/
+
+# ClickUp local tracking (not for repo)
+clickup-*.md
+clickup-*.json
