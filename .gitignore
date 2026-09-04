@@ -49,3 +49,10 @@ opencode.json
 # ClickUp local tracking (not for repo)
 clickup-*.md
 clickup-*.json
+clickup-setup.mjs
+
+# Local task files
+abrahm-tasks.md
+doc-reference-all.md
+doc-reference-values.md
+doc-reference.csv

@@ -118,9 +118,7 @@
             {
               "listen": "test",
               "script": {
-                "exec": [
-                  "pm.test('Status is 200', () => pm.response.to.have.status(200));"
-                ]
+                "exec": ["pm.test('Status is 200', () => pm.response.to.have.status(200));"]
               }
             }
           ]
@@ -215,9 +213,7 @@
               "host": ["{{baseUrl}}"],
               "path": ["api", "v1", "members", "stage-1"]
             },
-            "header": [
-              { "key": "Content-Type", "value": "application/json" }
-            ],
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
             "body": {
               "mode": "raw",
               "raw": "{\n  \"fullName\": \"Test Member\",\n  \"christianName\": \"Test\",\n  \"phone\": \"+251911000001\",\n  \"yearOfStudy\": \"Year 1\",\n  \"academicDepartment\": \"Computer Science\",\n  \"campus\": \"Main\",\n  \"gender\": \"Male\"\n}"
@@ -254,9 +250,7 @@
             {
               "listen": "test",
               "script": {
-                "exec": [
-                  "pm.test('Status is 200', () => pm.response.to.have.status(200));"
-                ]
+                "exec": ["pm.test('Status is 200', () => pm.response.to.have.status(200));"]
               }
             }
           ]
@@ -270,9 +264,7 @@
               "host": ["{{baseUrl}}"],
               "path": ["api", "v1", "members", "{{memberId}}", "stage-2"]
             },
-            "header": [
-              { "key": "Content-Type", "value": "application/json" }
-            ],
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
             "body": {
               "mode": "raw",
               "raw": "{\n  \"subDepartments\": [],\n  \"familyId\": null,\n  \"photoUrl\": null,\n  \"telegramUsername\": null\n}"
@@ -288,9 +280,7 @@
               "host": ["{{baseUrl}}"],
               "path": ["api", "v1", "members", "{{memberId}}", "roles"]
             },
-            "header": [
-              { "key": "Content-Type", "value": "application/json" }
-            ],
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
             "body": {
               "mode": "raw",
               "raw": "{\n  \"role\": \"SUB_DEPT_LEADER\",\n  \"subDepartmentId\": null\n}"
@@ -311,7 +301,11 @@
               "host": ["{{baseUrl}}"],
               "path": ["api", "v1", "children"],
               "query": [
-                { "key": "group", "value": "", "description": "Filter by Kutr group (Kutr 1 / Kutr 2)" },
+                {
+                  "key": "group",
+                  "value": "",
+                  "description": "Filter by Kutr group (Kutr 1 / Kutr 2)"
+                },
                 { "key": "location", "value": "", "description": "Filter by collection location" },
                 { "key": "birthdayMonth", "value": "", "description": "Filter by birthday month" },
                 { "key": "search", "value": "", "description": "Search by name" }
@@ -328,9 +322,7 @@
               "host": ["{{baseUrl}}"],
               "path": ["api", "v1", "children"]
             },
-            "header": [
-              { "key": "Content-Type", "value": "application/json" }
-            ],
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
             "body": {
               "mode": "raw",
               "raw": "{\n  \"fullName\": \"Test Child\",\n  \"birthday\": \"2018-01-15\",\n  \"gender\": \"Male\",\n  \"kutrGroup\": \"Kutr 1\",\n  \"collectionLocation\": \"Apartama\"\n}"
@@ -371,9 +363,7 @@
               "host": ["{{baseUrl}}"],
               "path": ["api", "v1", "children", "{{childId}}", "parents"]
             },
-            "header": [
-              { "key": "Content-Type", "value": "application/json" }
-            ],
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
             "body": {
               "mode": "raw",
               "raw": "{\n  \"parentId\": \"{{parentId}}\",\n  \"relation\": \"Father\"\n}"
@@ -401,9 +391,7 @@
               "host": ["{{baseUrl}}"],
               "path": ["api", "v1", "children", "{{childId}}", "reclassify"]
             },
-            "header": [
-              { "key": "Content-Type", "value": "application/json" }
-            ],
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
             "body": {
               "mode": "raw",
               "raw": "{\n  \"kutrGroup\": \"Kutr 2\"\n}"
@@ -423,9 +411,7 @@
               "raw": "{{baseUrl}}/api/v1/parents?search=",
               "host": ["{{baseUrl}}"],
               "path": ["api", "v1", "parents"],
-              "query": [
-                { "key": "search", "value": "", "description": "Search by name or phone" }
-              ]
+              "query": [{ "key": "search", "value": "", "description": "Search by name or phone" }]
             }
           }
         },
@@ -438,9 +424,7 @@
               "host": ["{{baseUrl}}"],
               "path": ["api", "v1", "parents"]
             },
-            "header": [
-              { "key": "Content-Type", "value": "application/json" }
-            ],
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
             "body": {
               "mode": "raw",
               "raw": "{\n  \"fullName\": \"Test Parent\",\n  \"phone\": \"+251911000010\",\n  \"email\": \"parent@test.com\",\n  \"address\": \"Addis Ababa\"\n}"
@@ -485,9 +469,7 @@
               "host": ["{{baseUrl}}"],
               "path": ["api", "v1", "families"]
             },
-            "header": [
-              { "key": "Content-Type", "value": "application/json" }
-            ],
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
             "body": {
               "mode": "raw",
               "raw": "{\n  \"name\": \"Test Family\",\n  \"academicYear\": \"2016-2017 E.C.\"\n}"
@@ -598,9 +580,7 @@
               "host": ["{{baseUrl}}"],
               "path": ["api", "v1", "attendance", "records", "{{recordId}}"]
             },
-            "header": [
-              { "key": "Content-Type", "value": "application/json" }
-            ],
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
             "body": {
               "mode": "raw",
               "raw": "{\n  \"status\": \"Present\",\n  \"recordedBy\": \"{{memberId}}\"\n}"
@@ -616,9 +596,7 @@
               "host": ["{{baseUrl}}"],
               "path": ["api", "v1", "attendance", "sessions", "{{sessionId}}", "batch-verify"]
             },
-            "header": [
-              { "key": "Content-Type", "value": "application/json" }
-            ],
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
             "body": {
               "mode": "raw",
               "raw": "{\n  \"records\": [\n    { \"recordId\": \"...\", \"status\": \"Present\" }\n  ],\n  \"confirmedBy\": \"{{memberId}}\"\n}"
@@ -634,9 +612,7 @@
               "host": ["{{baseUrl}}"],
               "path": ["api", "v1", "attendance", "transport-assignment"]
             },
-            "header": [
-              { "key": "Content-Type", "value": "application/json" }
-            ],
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
             "body": {
               "mode": "raw",
               "raw": "{\n  \"sessionId\": \"{{sessionId}}\",\n  \"collectionLocation\": \"Apartama\",\n  \"memberIds\": [\"{{memberId}}\"]\n}"
@@ -668,9 +644,7 @@
               "host": ["{{baseUrl}}"],
               "path": ["api", "v1", "academic", "assessments"]
             },
-            "header": [
-              { "key": "Content-Type", "value": "application/json" }
-            ],
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
             "body": {
               "mode": "raw",
               "raw": "{\n  \"type\": \"Midterm\",\n  \"subject\": \"Bible Study\",\n  \"maxScore\": 100,\n  \"period\": \"Semester 1\"\n}"
@@ -699,9 +673,7 @@
               "host": ["{{baseUrl}}"],
               "path": ["api", "v1", "academic", "scores"]
             },
-            "header": [
-              { "key": "Content-Type", "value": "application/json" }
-            ],
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
             "body": {
               "mode": "raw",
               "raw": "{\n  \"assessmentId\": \"{{assessmentId}}\",\n  \"childId\": \"{{childId}}\",\n  \"score\": 85\n}"
@@ -716,9 +688,7 @@
               "raw": "{{baseUrl}}/api/v1/academic/scores?assessmentId={{assessmentId}}",
               "host": ["{{baseUrl}}"],
               "path": ["api", "v1", "academic", "scores"],
-              "query": [
-                { "key": "assessmentId", "value": "{{assessmentId}}" }
-              ]
+              "query": [{ "key": "assessmentId", "value": "{{assessmentId}}" }]
             }
           }
         }
@@ -747,9 +717,7 @@
               "host": ["{{baseUrl}}"],
               "path": ["api", "v1", "annual-plans"]
             },
-            "header": [
-              { "key": "Content-Type", "value": "application/json" }
-            ],
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
             "body": {
               "mode": "raw",
               "raw": "{\n  \"title\": \"Annual Plan 2016 E.C.\",\n  \"academicYear\": \"2016-2017 E.C.\"\n}"
@@ -778,9 +746,7 @@
               "host": ["{{baseUrl}}"],
               "path": ["api", "v1", "annual-plans", "{{planId}}", "goals"]
             },
-            "header": [
-              { "key": "Content-Type", "value": "application/json" }
-            ],
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
             "body": {
               "mode": "raw",
               "raw": "{\n  \"title\": \"Spiritual Education\",\n  \"description\": \"Strengthen spiritual growth\"\n}"
@@ -809,9 +775,7 @@
               "host": ["{{baseUrl}}"],
               "path": ["api", "v1", "annual-plans", "goals", "{{goalId}}", "activities"]
             },
-            "header": [
-              { "key": "Content-Type", "value": "application/json" }
-            ],
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
             "body": {
               "mode": "raw",
               "raw": "{\n  \"title\": \"Bible Study Sessions\",\n  \"budget\": 500,\n  \"people\": 20,\n  \"time\": 10\n}"
@@ -840,9 +804,7 @@
               "host": ["{{baseUrl}}"],
               "path": ["api", "v1", "annual-plans", "activities", "{{activityId}}", "distribute"]
             },
-            "header": [
-              { "key": "Content-Type", "value": "application/json" }
-            ],
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
             "body": {
               "mode": "raw",
               "raw": "{\n  \"subDepartmentId\": \"{{subDeptId}}\",\n  \"description\": \"Weekly Bible study for Timihrt sub-department\"\n}"
@@ -869,9 +831,7 @@
               "host": ["{{baseUrl}}"],
               "path": ["api", "v1", "annual-plans", "weekly-tasks"]
             },
-            "header": [
-              { "key": "Content-Type", "value": "application/json" }
-            ],
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
             "body": {
               "mode": "raw",
               "raw": "{\n  \"activityId\": \"{{activityId}}\",\n  \"weekNumber\": 1,\n  \"description\": \"Prepare study materials\"\n}"
@@ -900,9 +860,7 @@
               "host": ["{{baseUrl}}"],
               "path": ["api", "v1", "annual-plans", "weekly-tasks", "{{weeklyTaskId}}", "progress"]
             },
-            "header": [
-              { "key": "Content-Type", "value": "application/json" }
-            ],
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
             "body": {
               "mode": "raw",
               "raw": "{\n  \"actualResult\": \"Completed 3 sessions\",\n  \"progressPercentage\": 100,\n  \"challenges\": \"None\"\n}"
@@ -939,9 +897,7 @@
               "host": ["{{baseUrl}}"],
               "path": ["api", "v1", "events"]
             },
-            "header": [
-              { "key": "Content-Type", "value": "application/json" }
-            ],
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
             "body": {
               "mode": "raw",
               "raw": "{\n  \"name\": \"Timket Celebration\",\n  \"type\": \"Special\",\n  \"date\": \"2025-01-19\",\n  \"isPublished\": false\n}"
@@ -970,9 +926,7 @@
               "host": ["{{baseUrl}}"],
               "path": ["api", "v1", "events", "{{eventId}}", "assign-program"]
             },
-            "header": [
-              { "key": "Content-Type", "value": "application/json" }
-            ],
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
             "body": {
               "mode": "raw",
               "raw": "{\n  \"subDepartmentId\": \"{{subDeptId}}\",\n  \"programName\": \"Choir Performance\",\n  \"memberIds\": [\"{{memberId}}\", \"{{memberId2}}\"]\n}"
@@ -1004,9 +958,7 @@
               "host": ["{{baseUrl}}"],
               "path": ["api", "v1", "reports", "generate"]
             },
-            "header": [
-              { "key": "Content-Type", "value": "application/json" }
-            ],
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
             "body": {
               "mode": "raw",
               "raw": "{\n  \"period\": \"Monthly\",\n  \"subDepartmentId\": \"{{subDeptId}}\",\n  \"startDate\": \"2025-01-01\",\n  \"endDate\": \"2025-01-31\"\n}"
@@ -1038,9 +990,7 @@
               "host": ["{{baseUrl}}"],
               "path": ["api", "v1", "announcements"]
             },
-            "header": [
-              { "key": "Content-Type", "value": "application/json" }
-            ],
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
             "body": {
               "mode": "raw",
               "raw": "{\n  \"title\": \"Weekly Service Update\",\n  \"content\": \"This week's service will be held at the usual time.\",\n  \"targetAudience\": \"Members\",\n  \"isPublished\": true\n}"
@@ -1060,7 +1010,8 @@
               "raw": "{{baseUrl}}/api/v1/public/stats",
               "host": ["{{baseUrl}}"],
               "path": ["api", "v1", "public", "stats"]
-            },
+            }
+          },
           "event": [
             {
               "listen": "test",
