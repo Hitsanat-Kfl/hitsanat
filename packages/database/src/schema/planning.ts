@@ -26,7 +26,9 @@ export type NewAnnualMasterPlan = typeof annualMasterPlans.$inferInsert;
  */
 export const planGoals = pgTable("plan_goals", {
   id: uuid("id").primaryKey().defaultRandom(),
-  annualPlanId: uuid("annual_plan_id").notNull().references(() => annualMasterPlans.id, { onDelete: "cascade" }),
+  annualPlanId: uuid("annual_plan_id")
+    .notNull()
+    .references(() => annualMasterPlans.id, { onDelete: "cascade" }),
   goalNumber: integer("goal_number").notNull(),
   title: text("title").notNull(),
   createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
@@ -41,7 +43,9 @@ export type NewPlanGoal = typeof planGoals.$inferInsert;
  */
 export const planActivities = pgTable("plan_activities", {
   id: uuid("id").primaryKey().defaultRandom(),
-  planGoalId: uuid("plan_goal_id").notNull().references(() => planGoals.id, { onDelete: "cascade" }),
+  planGoalId: uuid("plan_goal_id")
+    .notNull()
+    .references(() => planGoals.id, { onDelete: "cascade" }),
   activityNumber: integer("activity_number").notNull(),
   mainActivity: text("main_activity").notNull(),
   expectedResult: text("expected_result"),
@@ -65,7 +69,9 @@ export type NewPlanActivity = typeof planActivities.$inferInsert;
  */
 export const planDistributions = pgTable("plan_distributions", {
   id: uuid("id").primaryKey().defaultRandom(),
-  planActivityId: uuid("plan_activity_id").notNull().references(() => planActivities.id, { onDelete: "cascade" }),
+  planActivityId: uuid("plan_activity_id")
+    .notNull()
+    .references(() => planActivities.id, { onDelete: "cascade" }),
   subDepartmentId: uuid("sub_department_id").notNull(),
   status: varchar("status", { length: 32 }).notNull(),
   assignedAt: timestamp("assigned_at", { withTimezone: true }).defaultNow().notNull(),
@@ -80,7 +86,9 @@ export type NewPlanDistribution = typeof planDistributions.$inferInsert;
  */
 export const weeklyPlans = pgTable("weekly_plans", {
   id: uuid("id").primaryKey().defaultRandom(),
-  planDistributionId: uuid("plan_distribution_id").notNull().references(() => planDistributions.id, { onDelete: "cascade" }),
+  planDistributionId: uuid("plan_distribution_id")
+    .notNull()
+    .references(() => planDistributions.id, { onDelete: "cascade" }),
   ethiopianMonth: varchar("ethiopian_month", { length: 32 }).notNull(),
   weekNumber: integer("week_number").notNull(),
   sessionDate: timestamp("session_date", { withTimezone: true }).notNull(),
@@ -96,7 +104,9 @@ export type NewWeeklyPlan = typeof weeklyPlans.$inferInsert;
  */
 export const planProgressRecords = pgTable("plan_progress_records", {
   id: uuid("id").primaryKey().defaultRandom(),
-  weeklyPlanId: uuid("weekly_plan_id").notNull().references(() => weeklyPlans.id, { onDelete: "cascade" }),
+  weeklyPlanId: uuid("weekly_plan_id")
+    .notNull()
+    .references(() => weeklyPlans.id, { onDelete: "cascade" }),
   actualResultNumeric: integer("actual_result_numeric"),
   actualResultText: text("actual_result_text"),
   status: varchar("status", { length: 32 }).notNull(),

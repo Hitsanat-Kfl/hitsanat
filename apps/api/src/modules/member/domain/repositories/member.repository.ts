@@ -1,4 +1,10 @@
-import type { Member, CreateEntity, UpdateEntity, PaginationParams, PaginatedResponse } from "@repo/schemas";
+import type {
+  Member,
+  CreateEntity,
+  UpdateEntity,
+  PaginationParams,
+  PaginatedResponse,
+} from "@repo/schemas";
 
 /**
  * Member repository interface

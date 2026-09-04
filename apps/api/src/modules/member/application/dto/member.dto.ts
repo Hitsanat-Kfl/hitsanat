@@ -51,7 +51,8 @@ export function toMemberResponseDto(member: MemberResponseDto): MemberResponseDt
     gender: member.gender,
     photoUrl: member.photoUrl,
     telegramUsername: member.telegramUsername,
-    dateJoined: member.dateJoined instanceof Date ? member.dateJoined.toISOString() : member.dateJoined,
+    dateJoined:
+      member.dateJoined instanceof Date ? member.dateJoined.toISOString() : member.dateJoined,
     isActive: member.isActive,
     createdAt: member.createdAt instanceof Date ? member.createdAt.toISOString() : member.createdAt,
     updatedAt: member.updatedAt instanceof Date ? member.updatedAt.toISOString() : member.updatedAt,

@@ -21,7 +21,9 @@ export type NewProgramSession = typeof programSessions.$inferInsert;
  */
 export const programSessionAttendance = pgTable("program_session_attendance", {
   id: uuid("id").primaryKey().defaultRandom(),
-  programSessionId: uuid("program_session_id").notNull().references(() => programSessions.id, { onDelete: "cascade" }),
+  programSessionId: uuid("program_session_id")
+    .notNull()
+    .references(() => programSessions.id, { onDelete: "cascade" }),
   personType: varchar("person_type", { length: 16 }).notNull(),
   personId: uuid("person_id").notNull(),
   collectionLocation: varchar("collection_location", { length: 64 }),
@@ -55,7 +57,9 @@ export type NewEvent = typeof events.$inferInsert;
  */
 export const eventProgramAssignments = pgTable("event_program_assignments", {
   id: uuid("id").primaryKey().defaultRandom(),
-  eventId: uuid("event_id").notNull().references(() => events.id, { onDelete: "cascade" }),
+  eventId: uuid("event_id")
+    .notNull()
+    .references(() => events.id, { onDelete: "cascade" }),
   subDepartmentId: uuid("sub_department_id").notNull(),
   programTitle: varchar("program_title", { length: 255 }).notNull(),
   assignedMembers: text("assigned_members"),
@@ -70,7 +74,9 @@ export type NewEventProgramAssignment = typeof eventProgramAssignments.$inferIns
  */
 export const eventAttendance = pgTable("event_attendance", {
   id: uuid("id").primaryKey().defaultRandom(),
-  eventId: uuid("event_id").notNull().references(() => events.id, { onDelete: "cascade" }),
+  eventId: uuid("event_id")
+    .notNull()
+    .references(() => events.id, { onDelete: "cascade" }),
   personType: varchar("person_type", { length: 16 }).notNull(),
   personId: uuid("person_id").notNull(),
   status: varchar("status", { length: 16 }).notNull(),

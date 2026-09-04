@@ -46,8 +46,12 @@ export type NewSubDepartment = typeof subDepartments.$inferInsert;
  */
 export const subDepartmentMembers = pgTable("sub_department_members", {
   id: uuid("id").primaryKey().defaultRandom(),
-  memberId: uuid("member_id").notNull().references(() => members.id, { onDelete: "cascade" }),
-  subDepartmentId: uuid("sub_department_id").notNull().references(() => subDepartments.id, { onDelete: "cascade" }),
+  memberId: uuid("member_id")
+    .notNull()
+    .references(() => members.id, { onDelete: "cascade" }),
+  subDepartmentId: uuid("sub_department_id")
+    .notNull()
+    .references(() => subDepartments.id, { onDelete: "cascade" }),
   role: varchar("role", { length: 64 }).notNull(),
   isPrimary: boolean("is_primary").default(false).notNull(),
   assignedAt: timestamp("assigned_at", { withTimezone: true }).defaultNow().notNull(),
@@ -78,8 +82,12 @@ export type NewFamily = typeof families.$inferInsert;
  */
 export const familyMembers = pgTable("family_members", {
   id: uuid("id").primaryKey().defaultRandom(),
-  familyId: uuid("family_id").notNull().references(() => families.id, { onDelete: "cascade" }),
-  memberId: uuid("member_id").notNull().references(() => members.id, { onDelete: "cascade" }),
+  familyId: uuid("family_id")
+    .notNull()
+    .references(() => families.id, { onDelete: "cascade" }),
+  memberId: uuid("member_id")
+    .notNull()
+    .references(() => members.id, { onDelete: "cascade" }),
   assignedAt: timestamp("assigned_at", { withTimezone: true }).defaultNow().notNull(),
 });
 

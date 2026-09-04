@@ -23,7 +23,9 @@ export type NewAcademicAssessment = typeof academicAssessments.$inferInsert;
  */
 export const studentScores = pgTable("student_scores", {
   id: uuid("id").primaryKey().defaultRandom(),
-  academicAssessmentId: uuid("academic_assessment_id").notNull().references(() => academicAssessments.id, { onDelete: "cascade" }),
+  academicAssessmentId: uuid("academic_assessment_id")
+    .notNull()
+    .references(() => academicAssessments.id, { onDelete: "cascade" }),
   childId: uuid("child_id").notNull(),
   scoreAchieved: numeric("score_achieved", { precision: 5, scale: 2 }).notNull(),
   recordedBy: uuid("recorded_by").notNull(),

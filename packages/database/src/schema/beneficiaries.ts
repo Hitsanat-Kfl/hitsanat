@@ -45,8 +45,12 @@ export type NewParent = typeof parents.$inferInsert;
  */
 export const childParents = pgTable("child_parents", {
   id: uuid("id").primaryKey().defaultRandom(),
-  childId: uuid("child_id").notNull().references(() => children.id, { onDelete: "cascade" }),
-  parentId: uuid("parent_id").notNull().references(() => parents.id, { onDelete: "restrict" }),
+  childId: uuid("child_id")
+    .notNull()
+    .references(() => children.id, { onDelete: "cascade" }),
+  parentId: uuid("parent_id")
+    .notNull()
+    .references(() => parents.id, { onDelete: "restrict" }),
   relation: varchar("relation", { length: 16 }).notNull(),
 });
 
