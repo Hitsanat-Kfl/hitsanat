@@ -33,6 +33,8 @@ export class CreateMemberStage1UseCase {
       academicDepartment: data.academicDepartment,
       campus: data.campus,
       gender: data.gender as Gender,
+      photoUrl: null,
+      telegramUsername: null,
       isActive: true,
       dateJoined: new Date(),
     });

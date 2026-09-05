@@ -29,8 +29,8 @@ export interface Member extends BaseEntity {
   academicDepartment: string;
   campus: string;
   gender: Gender;
-  photoUrl?: string;
-  telegramUsername?: string;
+  photoUrl: string | null;
+  telegramUsername: string | null;
   dateJoined: Date;
   isActive: boolean;
 }
