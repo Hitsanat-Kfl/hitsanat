@@ -15,6 +15,9 @@
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
+    "@repo/domain": "workspace:*",
+    "@repo/permissions": "workspace:*",
+    "@repo/validation": "workspace:*",
     "zod": "^3.24.2"
   },
   "devDependencies": {
