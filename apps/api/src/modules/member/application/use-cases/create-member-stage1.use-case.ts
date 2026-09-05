@@ -1,4 +1,4 @@
-import { Gender, YearOfStudy, type Member } from "@repo/domain";
+import type { Gender, YearOfStudy, Member } from "@repo/domain";
 import type { MemberRepository } from "../../domain/repositories/member.repository.js";
 import { MemberAlreadyExistsError } from "../../domain/errors/member.error.js";
 
@@ -18,9 +18,7 @@ export class CreateMemberStage1UseCase {
     campus: string;
     gender: string;
   }): Promise<Member> {
-    const existingMember = await this.memberRepository.findByPhoneNumber(
-      data.phoneNumber
-    );
+    const existingMember = await this.memberRepository.findByPhoneNumber(data.phoneNumber);
     if (existingMember) {
       throw new MemberAlreadyExistsError(data.phoneNumber);
     }

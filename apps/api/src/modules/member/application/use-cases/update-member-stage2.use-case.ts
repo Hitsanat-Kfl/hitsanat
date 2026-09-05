@@ -63,9 +63,7 @@ export class UpdateMemberStage2UseCase {
         where: eq(familyMembers.memberId, memberId),
       });
       if (oldFamilyLink) {
-        await db
-          .delete(familyMembers)
-          .where(eq(familyMembers.id, oldFamilyLink.id));
+        await db.delete(familyMembers).where(eq(familyMembers.id, oldFamilyLink.id));
       }
 
       await db.insert(familyMembers).values({

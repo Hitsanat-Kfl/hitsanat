@@ -4,7 +4,10 @@ import { UpdateMemberStage2UseCase } from "../../src/modules/member/application/
 import { ListMembersUseCase } from "../../src/modules/member/application/use-cases/list-members.use-case.js";
 import { GetMemberDetailUseCase } from "../../src/modules/member/application/use-cases/get-member-detail.use-case.js";
 import type { MemberRepository } from "../../src/modules/member/domain/repositories/member.repository.js";
-import { MemberAlreadyExistsError, MemberNotFoundError } from "../../src/modules/member/domain/errors/member.error.js";
+import {
+  MemberAlreadyExistsError,
+  MemberNotFoundError,
+} from "../../src/modules/member/domain/errors/member.error.js";
 
 const mockMember = {
   id: "test-id-123",

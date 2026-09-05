@@ -1,4 +1,4 @@
-import { type Request, type Response } from "express";
+import type { Request, Response } from "express";
 import { DrizzleMemberRepository } from "../infrastructure/repositories/member.repository.js";
 import { CreateMemberStage1UseCase } from "../application/use-cases/create-member-stage1.use-case.js";
 import { UpdateMemberStage2UseCase } from "../application/use-cases/update-member-stage2.use-case.js";

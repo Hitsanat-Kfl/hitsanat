@@ -73,11 +73,7 @@ export class DrizzleFamilyRepository implements FamilyRepository {
 
   async update(id: string, data: Partial<Omit<Family, "id" | "createdAt">>): Promise<Family> {
     const db = getDb();
-    const rows = await db
-      .update(families)
-      .set(data)
-      .where(eq(families.id, id))
-      .returning();
+    const rows = await db.update(families).set(data).where(eq(families.id, id)).returning();
     if (rows.length === 0) {
       throw new Error(`Family with id ${id} not found`);
     }

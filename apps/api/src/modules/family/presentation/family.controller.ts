@@ -1,4 +1,4 @@
-import { type Request, type Response } from "express";
+import type { Request, Response } from "express";
 import { DrizzleFamilyRepository } from "../infrastructure/repositories/family.repository.js";
 import { CreateFamilyUseCase } from "../application/use-cases/create-family.use-case.js";
 import { ListFamiliesUseCase } from "../application/use-cases/list-families.use-case.js";
