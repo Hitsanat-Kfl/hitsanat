@@ -6,6 +6,7 @@ import { getAuth } from "@repo/auth";
 import { env } from "./config/index.js";
 import { openApiSpec, swaggerJsonHandler } from "./infrastructure/swagger.js";
 import { healthRouter } from "./presentation/routes/health.router.js";
+import { memberRouter } from "./modules/member/presentation/member.router.js";
 
 export function createApp(): Express {
   const app = express();
@@ -65,6 +66,9 @@ export function createApp(): Express {
   // Health check endpoint at root level and versioned prefix
   app.use("/health", healthRouter);
   app.use(`${env.API_PREFIX}/health`, healthRouter);
+
+  // Member routes
+  app.use(`${env.API_PREFIX}/members`, memberRouter);
 
   // 404 Handler
   app.use((req: Request, res: Response) => {
