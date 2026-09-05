@@ -14,7 +14,10 @@
   },
   "dependencies": {
     "@repo/database": "workspace:*",
+    "@repo/domain": "workspace:*",
+    "@repo/permissions": "workspace:*",
     "@repo/schemas": "workspace:*",
+    "@repo/validation": "workspace:*",
     "cors": "^2.8.5",
     "dotenv": "^16.4.7",
     "express": "^4.21.2",

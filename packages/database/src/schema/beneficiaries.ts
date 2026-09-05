@@ -11,8 +11,10 @@ export const children = pgTable("children", {
   gender: varchar("gender", { length: 16 }).notNull(),
   dateOfBirth: date("date_of_birth").notNull(),
   address: text("address").notNull(),
-  kutrGroup: varchar("kutr_group", { length: 16 }).notNull(),
-  collectionLocation: varchar("collection_location", { length: 64 }).notNull(),
+  kutrGroup: varchar("kutr_group", { length: 16 }).notNull().$type<"Kutr 1" | "Kutr 2">(),
+  collectionLocation: varchar("collection_location", { length: 64 })
+    .notNull()
+    .$type<"Apartama" | "Gende Boy" | "Gende Je" | "Cobalt" | "Bate">(),
   photoUrl: text("photo_url"),
   isActive: boolean("is_active").default(true).notNull(),
   createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
@@ -43,16 +45,25 @@ export type NewParent = typeof parents.$inferInsert;
  * Child-Parent relationship table
  * Enforces max 1 Father and 1 Mother per child via UNIQUE constraint
  */
-export const childParents = pgTable("child_parents", {
-  id: uuid("id").primaryKey().defaultRandom(),
-  childId: uuid("child_id")
-    .notNull()
-    .references(() => children.id, { onDelete: "cascade" }),
-  parentId: uuid("parent_id")
-    .notNull()
-    .references(() => parents.id, { onDelete: "restrict" }),
-  relation: varchar("relation", { length: 16 }).notNull(),
-});
+export const childParents = pgTable(
+  "child_parents",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    childId: uuid("child_id")
+      .notNull()
+      .references(() => children.id, { onDelete: "cascade" }),
+    parentId: uuid("parent_id")
+      .notNull()
+      .references(() => parents.id, { onDelete: "restrict" }),
+    relation: varchar("relation", { length: 16 }).notNull().$type<"Father" | "Mother">(),
+  },
+  (table) => [
+    // Unique constraint: max 1 Father and 1 Mother per child
+    {
+      childRelationUnique: "child_parents_child_id_relation_unique",
+    },
+  ]
+);
 
 export type ChildParent = typeof childParents.$inferSelect;
 export type NewChildParent = typeof childParents.$inferInsert;
