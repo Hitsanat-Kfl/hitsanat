@@ -6,6 +6,8 @@ import { getAuth } from "@repo/auth";
 import { env } from "./config/index.js";
 import { openApiSpec, swaggerJsonHandler } from "./infrastructure/swagger.js";
 import { healthRouter } from "./presentation/routes/health.router.js";
+import { memberRouter } from "./modules/member/presentation/member.router.js";
+import { familyRouter } from "./modules/family/presentation/family.router.js";
 
 export function createApp(): Express {
   const app = express();
@@ -37,6 +39,7 @@ export function createApp(): Express {
         headers,
         url: url.toString(),
         body: req.body,
+        // biome-ignore lint/suspicious/noExplicitAny: Better Auth Web API Request type mismatch
       } as any);
 
       res.status(response.status);
@@ -65,6 +68,12 @@ export function createApp(): Express {
   // Health check endpoint at root level and versioned prefix
   app.use("/health", healthRouter);
   app.use(`${env.API_PREFIX}/health`, healthRouter);
+
+  // Member routes
+  app.use(`${env.API_PREFIX}/members`, memberRouter);
+
+  // Family routes
+  app.use(`${env.API_PREFIX}/families`, familyRouter);
 
   // 404 Handler
   app.use((req: Request, res: Response) => {
