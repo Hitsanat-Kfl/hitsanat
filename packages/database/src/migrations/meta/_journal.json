@@ -15,6 +15,13 @@
       "when": 1788640000000,
       "tag": "0001_add_constraints",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1788700000000,
+      "tag": "0002_add_auth_tables",
+      "breakpoints": true
     }
   ]
 }

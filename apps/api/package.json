@@ -13,6 +13,7 @@
     "test:unit": "vitest run"
   },
   "dependencies": {
+    "@repo/auth": "workspace:*",
     "@repo/database": "workspace:*",
     "@repo/domain": "workspace:*",
     "@repo/permissions": "workspace:*",

@@ -2,6 +2,7 @@ import express, { type Express, type Request, type Response, type NextFunction }
 import cors from "cors";
 import helmet from "helmet";
 import swaggerUi from "swagger-ui-express";
+import { getAuth } from "@repo/auth";
 import { env } from "./config/index.js";
 import { openApiSpec, swaggerJsonHandler } from "./infrastructure/swagger.js";
 import { healthRouter } from "./presentation/routes/health.router.js";
@@ -19,6 +20,37 @@ export function createApp(): Express {
   );
   app.use(express.json());
   app.use(express.urlencoded({ extended: true }));
+
+  // Better Auth handlers
+  app.all("/api/v1/auth/*", async (req, res) => {
+    const url = new URL(req.url, `http://${req.headers.host}`);
+    const headers = new Headers();
+    for (const [key, value] of Object.entries(req.headers)) {
+      if (value) headers.set(key, Array.isArray(value) ? value[0] : value);
+    }
+
+    try {
+      // Cast to any to resolve type mismatch between Express Request and Web API Request
+      // Better Auth expects standard Web API Request but Express has a different shape
+      const response = await getAuth().handler({
+        method: req.method,
+        headers,
+        url: url.toString(),
+        body: req.body,
+      } as any);
+
+      res.status(response.status);
+      for (const [key, value] of response.headers.entries()) {
+        res.setHeader(key, value);
+      }
+
+      const body = await response.text();
+      res.send(body);
+    } catch (error) {
+      console.error("Auth handler error:", error);
+      res.status(500).json({ error: "Internal Server Error" });
+    }
+  });
 
   // API Documentation (OpenAPI / Swagger)
   app.get("/docs.json", swaggerJsonHandler);
