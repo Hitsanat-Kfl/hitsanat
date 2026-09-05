@@ -74,6 +74,9 @@ export class UpdateMemberStage2UseCase {
 
     // Return updated member
     const updated = await this.memberRepository.findById(memberId);
-    return updated!;
+    if (!updated) {
+      throw new MemberNotFoundError(memberId);
+    }
+    return updated;
   }
 }

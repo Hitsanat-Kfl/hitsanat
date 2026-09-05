@@ -3,7 +3,7 @@ import { drizzleAdapter } from "better-auth/adapters/drizzle";
 import { getDb } from "@repo/database";
 import * as schema from "@repo/database/schema";
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
+// biome-ignore lint/suspicious/noExplicitAny: Better Auth returns complex generic types that can't be narrowed
 let _auth: any = null;
 
 function createAuth() {

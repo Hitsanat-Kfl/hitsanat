@@ -39,6 +39,7 @@ export function createApp(): Express {
         headers,
         url: url.toString(),
         body: req.body,
+        // biome-ignore lint/suspicious/noExplicitAny: Better Auth Web API Request type mismatch
       } as any);
 
       res.status(response.status);
