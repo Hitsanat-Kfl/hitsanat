@@ -66,6 +66,9 @@ jobs:
       - name: Run Unit Tests
         run: pnpm test:unit
 
+      - name: Run Database Migrations
+        run: pnpm --filter @repo/database db:migrate
+
       - name: Run PostgreSQL Integration Tests
         run: pnpm test:integration
 
