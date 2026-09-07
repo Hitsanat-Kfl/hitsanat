@@ -1,12 +1,12 @@
-import { Badge } from "@repo/ui/components/badge";
-import { Button } from "@repo/ui/components/button";
+import { Badge } from "@repo/ui/components/ui/badge";
+import { Button } from "@repo/ui/components/ui/button";
 import {
   Card,
   CardContent,
   CardDescription,
   CardHeader,
   CardTitle,
-} from "@repo/ui/components/card";
+} from "@repo/ui/components/ui/card";
 import { formatEthiopianDate, toEthiopianDate } from "@repo/calendar";
 import { Calendar, LayoutDashboard, Settings, Shield, Users } from "lucide-react";
 
@@ -20,7 +20,7 @@ export default function AdminDashboardPage() {
   const formattedEthDate = formatEthiopianDate(ethDate);
 
   return (
-    <div className="flex min-h-screen bg-slate-100 dark:bg-slate-950">
+    <div className="flex min-h-screen bg-surface-muted">
       {/* Sidebar navigation placeholder */}
       <aside className="w-64 border-r bg-card text-card-foreground p-4 hidden md:flex flex-col justify-between">
         <div className="space-y-6">
@@ -32,27 +32,27 @@ export default function AdminDashboardPage() {
           <nav className="space-y-1">
             <a
               href="#dashboard"
-              className="flex items-center gap-3 px-3 py-2 text-sm font-semibold rounded-md bg-slate-900 text-white dark:bg-slate-100 dark:text-slate-900"
+              className="flex items-center gap-3 px-3 py-2 text-sm font-semibold rounded-md bg-primary text-primary-foreground"
             >
               <LayoutDashboard className="h-4 w-4" />
               <span>Dashboard</span>
             </a>
-            <div className="flex items-center gap-3 px-3 py-2 text-sm font-medium rounded-md text-slate-600 dark:text-slate-400 hover:bg-accent/50 cursor-not-allowed">
+            <div className="flex items-center gap-3 px-3 py-2 text-sm font-medium rounded-md text-muted-foreground hover:bg-accent/50 cursor-not-allowed">
               <Users className="h-4 w-4" />
               <span>Ministry Management (Upcoming)</span>
             </div>
-            <div className="flex items-center gap-3 px-3 py-2 text-sm font-medium rounded-md text-slate-600 dark:text-slate-400 hover:bg-accent/50 cursor-not-allowed">
+            <div className="flex items-center gap-3 px-3 py-2 text-sm font-medium rounded-md text-muted-foreground hover:bg-accent/50 cursor-not-allowed">
               <Calendar className="h-4 w-4" />
               <span>Schedule &amp; Planning (Upcoming)</span>
             </div>
-            <div className="flex items-center gap-3 px-3 py-2 text-sm font-medium rounded-md text-slate-600 dark:text-slate-400 hover:bg-accent/50 cursor-not-allowed">
+            <div className="flex items-center gap-3 px-3 py-2 text-sm font-medium rounded-md text-muted-foreground hover:bg-accent/50 cursor-not-allowed">
               <Settings className="h-4 w-4" />
               <span>Settings (Upcoming)</span>
             </div>
           </nav>
         </div>
 
-        <div className="border-t pt-4 text-xs text-slate-600 dark:text-slate-400">
+        <div className="border-t pt-4 text-xs text-muted-foreground">
           Hitsanat Kifl v1.0.0 (Foundation)
         </div>
       </aside>
@@ -65,7 +65,7 @@ export default function AdminDashboardPage() {
             <h2 className="font-semibold text-lg">Ministry Administration</h2>
             <Badge variant="outline">Foundation Mode</Badge>
           </div>
-          <div className="text-sm text-slate-600 dark:text-slate-400">{formattedEthDate}</div>
+          <div className="text-sm text-muted-foreground">{formattedEthDate}</div>
         </header>
 
         {/* Dashboard Placeholder Content */}
@@ -77,7 +77,7 @@ export default function AdminDashboardPage() {
                 <CardTitle className="text-2xl">Healthy</CardTitle>
               </CardHeader>
               <CardContent>
-                <p className="text-xs text-slate-600 dark:text-slate-400">
+                <p className="text-xs text-muted-foreground">
                   Monorepo foundation &amp; services active
                 </p>
               </CardContent>
@@ -88,7 +88,7 @@ export default function AdminDashboardPage() {
                 <CardTitle className="text-2xl">Ethiopian</CardTitle>
               </CardHeader>
               <CardContent>
-                <p className="text-xs text-slate-600 dark:text-slate-400">
+                <p className="text-xs text-muted-foreground">
                   Integrated with ethiopian-calendar-new
                 </p>
               </CardContent>
@@ -99,7 +99,7 @@ export default function AdminDashboardPage() {
                 <CardTitle className="text-2xl">@repo/ui</CardTitle>
               </CardHeader>
               <CardContent>
-                <p className="text-xs text-slate-600 dark:text-slate-400">
+                <p className="text-xs text-muted-foreground">
                   Shared shadcn/ui library ready
                 </p>
               </CardContent>
@@ -114,7 +114,7 @@ export default function AdminDashboardPage() {
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
-              <p className="text-sm text-slate-600 dark:text-slate-400">
+              <p className="text-sm text-muted-foreground">
                 This administrative application foundation provides the base navigation shell and
                 shared component bindings for the Hitsanat Kifl system.
               </p>
