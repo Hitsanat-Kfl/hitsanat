@@ -1,13 +1,6 @@
-import { Button } from "@repo/ui/components/button";
-import {
-  Card,
-  CardHeader,
-  CardTitle,
-  CardDescription,
-  CardContent,
-  CardFooter,
-} from "@repo/ui/components/card";
-import { Badge } from "@repo/ui/components/badge";
+import { Button } from "@repo/ui";
+import { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter } from "@repo/ui";
+import { Badge } from "@repo/ui";
 import { formatEthiopianDate, toEthiopianDate } from "@repo/calendar";
 
 export default function HomePage() {
@@ -20,13 +13,13 @@ export default function HomePage() {
   const formattedEthDate = formatEthiopianDate(ethDate);
 
   return (
-    <main className="flex min-h-screen flex-col items-center justify-center p-8 bg-slate-50 dark:bg-slate-950">
+    <main className="flex min-h-screen flex-col items-center justify-center p-8 bg-surface-muted">
       <div className="max-w-xl w-full space-y-6">
         <div className="text-center space-y-2">
           <Badge variant="secondary" className="mb-2">
             Hitsanat Kifl Portal
           </Badge>
-          <h1 className="text-3xl font-bold tracking-tight text-slate-900 dark:text-white">
+          <h1 className="text-3xl font-bold tracking-tight text-foreground">
             ህፃናት ክፍል — Children's Ministry
           </h1>
           <p className="text-muted-foreground text-sm">ዛሬ {formattedEthDate}</p>

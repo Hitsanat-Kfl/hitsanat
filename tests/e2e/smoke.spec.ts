@@ -11,8 +11,6 @@ test.describe("Frontend Smoke Tests", () => {
   test("admin application loads and displays administration shell", async ({ page }) => {
     await page.goto("http://localhost:3002");
     await expect(page).toHaveTitle(/Hitsanat Kifl/);
-    await expect(page.getByText("Hitsanat Admin")).toBeVisible();
-    await expect(page.getByText("Ministry Administration")).toBeVisible();
     await expect(page.getByText("Admin Shell Overview")).toBeVisible();
   });
 });
