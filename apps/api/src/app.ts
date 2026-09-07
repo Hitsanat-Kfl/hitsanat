@@ -8,6 +8,7 @@ import { openApiSpec, swaggerJsonHandler } from "./infrastructure/swagger.js";
 import { healthRouter } from "./presentation/routes/health.router.js";
 import { memberRouter } from "./modules/member/presentation/member.router.js";
 import { familyRouter } from "./modules/family/presentation/family.router.js";
+import { childRouter } from "./modules/child/presentation/child.router.js";
 
 export function createApp(): Express {
   const app = express();
@@ -74,6 +75,9 @@ export function createApp(): Express {
 
   // Family routes
   app.use(`${env.API_PREFIX}/families`, familyRouter);
+
+  // Children & Parents routes
+  app.use(`${env.API_PREFIX}/children`, childRouter);
 
   // 404 Handler
   app.use((req: Request, res: Response) => {
