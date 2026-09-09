@@ -5,7 +5,7 @@ import postgres from "postgres";
 const connectionString =
   process.env.DATABASE_URL || "postgresql://postgres:postgres@localhost:5432/hitsanat_dev";
 
-const subDepartments = [
+export const subDepartments = [
   {
     code: "TIMIHRT",
     name_am: "ትምህርት",
