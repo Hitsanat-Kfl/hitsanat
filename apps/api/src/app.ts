@@ -13,6 +13,8 @@ import { planningRouter } from "./modules/planning/presentation/planning.router.
 import { attendanceRouter } from "./modules/attendance/presentation/attendance.router.js";
 import { eventsRouter } from "./modules/events/presentation/events.router.js";
 import { reportsRouter } from "./modules/reports/presentation/reports.router.js";
+import { announcementsRouter } from "./modules/announcements/presentation/announcements.router.js";
+import { publicRouter } from "./modules/public/presentation/public.router.js";
 
 export function createApp(): Express {
   const app = express();
@@ -94,6 +96,12 @@ export function createApp(): Express {
 
   // Reports routes
   app.use(`${env.API_PREFIX}/reports`, reportsRouter);
+
+  // Announcements routes
+  app.use(`${env.API_PREFIX}/announcements`, announcementsRouter);
+
+  // Public routes (no auth required)
+  app.use(`${env.API_PREFIX}/public`, publicRouter);
 
   // 404 Handler
   app.use((req: Request, res: Response) => {
