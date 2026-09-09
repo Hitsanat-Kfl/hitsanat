@@ -32,19 +32,19 @@ describe("Badge", () => {
   it("renders with success variant", () => {
     render(<Badge variant="success">Success</Badge>);
     const badge = screen.getByRole("status");
-    expect(badge.className).toContain("text-emerald-700");
+    expect(badge.className).toContain("text-success");
   });
 
   it("renders with warning variant", () => {
     render(<Badge variant="warning">Warning</Badge>);
     const badge = screen.getByRole("status");
-    expect(badge.className).toContain("text-amber-700");
+    expect(badge.className).toContain("text-warning");
   });
 
   it("renders with info variant", () => {
     render(<Badge variant="info">Info</Badge>);
     const badge = screen.getByRole("status");
-    expect(badge.className).toContain("text-blue-700");
+    expect(badge.className).toContain("text-info");
   });
 
   it("renders with dot indicator", () => {
@@ -71,8 +71,8 @@ describe("badgeVariants", () => {
     expect(badgeVariants({ variant: "secondary" })).toContain("bg-secondary");
     expect(badgeVariants({ variant: "destructive" })).toContain("bg-destructive");
     expect(badgeVariants({ variant: "outline" })).toContain("border-current");
-    expect(badgeVariants({ variant: "success" })).toContain("text-emerald-700");
-    expect(badgeVariants({ variant: "warning" })).toContain("text-amber-700");
-    expect(badgeVariants({ variant: "info" })).toContain("text-blue-700");
+    expect(badgeVariants({ variant: "success" })).toContain("text-success");
+    expect(badgeVariants({ variant: "warning" })).toContain("text-warning");
+    expect(badgeVariants({ variant: "info" })).toContain("text-info");
   });
 });
