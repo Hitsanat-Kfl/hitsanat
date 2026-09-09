@@ -105,6 +105,22 @@ export default function AdminDashboardPage() {
           - Score entry form (student, score)
           - Score summary per assessment
           - Depends on: OPS-005 */}
+
+      {/* TODO HRD-007 (Frontend 2): Admin Accessibility Audit
+          Perform comprehensive accessibility audit on all admin pages
+          - All pages pass axe-core WCAG 2.1 AA
+          - Keyboard navigation works on all interactive elements
+          - Screen reader compatibility verified
+          - Color contrast ratios meet standards
+          - Focus management correct */}
+
+      {/* TODO HRD-008 (Frontend 1 - Eyob): Portfolio Accessibility Audit
+          Perform comprehensive accessibility audit on all portfolio pages
+          - All pages pass axe-core WCAG 2.1 AA
+          - Keyboard navigation works
+          - Screen reader compatibility verified
+          - Mobile accessibility verified
+          - Language attributes correct (Amharic) */}
     </PageShell>
   );
 }
