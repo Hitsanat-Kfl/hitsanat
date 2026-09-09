@@ -40,3 +40,5 @@ export * from "./components/ui/combobox";
 export * from "./components/ui/file-upload";
 export * from "./components/ui/calendar";
 export * from "./components/ui/chart";
+export * from "./components/ui/dashboard";
+export * from "./types/dashboard";
