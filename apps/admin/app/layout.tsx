@@ -1,6 +1,5 @@
 import type { Metadata } from "next";
 import "./globals.css";
-import { AppShell } from "../components/shell/app-shell";
 
 export const metadata: Metadata = {
   title: "Hitsanat Kifl - Admin Portal",
@@ -14,9 +13,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="am" suppressHydrationWarning>
-      <body className="min-h-screen bg-background font-sans antialiased">
-        <AppShell>{children}</AppShell>
-      </body>
+      <body className="min-h-screen bg-background font-sans antialiased">{children}</body>
     </html>
   );
 }
