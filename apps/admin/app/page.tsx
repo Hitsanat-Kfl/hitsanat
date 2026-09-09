@@ -58,6 +58,23 @@ export default function AdminDashboardPage() {
           </p>
         </CardContent>
       </Card>
+
+      {/* TODO PLN-007 (Frontend 1 - Eyob): Planning Matrix UI
+          Build interactive planning matrix in apps/admin
+          - Display 25 activities with weight bars, quarterly distribution, progress indicators
+          - Interactive table with Budget, People, Time columns
+          - Edit capability for authorized users (Ekd)
+          - Responsive layout
+          - Depends on: PLN-003, PLN-004 */}
+
+      {/* TODO PLN-008 (Frontend 2 - TBD): Sub-Department Plan Execution UI
+          Build sub-department plan execution view in apps/admin
+          - Show activities distributed to user's sub-department
+          - Weekly task list
+          - Progress recording form (actual result, status, challenges)
+          - Roll-up progress indicator
+          - Scoped to user's sub-department (RBAC)
+          - Depends on: PLN-004, PLN-005 */}
     </PageShell>
   );
 }

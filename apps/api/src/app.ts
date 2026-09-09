@@ -9,6 +9,7 @@ import { healthRouter } from "./presentation/routes/health.router.js";
 import { memberRouter } from "./modules/member/presentation/member.router.js";
 import { familyRouter } from "./modules/family/presentation/family.router.js";
 import { childRouter } from "./modules/child/presentation/child.router.js";
+import { planningRouter } from "./modules/planning/presentation/planning.router.js";
 
 export function createApp(): Express {
   const app = express();
@@ -78,6 +79,9 @@ export function createApp(): Express {
 
   // Children & Parents routes
   app.use(`${env.API_PREFIX}/children`, childRouter);
+
+  // Planning routes
+  app.use(`${env.API_PREFIX}/annual-plans`, planningRouter);
 
   // 404 Handler
   app.use((req: Request, res: Response) => {
