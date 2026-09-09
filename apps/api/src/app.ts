@@ -10,6 +10,8 @@ import { memberRouter } from "./modules/member/presentation/member.router.js";
 import { familyRouter } from "./modules/family/presentation/family.router.js";
 import { childRouter } from "./modules/child/presentation/child.router.js";
 import { planningRouter } from "./modules/planning/presentation/planning.router.js";
+import { attendanceRouter } from "./modules/attendance/presentation/attendance.router.js";
+import { eventsRouter } from "./modules/events/presentation/events.router.js";
 
 export function createApp(): Express {
   const app = express();
@@ -82,6 +84,12 @@ export function createApp(): Express {
 
   // Planning routes
   app.use(`${env.API_PREFIX}/annual-plans`, planningRouter);
+
+  // Attendance routes
+  app.use(`${env.API_PREFIX}/attendance`, attendanceRouter);
+
+  // Events routes
+  app.use(`${env.API_PREFIX}/events`, eventsRouter);
 
   // 404 Handler
   app.use((req: Request, res: Response) => {
