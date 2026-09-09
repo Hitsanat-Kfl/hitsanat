@@ -12,6 +12,7 @@ import { childRouter } from "./modules/child/presentation/child.router.js";
 import { planningRouter } from "./modules/planning/presentation/planning.router.js";
 import { attendanceRouter } from "./modules/attendance/presentation/attendance.router.js";
 import { eventsRouter } from "./modules/events/presentation/events.router.js";
+import { reportsRouter } from "./modules/reports/presentation/reports.router.js";
 
 export function createApp(): Express {
   const app = express();
@@ -90,6 +91,9 @@ export function createApp(): Express {
 
   // Events routes
   app.use(`${env.API_PREFIX}/events`, eventsRouter);
+
+  // Reports routes
+  app.use(`${env.API_PREFIX}/reports`, reportsRouter);
 
   // 404 Handler
   app.use((req: Request, res: Response) => {
