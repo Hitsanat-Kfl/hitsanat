@@ -11,6 +11,6 @@ test.describe("Frontend Smoke Tests", () => {
   test("admin application loads and displays administration shell", async ({ page }) => {
     await page.goto("http://localhost:3002");
     await expect(page).toHaveTitle(/Hitsanat Kifl/);
-    await expect(page.getByText("Admin Shell Overview")).toBeVisible();
+    await expect(page.getByRole("heading", { name: "Chairperson Dashboard" })).toBeVisible();
   });
 });
