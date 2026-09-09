@@ -99,9 +99,7 @@ export default function AdminDashboardPage() {
                 <CardTitle className="text-2xl">@repo/ui</CardTitle>
               </CardHeader>
               <CardContent>
-                <p className="text-xs text-muted-foreground">
-                  Shared shadcn/ui library ready
-                </p>
+                <p className="text-xs text-muted-foreground">Shared shadcn/ui library ready</p>
               </CardContent>
             </Card>
           </div>
