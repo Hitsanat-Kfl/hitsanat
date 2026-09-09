@@ -75,6 +75,36 @@ export default function AdminDashboardPage() {
           - Roll-up progress indicator
           - Scoped to user's sub-department (RBAC)
           - Depends on: PLN-004, PLN-005 */}
+
+      {/* TODO OPS-008 (Frontend 2): Attendance Checksheets UI
+          Build attendance checksheets in apps/admin for Kutitr officials
+          - Session selection dropdown
+          - Member/child list with status toggles (Present/Absent/Excused)
+          - Batch save capability
+          - Mobile-optimized (touch-friendly)
+          - Depends on: OPS-002, OPS-003 */}
+
+      {/* TODO OPS-009 (Frontend 2): Transport Dispatcher UI
+          Build Saturday transport route dispatcher in apps/admin
+          - 5 route columns (Apartama, Gende Boy, Gende Je, Cobalt, Bate)
+          - Drag-and-drop or multi-select member assignment
+          - Minimum 2 members per route indicator
+          - Depends on: OPS-004 */}
+
+      {/* TODO OPS-010 (Frontend 2): Event Management UI
+          Build event creation and management interface in apps/admin
+          - Event list with filtering by type
+          - Event creation form
+          - Program assignment interface
+          - Multi-member selection for programs
+          - Depends on: OPS-006 */}
+
+      {/* TODO OPS-011 (Frontend 2): Academic Score Entry UI
+          Build Timihrt gradebook interface in apps/admin
+          - Assessment list
+          - Score entry form (student, score)
+          - Score summary per assessment
+          - Depends on: OPS-005 */}
     </PageShell>
   );
 }
