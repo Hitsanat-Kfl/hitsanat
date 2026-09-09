@@ -8,9 +8,10 @@ test.describe("Frontend Smoke Tests", () => {
     await expect(page.getByText("Welcome to Hitsanat Kifl")).toBeVisible();
   });
 
-  test("admin application loads and displays administration shell", async ({ page }) => {
+  test("admin application loads and displays login page", async ({ page }) => {
     await page.goto("http://localhost:3002");
     await expect(page).toHaveTitle(/Hitsanat Kifl/);
-    await expect(page.getByRole("heading", { name: "Chairperson Dashboard" })).toBeVisible();
+    await expect(page.getByRole("heading", { name: "Hitsanat Kifl" })).toBeVisible();
+    await expect(page.getByText("Admin Portal - Sign in to your account")).toBeVisible();
   });
 });
