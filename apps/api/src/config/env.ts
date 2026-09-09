@@ -10,7 +10,10 @@ const envSchema = z.object({
   DATABASE_URL: z.string().optional(),
   CORS_ORIGIN: z.string().default("*"),
   API_PREFIX: z.string().default("/api/v1"),
-  AUTH_SECRET: z.string().default("dev-secret-change-in-production"),
+  AUTH_SECRET: z
+    .string()
+    .min(16, "AUTH_SECRET must be at least 16 characters")
+    .default("dev-secret-change-in-production-16chars"),
 });
 
 export const env = envSchema.parse({

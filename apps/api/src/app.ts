@@ -1,4 +1,4 @@
-import express, { type Express, type Request, type Response, type NextFunction } from "express";
+import express, { type Express } from "express";
 import cors from "cors";
 import helmet from "helmet";
 import swaggerUi from "swagger-ui-express";
@@ -15,6 +15,8 @@ import { eventsRouter } from "./modules/events/presentation/events.router.js";
 import { reportsRouter } from "./modules/reports/presentation/reports.router.js";
 import { announcementsRouter } from "./modules/announcements/presentation/announcements.router.js";
 import { publicRouter } from "./modules/public/presentation/public.router.js";
+import { errorHandler, notFoundHandler } from "./shared/middleware/error-handler.js";
+import { publicRateLimiter, authRateLimiter } from "./shared/middleware/rate-limiter.js";
 
 export function createApp(): Express {
   const app = express();
@@ -30,8 +32,8 @@ export function createApp(): Express {
   app.use(express.json());
   app.use(express.urlencoded({ extended: true }));
 
-  // Better Auth handlers
-  app.all("/api/v1/auth/*", async (req, res) => {
+  // Better Auth handlers with rate limiting
+  app.all("/api/v1/auth/*", authRateLimiter, async (req, res) => {
     const url = new URL(req.url, `http://${req.headers.host}`);
     const headers = new Headers();
     for (const [key, value] of Object.entries(req.headers)) {
@@ -58,7 +60,11 @@ export function createApp(): Express {
       res.send(body);
     } catch (error) {
       console.error("Auth handler error:", error);
-      res.status(500).json({ error: "Internal Server Error" });
+      res.status(500).json({
+        type: "https://hitsanat.kfl/errors/500",
+        title: "Internal Server Error",
+        status: 500,
+      });
     }
   });
 
@@ -100,25 +106,14 @@ export function createApp(): Express {
   // Announcements routes
   app.use(`${env.API_PREFIX}/announcements`, announcementsRouter);
 
-  // Public routes (no auth required)
-  app.use(`${env.API_PREFIX}/public`, publicRouter);
+  // Public routes with rate limiting (no auth required)
+  app.use(`${env.API_PREFIX}/public`, publicRateLimiter, publicRouter);
 
   // 404 Handler
-  app.use((req: Request, res: Response) => {
-    res.status(404).json({
-      error: "Not Found",
-      message: `Cannot ${req.method} ${req.path}`,
-    });
-  });
+  app.use(notFoundHandler);
 
-  // Global Error Handler
-  app.use((err: Error, _req: Request, res: Response, _next: NextFunction) => {
-    console.error("Unhandled API Error:", err);
-    res.status(500).json({
-      error: "Internal Server Error",
-      message: env.NODE_ENV === "production" ? "An unexpected error occurred" : err.message,
-    });
-  });
+  // Global Error Handler (RFC 7807)
+  app.use(errorHandler);
 
   return app;
 }
