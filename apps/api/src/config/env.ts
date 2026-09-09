@@ -10,6 +10,7 @@ const envSchema = z.object({
   DATABASE_URL: z.string().optional(),
   CORS_ORIGIN: z.string().default("*"),
   API_PREFIX: z.string().default("/api/v1"),
+  AUTH_SECRET: z.string().default("dev-secret-change-in-production"),
 });
 
 export const env = envSchema.parse({
@@ -18,4 +19,5 @@ export const env = envSchema.parse({
   DATABASE_URL: process.env.DATABASE_URL,
   CORS_ORIGIN: process.env.CORS_ORIGIN,
   API_PREFIX: process.env.API_PREFIX,
+  AUTH_SECRET: process.env.AUTH_SECRET,
 });

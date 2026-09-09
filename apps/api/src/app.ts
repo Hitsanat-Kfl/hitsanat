@@ -2,9 +2,13 @@ import express, { type Express, type Request, type Response, type NextFunction }
 import cors from "cors";
 import helmet from "helmet";
 import swaggerUi from "swagger-ui-express";
+import { getAuth } from "@repo/auth";
 import { env } from "./config/index.js";
 import { openApiSpec, swaggerJsonHandler } from "./infrastructure/swagger.js";
 import { healthRouter } from "./presentation/routes/health.router.js";
+import { memberRouter } from "./modules/member/presentation/member.router.js";
+import { familyRouter } from "./modules/family/presentation/family.router.js";
+import { childRouter } from "./modules/child/presentation/child.router.js";
 
 export function createApp(): Express {
   const app = express();
@@ -20,6 +24,38 @@ export function createApp(): Express {
   app.use(express.json());
   app.use(express.urlencoded({ extended: true }));
 
+  // Better Auth handlers
+  app.all("/api/v1/auth/*", async (req, res) => {
+    const url = new URL(req.url, `http://${req.headers.host}`);
+    const headers = new Headers();
+    for (const [key, value] of Object.entries(req.headers)) {
+      if (value) headers.set(key, Array.isArray(value) ? value[0] : value);
+    }
+
+    try {
+      // Cast to any to resolve type mismatch between Express Request and Web API Request
+      // Better Auth expects standard Web API Request but Express has a different shape
+      const response = await getAuth().handler({
+        method: req.method,
+        headers,
+        url: url.toString(),
+        body: req.body,
+        // biome-ignore lint/suspicious/noExplicitAny: Better Auth Web API Request type mismatch
+      } as any);
+
+      res.status(response.status);
+      for (const [key, value] of response.headers.entries()) {
+        res.setHeader(key, value);
+      }
+
+      const body = await response.text();
+      res.send(body);
+    } catch (error) {
+      console.error("Auth handler error:", error);
+      res.status(500).json({ error: "Internal Server Error" });
+    }
+  });
+
   // API Documentation (OpenAPI / Swagger)
   app.get("/docs.json", swaggerJsonHandler);
   app.use(
@@ -33,6 +69,15 @@ export function createApp(): Express {
   // Health check endpoint at root level and versioned prefix
   app.use("/health", healthRouter);
   app.use(`${env.API_PREFIX}/health`, healthRouter);
+
+  // Member routes
+  app.use(`${env.API_PREFIX}/members`, memberRouter);
+
+  // Family routes
+  app.use(`${env.API_PREFIX}/families`, familyRouter);
+
+  // Children & Parents routes
+  app.use(`${env.API_PREFIX}/children`, childRouter);
 
   // 404 Handler
   app.use((req: Request, res: Response) => {
