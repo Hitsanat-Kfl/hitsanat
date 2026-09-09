@@ -15,3 +15,12 @@ export {
   type PlanProgress,
   type IProgressRollUpEngine,
 } from "./progress-rollup.js";
+
+export {
+  ReportAggregationEngine,
+  type AggregationInput,
+  type AttendanceData,
+  type PlanningData,
+  type AcademicData,
+  type IReportAggregationEngine,
+} from "./report-aggregation.js";

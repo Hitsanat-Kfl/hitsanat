@@ -28,5 +28,8 @@ export * from "./attendance";
 // Academic & Announcements
 export * from "./academic";
 
+// Reports & Analytics
+export * from "./reports";
+
 // Auth & Session Management
 export * from "./auth";
