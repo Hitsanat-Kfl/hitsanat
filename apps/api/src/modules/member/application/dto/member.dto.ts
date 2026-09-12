@@ -1,5 +1,5 @@
-import type { z } from "zod";
 import { memberStage1Schema, memberStage2Schema } from "@repo/schemas";
+import type { z } from "zod";
 
 /**
  * Create Member Stage 1 DTO

@@ -1,6 +1,6 @@
-import type { Gender, YearOfStudy, Member } from "@repo/domain";
-import type { MemberRepository } from "../../domain/repositories/member.repository.js";
+import type { Gender, Member, YearOfStudy } from "@repo/domain";
 import { MemberAlreadyExistsError } from "../../domain/errors/member.error.js";
+import type { MemberRepository } from "../../domain/repositories/member.repository.js";
 
 /**
  * Create Member Stage 1 Use Case

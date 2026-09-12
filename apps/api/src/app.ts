@@ -1,22 +1,23 @@
-import express, { type Express } from "express";
+import { getAuth } from "@repo/auth";
 import cors from "cors";
+import express, { type Express } from "express";
 import helmet from "helmet";
 import swaggerUi from "swagger-ui-express";
-import { getAuth } from "@repo/auth";
 import { env } from "./config/index.js";
 import { openApiSpec, swaggerJsonHandler } from "./infrastructure/swagger.js";
-import { healthRouter } from "./presentation/routes/health.router.js";
-import { memberRouter } from "./modules/member/presentation/member.router.js";
-import { familyRouter } from "./modules/family/presentation/family.router.js";
-import { childRouter } from "./modules/child/presentation/child.router.js";
-import { planningRouter } from "./modules/planning/presentation/planning.router.js";
-import { attendanceRouter } from "./modules/attendance/presentation/attendance.router.js";
-import { eventsRouter } from "./modules/events/presentation/events.router.js";
-import { reportsRouter } from "./modules/reports/presentation/reports.router.js";
 import { announcementsRouter } from "./modules/announcements/presentation/announcements.router.js";
+import { attendanceRouter } from "./modules/attendance/presentation/attendance.router.js";
+import { childRouter } from "./modules/child/presentation/child.router.js";
+import { eventsRouter } from "./modules/events/presentation/events.router.js";
+import { familyRouter } from "./modules/family/presentation/family.router.js";
+import { memberRouter } from "./modules/member/presentation/member.router.js";
+import { planningRouter } from "./modules/planning/presentation/planning.router.js";
 import { publicRouter } from "./modules/public/presentation/public.router.js";
+import { reportsRouter } from "./modules/reports/presentation/reports.router.js";
+import { subDepartmentRouter } from "./modules/sub-department/presentation/sub-department.router.js";
+import { healthRouter } from "./presentation/routes/health.router.js";
 import { errorHandler, notFoundHandler } from "./shared/middleware/error-handler.js";
-import { publicRateLimiter, authRateLimiter } from "./shared/middleware/rate-limiter.js";
+import { authRateLimiter, publicRateLimiter } from "./shared/middleware/rate-limiter.js";
 
 export function createApp(): Express {
   const app = express();
@@ -90,6 +91,9 @@ export function createApp(): Express {
 
   // Children & Parents routes
   app.use(`${env.API_PREFIX}/children`, childRouter);
+
+  // Sub-Department routes
+  app.use(`${env.API_PREFIX}/sub-departments`, subDepartmentRouter);
 
   // Planning routes
   app.use(`${env.API_PREFIX}/annual-plans`, planningRouter);

@@ -1,6 +1,6 @@
 import type { Member } from "@repo/domain";
-import type { MemberRepository } from "../../domain/repositories/member.repository.js";
 import { MemberNotFoundError } from "../../domain/errors/member.error.js";
+import type { MemberRepository } from "../../domain/repositories/member.repository.js";
 
 /**
  * Get Member Detail Use Case
