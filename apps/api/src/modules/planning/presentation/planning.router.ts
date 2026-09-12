@@ -4,6 +4,8 @@ import {
   createWeeklyPlan,
   distributePlan,
   getAnnualPlan,
+  getDistributionStatus,
+  getProgressSummary,
   listAnnualPlans,
   submitProgress,
   updateAnnualPlan,
@@ -16,6 +18,10 @@ planningRouter.post("/", createAnnualPlan);
 planningRouter.get("/", listAnnualPlans);
 planningRouter.get("/:id", getAnnualPlan);
 planningRouter.patch("/:id", updateAnnualPlan);
+
+// Analytics Queries (BES-012)
+planningRouter.get("/:id/distributions", getDistributionStatus);
+planningRouter.get("/:id/progress", getProgressSummary);
 
 // Plan Distribution
 planningRouter.post("/:activityId/distribute", distributePlan);

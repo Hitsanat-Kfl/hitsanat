@@ -3,6 +3,8 @@ import { CreateAnnualPlanUseCase } from "../application/use-cases/create-annual-
 import { CreateWeeklyPlanUseCase } from "../application/use-cases/create-weekly-plan.use-case.js";
 import { DistributePlanUseCase } from "../application/use-cases/distribute-plan.use-case.js";
 import { GetAnnualPlanUseCase } from "../application/use-cases/get-annual-plan.use-case.js";
+import { GetDistributionStatusUseCase } from "../application/use-cases/get-distribution-status.use-case.js";
+import { GetProgressSummaryUseCase } from "../application/use-cases/get-progress-summary.use-case.js";
 import { ListAnnualPlansUseCase } from "../application/use-cases/list-annual-plans.use-case.js";
 import { SubmitProgressUseCase } from "../application/use-cases/submit-progress.use-case.js";
 import { UpdateAnnualPlanUseCase } from "../application/use-cases/update-annual-plan.use-case.js";
@@ -97,5 +99,27 @@ export async function submitProgress(req: Request, res: Response) {
   } catch (error) {
     const message = error instanceof Error ? error.message : "Unknown error";
     res.status(400).json({ success: false, error: message });
+  }
+}
+
+export async function getDistributionStatus(req: Request, res: Response) {
+  try {
+    const useCase = new GetDistributionStatusUseCase(planningRepository);
+    const distributions = await useCase.execute(req.params.id as string);
+    res.status(200).json({ success: true, data: distributions });
+  } catch (error) {
+    const message = error instanceof Error ? error.message : "Unknown error";
+    res.status(500).json({ success: false, error: message });
+  }
+}
+
+export async function getProgressSummary(req: Request, res: Response) {
+  try {
+    const useCase = new GetProgressSummaryUseCase(planningRepository);
+    const summary = await useCase.execute(req.params.id as string);
+    res.status(200).json({ success: true, data: summary });
+  } catch (error) {
+    const message = error instanceof Error ? error.message : "Unknown error";
+    res.status(500).json({ success: false, error: message });
   }
 }

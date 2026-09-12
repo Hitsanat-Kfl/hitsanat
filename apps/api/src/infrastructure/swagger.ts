@@ -228,6 +228,91 @@ export const openApiSpec = {
           },
         ],
       },
+      AnnualMasterPlan: {
+        type: "object",
+        properties: {
+          id: { type: "string", format: "uuid" },
+          academicYear: { type: "string", example: "2026-2027" },
+          title: { type: "string", example: "Annual Master Plan 2026" },
+          totalBudget: { type: "number", description: "Sum of all activity budgets" },
+          totalPeople: { type: "integer", description: "Sum of all human resources" },
+          totalTime: { type: "number", description: "Sum of all planned times (hours)" },
+          status: {
+            type: "string",
+            enum: ["Draft", "Distributed", "Active", "Completed", "Archived"],
+          },
+          createdBy: { type: "string" },
+          approvedBy: { type: "string", nullable: true },
+          approvedAt: { type: "string", format: "date-time", nullable: true },
+          createdAt: { type: "string", format: "date-time" },
+        },
+      },
+      PlanGoal: {
+        type: "object",
+        properties: {
+          id: { type: "string", format: "uuid" },
+          annualPlanId: { type: "string", format: "uuid" },
+          goalNumber: { type: "integer" },
+          title: { type: "string", example: "Spiritual Growth" },
+          createdAt: { type: "string", format: "date-time" },
+        },
+      },
+      PlanActivity: {
+        type: "object",
+        properties: {
+          id: { type: "string", format: "uuid" },
+          planGoalId: { type: "string", format: "uuid" },
+          activityNumber: { type: "integer" },
+          mainActivity: { type: "string", example: "Bible Study Sessions" },
+          expectedResult: { type: "string", nullable: true },
+          annualTarget: { type: "integer" },
+          budget: { type: "number", description: "Budget in ETB" },
+          humanResource: { type: "integer", description: "Number of people required" },
+          plannedTime: { type: "number", description: "Time in hours" },
+          weight: { type: "number", description: "Calculated weight percentage (BR-030)" },
+          q1Target: { type: "integer", description: "Q1 quarterly target" },
+          q2Target: { type: "integer", description: "Q2 quarterly target" },
+          q3Target: { type: "integer", description: "Q3 quarterly target" },
+          q4Target: { type: "integer", description: "Q4 quarterly target" },
+          createdAt: { type: "string", format: "date-time" },
+        },
+      },
+      PlanDistribution: {
+        type: "object",
+        properties: {
+          id: { type: "string", format: "uuid" },
+          planActivityId: { type: "string", format: "uuid" },
+          subDepartmentId: { type: "string" },
+          status: { type: "string", enum: ["Assigned", "In_Progress", "Completed"] },
+          assignedAt: { type: "string", format: "date-time" },
+          createdAt: { type: "string", format: "date-time" },
+        },
+      },
+      WeeklyPlan: {
+        type: "object",
+        properties: {
+          id: { type: "string", format: "uuid" },
+          planDistributionId: { type: "string", format: "uuid" },
+          ethiopianMonth: { type: "string", example: "Meskerem" },
+          weekNumber: { type: "integer" },
+          sessionDate: { type: "string", format: "date-time" },
+          taskDescription: { type: "string" },
+          createdAt: { type: "string", format: "date-time" },
+        },
+      },
+      PlanProgressRecord: {
+        type: "object",
+        properties: {
+          id: { type: "string", format: "uuid" },
+          weeklyPlanId: { type: "string", format: "uuid" },
+          actualResultNumeric: { type: "number", nullable: true },
+          actualResultText: { type: "string", nullable: true },
+          status: { type: "string", enum: ["Assigned", "In_Progress", "Completed"] },
+          challenges: { type: "string", nullable: true },
+          submittedBy: { type: "string" },
+          createdAt: { type: "string", format: "date-time" },
+        },
+      },
     },
   },
   paths: {
@@ -1164,6 +1249,402 @@ export const openApiSpec = {
               },
             },
           },
+        },
+      },
+    },
+    "/annual-plans": {
+      post: {
+        summary: "Create annual plan",
+        description:
+          "Creates a new annual master plan with goals and activities. Weights are auto-calculated using BR-030 formula: Weight = 1/3 * (Budget% + People% + Time%)",
+        tags: ["Planning"],
+        security: [{ sessionAuth: [] }, { bearerAuth: [] }],
+        requestBody: {
+          required: true,
+          content: {
+            "application/json": {
+              schema: {
+                type: "object",
+                required: ["academicYear", "title", "createdBy", "goals"],
+                properties: {
+                  academicYear: { type: "string", example: "2026-2027" },
+                  title: { type: "string", example: "Annual Master Plan 2026" },
+                  createdBy: { type: "string" },
+                  goals: {
+                    type: "array",
+                    items: {
+                      type: "object",
+                      required: ["goalNumber", "title", "activities"],
+                      properties: {
+                        goalNumber: { type: "integer" },
+                        title: { type: "string" },
+                        activities: {
+                          type: "array",
+                          items: {
+                            type: "object",
+                            required: [
+                              "activityNumber",
+                              "mainActivity",
+                              "annualTarget",
+                              "budget",
+                              "humanResource",
+                              "plannedTime",
+                              "q1Target",
+                              "q2Target",
+                              "q3Target",
+                              "q4Target",
+                            ],
+                            properties: {
+                              activityNumber: { type: "integer" },
+                              mainActivity: { type: "string" },
+                              expectedResult: { type: "string" },
+                              annualTarget: { type: "integer" },
+                              budget: { type: "number" },
+                              humanResource: { type: "integer" },
+                              plannedTime: { type: "number" },
+                              q1Target: { type: "integer" },
+                              q2Target: { type: "integer" },
+                              q3Target: { type: "integer" },
+                              q4Target: { type: "integer" },
+                            },
+                          },
+                        },
+                      },
+                    },
+                  },
+                },
+              },
+            },
+          },
+        },
+        responses: {
+          "201": { description: "Plan created with calculated weights" },
+          "400": { description: "Validation error" },
+        },
+      },
+      get: {
+        summary: "List annual plans",
+        description: "Returns paginated list of annual plans",
+        tags: ["Planning"],
+        security: [{ sessionAuth: [] }, { bearerAuth: [] }],
+        parameters: [
+          { name: "page", in: "query", schema: { type: "integer", default: 1 } },
+          { name: "limit", in: "query", schema: { type: "integer", default: 20 } },
+          { name: "search", in: "query", schema: { type: "string" } },
+        ],
+        responses: {
+          "200": {
+            description: "Paginated list of plans",
+            content: {
+              "application/json": {
+                schema: {
+                  type: "object",
+                  properties: {
+                    success: { type: "boolean" },
+                    data: {
+                      type: "array",
+                      items: { $ref: "#/components/schemas/AnnualMasterPlan" },
+                    },
+                    pagination: {
+                      type: "object",
+                      properties: {
+                        page: { type: "integer" },
+                        limit: { type: "integer" },
+                        total: { type: "integer" },
+                        totalPages: { type: "integer" },
+                      },
+                    },
+                  },
+                },
+              },
+            },
+          },
+        },
+      },
+    },
+    "/annual-plans/{id}": {
+      get: {
+        summary: "Get annual plan",
+        description: "Returns a single plan with nested goals and activities",
+        tags: ["Planning"],
+        security: [{ sessionAuth: [] }, { bearerAuth: [] }],
+        parameters: [
+          { name: "id", in: "path", required: true, schema: { type: "string", format: "uuid" } },
+        ],
+        responses: {
+          "200": {
+            description: "Plan with goals and activities",
+            content: {
+              "application/json": {
+                schema: {
+                  type: "object",
+                  properties: {
+                    success: { type: "boolean" },
+                    data: {
+                      allOf: [
+                        { $ref: "#/components/schemas/AnnualMasterPlan" },
+                        {
+                          type: "object",
+                          properties: {
+                            goals: {
+                              type: "array",
+                              items: {
+                                allOf: [
+                                  { $ref: "#/components/schemas/PlanGoal" },
+                                  {
+                                    type: "object",
+                                    properties: {
+                                      activities: {
+                                        type: "array",
+                                        items: { $ref: "#/components/schemas/PlanActivity" },
+                                      },
+                                    },
+                                  },
+                                ],
+                              },
+                            },
+                          },
+                        },
+                      ],
+                    },
+                  },
+                },
+              },
+            },
+          },
+          "404": { description: "Plan not found" },
+        },
+      },
+      patch: {
+        summary: "Update annual plan",
+        description: "Partially update an annual plan (title, status, approval)",
+        tags: ["Planning"],
+        security: [{ sessionAuth: [] }, { bearerAuth: [] }],
+        parameters: [
+          { name: "id", in: "path", required: true, schema: { type: "string", format: "uuid" } },
+        ],
+        requestBody: {
+          required: true,
+          content: {
+            "application/json": {
+              schema: {
+                type: "object",
+                properties: {
+                  title: { type: "string" },
+                  status: {
+                    type: "string",
+                    enum: ["Draft", "Distributed", "Active", "Completed", "Archived"],
+                  },
+                  approvedBy: { type: "string" },
+                },
+              },
+            },
+          },
+        },
+        responses: {
+          "200": { description: "Plan updated" },
+          "400": { description: "Invalid status transition" },
+        },
+      },
+    },
+    "/annual-plans/{id}/distributions": {
+      get: {
+        summary: "Get distribution status by plan",
+        description:
+          "Returns all distributions for a plan with activity and sub-department details",
+        tags: ["Planning"],
+        security: [{ sessionAuth: [] }, { bearerAuth: [] }],
+        parameters: [
+          { name: "id", in: "path", required: true, schema: { type: "string", format: "uuid" } },
+        ],
+        responses: {
+          "200": {
+            description: "Distribution status list",
+            content: {
+              "application/json": {
+                schema: {
+                  type: "object",
+                  properties: {
+                    success: { type: "boolean" },
+                    data: {
+                      type: "array",
+                      items: {
+                        type: "object",
+                        properties: {
+                          distributionId: { type: "string", format: "uuid" },
+                          activityMainActivity: { type: "string" },
+                          subDepartmentId: { type: "string" },
+                          status: {
+                            type: "string",
+                            enum: ["Assigned", "In_Progress", "Completed"],
+                          },
+                          assignedAt: { type: "string", format: "date-time" },
+                        },
+                      },
+                    },
+                  },
+                },
+              },
+            },
+          },
+        },
+      },
+    },
+    "/annual-plans/{id}/progress": {
+      get: {
+        summary: "Get progress summary by plan",
+        description:
+          "Returns progress summary per activity with weight-adjusted completion metrics",
+        tags: ["Planning"],
+        security: [{ sessionAuth: [] }, { bearerAuth: [] }],
+        parameters: [
+          { name: "id", in: "path", required: true, schema: { type: "string", format: "uuid" } },
+        ],
+        responses: {
+          "200": {
+            description: "Progress summary",
+            content: {
+              "application/json": {
+                schema: {
+                  type: "object",
+                  properties: {
+                    success: { type: "boolean" },
+                    data: {
+                      type: "array",
+                      items: {
+                        type: "object",
+                        properties: {
+                          goalNumber: { type: "integer" },
+                          goalTitle: { type: "string" },
+                          activityId: { type: "string", format: "uuid" },
+                          mainActivity: { type: "string" },
+                          weight: { type: "number", description: "Weight percentage (BR-030)" },
+                          progressCount: { type: "integer" },
+                          totalNumeric: { type: "number" },
+                          latestStatus: { type: "string", nullable: true },
+                        },
+                      },
+                    },
+                  },
+                },
+              },
+            },
+          },
+        },
+      },
+    },
+    "/annual-plans/{activityId}/distribute": {
+      post: {
+        summary: "Distribute activity to sub-departments",
+        description:
+          "Distributes a plan activity to one or more sub-departments. Sub-departments cannot create independent plans (BR-031).",
+        tags: ["Planning"],
+        security: [{ sessionAuth: [] }, { bearerAuth: [] }],
+        parameters: [
+          {
+            name: "activityId",
+            in: "path",
+            required: true,
+            schema: { type: "string", format: "uuid" },
+          },
+        ],
+        requestBody: {
+          required: true,
+          content: {
+            "application/json": {
+              schema: {
+                type: "object",
+                required: ["subDepartmentIds"],
+                properties: {
+                  subDepartmentIds: {
+                    type: "array",
+                    items: { type: "string" },
+                    description:
+                      "Array of sub-department IDs (TIMIHRT, MEZMUR, KUTITR, EKD, KINETIBEB)",
+                  },
+                },
+              },
+            },
+          },
+        },
+        responses: {
+          "201": { description: "Distributions created" },
+          "400": { description: "Activity not found" },
+        },
+      },
+    },
+    "/annual-plans/distributions/{distributionId}/weekly-plans": {
+      post: {
+        summary: "Create weekly plan",
+        description: "Creates a weekly execution item for a distribution",
+        tags: ["Planning"],
+        security: [{ sessionAuth: [] }, { bearerAuth: [] }],
+        parameters: [
+          {
+            name: "distributionId",
+            in: "path",
+            required: true,
+            schema: { type: "string", format: "uuid" },
+          },
+        ],
+        requestBody: {
+          required: true,
+          content: {
+            "application/json": {
+              schema: {
+                type: "object",
+                required: ["ethiopianMonth", "weekNumber", "sessionDate", "taskDescription"],
+                properties: {
+                  ethiopianMonth: { type: "string", example: "Meskerem" },
+                  weekNumber: { type: "integer" },
+                  sessionDate: { type: "string", format: "date-time" },
+                  taskDescription: { type: "string" },
+                },
+              },
+            },
+          },
+        },
+        responses: {
+          "201": { description: "Weekly plan created" },
+          "400": { description: "Validation error" },
+        },
+      },
+    },
+    "/annual-plans/weekly-plans/{weeklyPlanId}/progress": {
+      post: {
+        summary: "Submit progress",
+        description: "Records progress for a weekly plan. Status rolls up via BR-032 aggregation.",
+        tags: ["Planning"],
+        security: [{ sessionAuth: [] }, { bearerAuth: [] }],
+        parameters: [
+          {
+            name: "weeklyPlanId",
+            in: "path",
+            required: true,
+            schema: { type: "string", format: "uuid" },
+          },
+        ],
+        requestBody: {
+          required: true,
+          content: {
+            "application/json": {
+              schema: {
+                type: "object",
+                required: ["status", "submittedBy"],
+                properties: {
+                  actualResultNumeric: { type: "number" },
+                  actualResultText: { type: "string" },
+                  status: { type: "string", enum: ["Assigned", "In_Progress", "Completed"] },
+                  challenges: { type: "string" },
+                  submittedBy: { type: "string" },
+                },
+              },
+            },
+          },
+        },
+        responses: {
+          "201": { description: "Progress recorded" },
+          "400": { description: "Validation error" },
         },
       },
     },
