@@ -407,4 +407,110 @@ export class DrizzlePlanningRepository implements PlanningRepository {
       .where(eq(planProgressRecords.weeklyPlanId, weeklyPlanId));
     return rows.map(toProgressRecord);
   }
+
+  async findDistributionsByPlanId(
+    planId: string
+  ): Promise<(PlanDistribution & { activityMainActivity: string; subDepartmentName: string })[]> {
+    const db = getDb();
+    const rows = await db
+      .select({
+        id: planDistributions.id,
+        planActivityId: planDistributions.planActivityId,
+        subDepartmentId: planDistributions.subDepartmentId,
+        status: planDistributions.status,
+        assignedAt: planDistributions.assignedAt,
+        activityMainActivity: planActivities.mainActivity,
+        subDepartmentName: planDistributions.subDepartmentId,
+      })
+      .from(planDistributions)
+      .innerJoin(planActivities, eq(planDistributions.planActivityId, planActivities.id))
+      .innerJoin(planGoals, eq(planActivities.planGoalId, planGoals.id))
+      .where(eq(planGoals.annualPlanId, planId));
+
+    return rows.map((row) => ({
+      id: row.id,
+      planActivityId: row.planActivityId,
+      subDepartmentId: row.subDepartmentId,
+      status: row.status as PlanDistribution["status"],
+      assignedAt: row.assignedAt,
+      createdAt: row.assignedAt,
+      activityMainActivity: row.activityMainActivity,
+      subDepartmentName: row.subDepartmentName,
+    }));
+  }
+
+  async findProgressByPlanId(planId: string): Promise<
+    {
+      goalNumber: number;
+      goalTitle: string;
+      activityId: string;
+      mainActivity: string;
+      weight: number;
+      progressCount: number;
+      totalNumeric: number;
+      latestStatus: string | null;
+    }[]
+  > {
+    const db = getDb();
+
+    const activities = await db
+      .select({
+        goalNumber: planGoals.goalNumber,
+        goalTitle: planGoals.title,
+        activityId: planActivities.id,
+        mainActivity: planActivities.mainActivity,
+        weight: planActivities.weight,
+      })
+      .from(planActivities)
+      .innerJoin(planGoals, eq(planActivities.planGoalId, planGoals.id))
+      .where(eq(planGoals.annualPlanId, planId))
+      .orderBy(planGoals.goalNumber, planActivities.activityNumber);
+
+    const results = await Promise.all(
+      activities.map(async (act) => {
+        const distributions = await db
+          .select({ id: planDistributions.id })
+          .from(planDistributions)
+          .where(eq(planDistributions.planActivityId, act.activityId));
+
+        let progressCount = 0;
+        let totalNumeric = 0;
+        let latestStatus: string | null = null;
+
+        for (const dist of distributions) {
+          const weeklyPlansList = await db
+            .select({ id: weeklyPlans.id })
+            .from(weeklyPlans)
+            .where(eq(weeklyPlans.planDistributionId, dist.id));
+
+          for (const wp of weeklyPlansList) {
+            const records = await db
+              .select()
+              .from(planProgressRecords)
+              .where(eq(planProgressRecords.weeklyPlanId, wp.id))
+              .limit(1);
+
+            if (records.length > 0) {
+              progressCount++;
+              totalNumeric += Number(records[0].actualResultNumeric ?? 0);
+              if (!latestStatus) latestStatus = records[0].status;
+            }
+          }
+        }
+
+        return {
+          goalNumber: act.goalNumber,
+          goalTitle: act.goalTitle,
+          activityId: act.activityId,
+          mainActivity: act.mainActivity,
+          weight: Number(act.weight),
+          progressCount,
+          totalNumeric,
+          latestStatus,
+        };
+      })
+    );
+
+    return results;
+  }
 }

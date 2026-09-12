@@ -66,4 +66,21 @@ export interface PlanningRepository {
     data: Omit<PlanProgressRecord, "id" | "createdAt" | "updatedAt">
   ): Promise<PlanProgressRecord>;
   findProgressRecordsByWeeklyPlanId(weeklyPlanId: string): Promise<PlanProgressRecord[]>;
+
+  // Analytics Queries (BES-012)
+  findDistributionsByPlanId(
+    planId: string
+  ): Promise<(PlanDistribution & { activityMainActivity: string; subDepartmentName: string })[]>;
+  findProgressByPlanId(planId: string): Promise<
+    {
+      goalNumber: number;
+      goalTitle: string;
+      activityId: string;
+      mainActivity: string;
+      weight: number;
+      progressCount: number;
+      totalNumeric: number;
+      latestStatus: string | null;
+    }[]
+  >;
 }
