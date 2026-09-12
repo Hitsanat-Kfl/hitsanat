@@ -1,11 +1,11 @@
 import type {
-  KPIData,
-  ApprovalQueueItem,
-  ProgressData,
-  StatusSummaryItem,
-  EventItem,
   ActivityItem,
+  ApprovalQueueItem,
+  EventItem,
+  KPIData,
+  ProgressData,
   QuickAction,
+  StatusSummaryItem,
 } from "@repo/ui";
 
 // ============================================================

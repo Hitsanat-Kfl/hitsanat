@@ -1,20 +1,20 @@
 "use client";
 
-import * as React from "react";
+import { Button, ScrollArea, Separator, Tooltip } from "@repo/ui";
+import { cn } from "@repo/ui/lib/utils";
+import { ChevronLeft, ChevronRight } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { ChevronLeft, ChevronRight } from "lucide-react";
-import { Button, Tooltip, Separator, ScrollArea } from "@repo/ui";
-import { cn } from "@repo/ui/lib/utils";
-import { useShell } from "./shell-context";
+import * as React from "react";
 import { useI18n } from "./i18n";
 import {
-  getNavigationForRoles,
-  findActiveNavItem,
-  type UserRole,
   type NavItem,
   type NavSection,
+  type UserRole,
+  findActiveNavItem,
+  getNavigationForRoles,
 } from "./nav-config";
+import { useShell } from "./shell-context";
 
 interface AppSidebarProps {
   roles?: UserRole[];

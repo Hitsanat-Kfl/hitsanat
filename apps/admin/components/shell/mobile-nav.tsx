@@ -1,30 +1,30 @@
 "use client";
 
-import * as React from "react";
-import Link from "next/link";
-import { usePathname } from "next/navigation";
-import { Menu, X } from "lucide-react";
 import {
   Button,
   Drawer,
-  DrawerTrigger,
+  DrawerClose,
   DrawerContent,
   DrawerHeader,
   DrawerTitle,
-  DrawerClose,
+  DrawerTrigger,
   ScrollArea,
 } from "@repo/ui";
 import { cn } from "@repo/ui/lib/utils";
-import { useShell } from "./shell-context";
+import { Menu, X } from "lucide-react";
+import Link from "next/link";
+import { usePathname } from "next/navigation";
+import * as React from "react";
 import { useI18n } from "./i18n";
 import {
-  getNavigationForRoles,
-  getPrimaryNavItems,
-  findActiveNavItem,
-  type UserRole,
   type NavItem,
   type NavSection,
+  type UserRole,
+  findActiveNavItem,
+  getNavigationForRoles,
+  getPrimaryNavItems,
 } from "./nav-config";
+import { useShell } from "./shell-context";
 
 interface MobileNavProps {
   roles?: UserRole[];

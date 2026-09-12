@@ -1,18 +1,18 @@
 "use client";
 
-import * as React from "react";
-import { LogOut, Settings, User, Globe } from "lucide-react";
 import {
-  Button,
   Avatar,
+  Button,
   Popover,
-  PopoverTrigger,
   PopoverContent,
   PopoverItem,
+  PopoverTrigger,
   Separator,
 } from "@repo/ui";
 import { cn } from "@repo/ui/lib/utils";
-import { useI18n, type Locale } from "./i18n";
+import { Globe, LogOut, Settings, User } from "lucide-react";
+import * as React from "react";
+import { type Locale, useI18n } from "./i18n";
 
 interface UserMenuProps {
   name?: string;

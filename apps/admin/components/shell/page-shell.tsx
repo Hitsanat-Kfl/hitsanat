@@ -1,8 +1,8 @@
 "use client";
 
-import type * as React from "react";
 import { Breadcrumb, type BreadcrumbItem, Button, Separator } from "@repo/ui";
 import { cn } from "@repo/ui/lib/utils";
+import type * as React from "react";
 
 interface PageShellProps {
   breadcrumbs?: BreadcrumbItem[];

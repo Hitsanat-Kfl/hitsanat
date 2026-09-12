@@ -1,17 +1,17 @@
 "use client";
 
-import type * as React from "react";
-import { Bell, Check, CheckCheck, Info, AlertTriangle, XCircle } from "lucide-react";
 import {
-  Button,
-  Popover,
-  PopoverTrigger,
-  PopoverContent,
   Badge,
-  ScrollArea,
+  Button,
   EmptyState,
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+  ScrollArea,
 } from "@repo/ui";
 import { cn } from "@repo/ui/lib/utils";
+import { AlertTriangle, Bell, Check, CheckCheck, Info, XCircle } from "lucide-react";
+import type * as React from "react";
 import { useI18n } from "./i18n";
 
 export interface Notification {
