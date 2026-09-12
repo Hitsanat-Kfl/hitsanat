@@ -1,0 +1,2 @@
+# Force LF line endings for source files to satisfy biome formatter (lineEnding: lf)
+* text=auto eol=lf
