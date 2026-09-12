@@ -41,7 +41,7 @@ graph TD
 - **Mezmur Astegni Assignment:** Assigns choir conductors from its members to lead Saturday rehearsals.
 - **Awdemerit Coordination:** Prepares the monthly church presentation where children chant before the congregation.
 
-### 2.3 Kutitr (ቁጥር — Attendance & Logistics)
+### 2.3 Kutitr (ቁጥጥር — Attendance & Logistics)
 - **Weekend Headcounts:** Records physical attendance for Saturday (8:00–11:30) and Sunday (8:00–10:00).
 - **Transport Chaperones:** Assigns $\ge 2$ members to each of the 5 child collection points.
 - **Cohort Group Management:** Manages and reclassifies children between `Kutr 1` and `Kutr 2`.
@@ -51,7 +51,7 @@ graph TD
 - **Plan Distribution:** Distributes plan activities to the 5 sub-departments.
 - **Periodic Reporting:** Aggregates weekly, monthly, quarterly, and annual reports.
 
-### 2.5 Kinetibeb (ቅንጥብጥብ — Visual Arts & Storytelling)
+### 2.5 Kinetibeb (ኪነ-ጥበብ — Visual Arts & Storytelling)
 - **Religious Film Library:** Manages film screenings and visual spiritual media.
 - **Yeteret Abat Programs:** Schedules moral storytelling sessions and assigns members.
 - **Puppet & Drama:** Coordinates theatrical spiritual performances during special feasts.

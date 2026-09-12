@@ -11,4 +11,10 @@ export const paginationSchema = z.object({
   search: z.string().optional(),
 });
 
+export const dateRangeSchema = z.object({
+  startDate: z.string().date(),
+  endDate: z.string().date(),
+});
+
 export type PaginationInput = z.infer<typeof paginationSchema>;
+export type DateRangeInput = z.infer<typeof dateRangeSchema>;

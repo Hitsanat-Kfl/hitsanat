@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { uuidSchema, dateSchema } from "./common.js";
+import { dateSchema, uuidSchema } from "./common.js";
 
 export const assessmentSchema = z.object({
   curriculumId: uuidSchema,

@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { uuidSchema, phoneSchema, dateSchema } from "./common.js";
+import { dateSchema, phoneSchema, uuidSchema } from "./common.js";
 
 export const childRegistrationSchema = z.object({
   fullName: z.string().min(1).max(255),

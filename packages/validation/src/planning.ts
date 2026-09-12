@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { uuidSchema, dateSchema } from "./common.js";
+import { dateSchema, uuidSchema } from "./common.js";
 
 export const annualPlanSchema = z.object({
   academicYear: z.string().max(32),

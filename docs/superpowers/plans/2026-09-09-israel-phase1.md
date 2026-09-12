@@ -50,8 +50,8 @@ Both BES-001 and BES-002 have implementations but are **missing required tests**
 
 **Acceptance Criteria (from spec):**
 - [ ] 5 sub-departments seeded
-- [ ] Amharic names correct (ትምህርት, መዝሙር, ኩትትር, ኢክድ, ኪነጠበብ)
-- [ ] English names correct (Education, Worship, Children, EKD, Sports)
+- [ ] Amharic names correct (ትምህርት, መዝሙር, ቁጥጥር, እቅድ, ኪነ-ጥበብ)
+- [ ] English names correct (Timihrt, Mezmur, Kutitr, Ekd, Kinetibeb)
 - [ ] Seed is idempotent (safe to run multiple times)
 
 - [ ] **Step 1: Create test file structure**
@@ -97,8 +97,8 @@ describe("Sub-Departments Seed Script", () => {
       const { subDepartments } = await import("../../src/seeds/sub-departments.js");
       const kutitr = subDepartments.find((d) => d.code === "KUTITR");
       expect(kutitr).toBeDefined();
-      expect(kutitr?.name_am).toBe("ኩትትር");
-      expect(kutitr?.name_en).toBe("Children");
+      expect(kutitr?.name_am).toBe("ቁጥጥር");
+      expect(kutitr?.name_en).toBe("Kutitr");
     });
 
     it("should include EKD department with correct names", async () => {
@@ -113,8 +113,8 @@ describe("Sub-Departments Seed Script", () => {
       const { subDepartments } = await import("../../src/seeds/sub-departments.js");
       const kinetibeb = subDepartments.find((d) => d.code === "KINETIBEB");
       expect(kinetibeb).toBeDefined();
-      expect(kinetibeb?.name_am).toBe("ኪነጠበብ");
-      expect(kinetibeb?.name_en).toBe("Sports");
+      expect(kinetibeb?.name_am).toBe("ኪነ-ጥበብ");
+      expect(kinetibeb?.name_en).toBe("Kinetibeb");
     });
 
     it("should have descriptions for all departments", async () => {

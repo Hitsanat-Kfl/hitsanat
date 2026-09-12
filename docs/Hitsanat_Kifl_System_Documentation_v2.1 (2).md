@@ -112,7 +112,7 @@ Every member must belong to at least one sub-department, and may belong to more 
 | Mezmur         | መዝሙር    | Prepares song playlists and assigns Mezmur Astegni (song leaders) from its members                                                        |
 | Kutitr         | ቁጥጥር     | Tracks children's attendance, manages transportation, tracks member activity and family-based organization                                |
 | Ekd            | እቅድ     | Organizes events and activities; generates weekly, monthly, quarterly, half-year and full-year plans and reports from all sub-departments |
-| Kinetibeb      | ቅንጥብጥብ  | Prepares religious films, Yeteret Abat programs, and assigns members to the schedule; leads specific programs during special events       |
+| Kinetibeb      | ኪነ-ጥበብ  | Prepares religious films, Yeteret Abat programs, and assigns members to the schedule; leads specific programs during special events       |
 
 Each sub-department has: Leader, Sub-Leader, Secretary, and Regular Members.
 
@@ -1087,9 +1087,9 @@ pnpm add ethiopian-calendar-new
 | Gibi Gubae          | Main Orthodox student organization at Haramaya University    |
 | Timihrt (ትምህርት)     | Education sub-department                                     |
 | Mezmur (መዝሙር)       | Music/Hymns sub-department                                   |
-| Kutitr (ቁጥር)        | Attendance and tracking sub-department                       |
+| Kutitr (ቁጥጥር)        | Attendance and tracking sub-department                       |
 | Ekd (እቅድ)           | Planning and events sub-department                           |
-| Kinetibeb (ቅንጥብጥብ)  | Films and programs sub-department                            |
+| Kinetibeb (ኪነ-ጥበብ)  | Films and programs sub-department                            |
 | Khnet               | Family unit within the Kifl                                  |
 | Mezmur Astegni      | Song leader assigned by Mezmur Kifl                          |
 | Yeteret Abat        | A religious program prepared by Kinetibeb Kifl               |
