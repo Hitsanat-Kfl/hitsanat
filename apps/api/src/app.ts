@@ -6,6 +6,7 @@ import swaggerUi from "swagger-ui-express";
 import { env } from "./config/index.js";
 import { openApiSpec, swaggerJsonHandler } from "./infrastructure/swagger.js";
 import { announcementsRouter } from "./modules/announcements/presentation/announcements.router.js";
+import { academicRouter } from "./modules/academic/presentation/academic.router.js";
 import { attendanceRouter } from "./modules/attendance/presentation/attendance.router.js";
 import { childRouter } from "./modules/child/presentation/child.router.js";
 import { eventsRouter } from "./modules/events/presentation/events.router.js";
@@ -100,6 +101,9 @@ export function createApp(): Express {
 
   // Attendance routes
   app.use(`${env.API_PREFIX}/attendance`, attendanceRouter);
+
+  // Academic routes
+  app.use(`${env.API_PREFIX}/academic`, academicRouter);
 
   // Events routes
   app.use(`${env.API_PREFIX}/events`, eventsRouter);

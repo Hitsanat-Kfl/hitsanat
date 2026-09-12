@@ -3,6 +3,7 @@ import type { BaseEntity } from "../base.js";
 export enum AssessmentType {
   MID_EXAM = "Mid_Exam",
   FINAL_EXAM = "Final_Exam",
+  QUIZ = "Quiz",
   ASSIGNMENT = "Assignment",
 }
 
