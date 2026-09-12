@@ -9,6 +9,7 @@ import {
   Music,
   Settings,
   Shield,
+  Target,
   Users,
 } from "lucide-react";
 
@@ -158,6 +159,16 @@ export const navigationConfig: NavSection[] = [
         section: "management",
         allowedRoles: ["chairperson", "sub-chairperson", "secretary", "super-admin"],
         priority: 9,
+      },
+      {
+        id: "planning",
+        label: "Planning",
+        labelAm: "እቅፍ",
+        icon: Target,
+        href: "/planning",
+        section: "management",
+        allowedRoles: ["chairperson", "sub-chairperson", "secretary", "ekd-leader", "super-admin"],
+        priority: 10,
       },
     ],
   },
