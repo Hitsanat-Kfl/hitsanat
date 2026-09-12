@@ -1,11 +1,11 @@
 "use client";
 
-import * as React from "react";
-import { Search, FileText, Users, Calendar, Settings } from "lucide-react";
-import { Button, Input, EmptyState } from "@repo/ui";
+import { Button, EmptyState, Input } from "@repo/ui";
 import { cn } from "@repo/ui/lib/utils";
-import { useShell } from "./shell-context";
+import { Calendar, FileText, Search, Settings, Users } from "lucide-react";
+import * as React from "react";
 import { useI18n } from "./i18n";
+import { useShell } from "./shell-context";
 
 interface SearchResult {
   id: string;

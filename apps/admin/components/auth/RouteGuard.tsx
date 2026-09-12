@@ -1,7 +1,7 @@
 "use client";
 
+import { usePathname, useRouter } from "next/navigation";
 import type * as React from "react";
-import { useRouter, usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
 
 interface SessionUser {

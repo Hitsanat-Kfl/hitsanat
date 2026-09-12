@@ -1,8 +1,8 @@
 "use client";
 
 import type * as React from "react";
-import { AppShell } from "../../components/shell/app-shell";
 import { RouteGuard } from "../../components/auth/RouteGuard";
+import { AppShell } from "../../components/shell/app-shell";
 
 interface AuthenticatedLayoutProps {
   children: React.ReactNode;

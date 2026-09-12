@@ -1,13 +1,13 @@
 "use client";
 
-import * as React from "react";
-import { Menu } from "lucide-react";
 import { Button } from "@repo/ui";
 import { cn } from "@repo/ui/lib/utils";
-import { useShell } from "./shell-context";
-import { useI18n } from "./i18n";
+import { Menu } from "lucide-react";
+import * as React from "react";
 import { SearchTrigger } from "./global-search";
+import { useI18n } from "./i18n";
 import { NotificationCenter } from "./notification-center";
+import { useShell } from "./shell-context";
 import { UserMenu } from "./user-menu";
 
 interface AppHeaderProps {

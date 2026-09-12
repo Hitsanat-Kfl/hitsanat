@@ -1,14 +1,14 @@
 "use client";
 
-import type * as React from "react";
 import { cn } from "@repo/ui/lib/utils";
-import { ShellProvider } from "./shell-context";
-import { I18nProvider } from "./i18n";
-import { AppSidebar } from "./app-sidebar";
+import type * as React from "react";
 import { AppHeader } from "./app-header";
-import { MobileNav } from "./mobile-nav";
+import { AppSidebar } from "./app-sidebar";
 import { GlobalSearch } from "./global-search";
+import { I18nProvider } from "./i18n";
+import { MobileNav } from "./mobile-nav";
 import type { UserRole } from "./nav-config";
+import { ShellProvider } from "./shell-context";
 
 interface AppShellProps {
   children: React.ReactNode;

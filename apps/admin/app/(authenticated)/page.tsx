@@ -1,31 +1,31 @@
 "use client";
 
-import * as React from "react";
 import {
+  ActivityWidget,
+  ApprovalQueueWidget,
   DashboardContainer,
-  DashboardHeader,
-  DashboardSection,
   DashboardGrid,
   DashboardGridItem,
+  DashboardHeader,
+  DashboardSection,
   KPIRow,
-  ApprovalQueueWidget,
+  type ProgressData,
   ProgressWidget,
+  QuickActionsWidget,
   StatusSummaryWidget,
   UpcomingEventsWidget,
-  ActivityWidget,
-  QuickActionsWidget,
-  type ProgressData,
 } from "@repo/ui";
-import { PageShell } from "../../components/shell/page-shell";
+import * as React from "react";
 import {
-  getChairpersonKPIs,
-  getChairpersonApprovals,
-  getChairpersonProgress,
-  getChairpersonStatusSummary,
-  getChairpersonEvents,
   getChairpersonActivity,
+  getChairpersonApprovals,
+  getChairpersonEvents,
+  getChairpersonKPIs,
+  getChairpersonProgress,
   getChairpersonQuickActions,
+  getChairpersonStatusSummary,
 } from "../../components/dashboard/chairperson-fixtures";
+import { PageShell } from "../../components/shell/page-shell";
 
 function useCurrentDate(): string {
   const [dateStr, setDateStr] = React.useState("");

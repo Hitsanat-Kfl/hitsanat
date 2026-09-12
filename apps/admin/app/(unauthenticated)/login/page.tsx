@@ -1,8 +1,8 @@
 "use client";
 
-import type * as React from "react";
 import { useRouter, useSearchParams } from "next/navigation";
-import { useState, Suspense } from "react";
+import type * as React from "react";
+import { Suspense, useState } from "react";
 
 function LoginForm() {
   const router = useRouter();

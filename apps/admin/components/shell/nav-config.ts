@@ -1,15 +1,15 @@
 import {
-  LayoutDashboard,
-  Users,
-  Calendar,
-  Settings,
-  Shield,
+  Baby,
   BookOpen,
-  Music,
+  Calendar,
   GraduationCap,
   HandHeart,
-  Baby,
+  LayoutDashboard,
   type LucideIcon,
+  Music,
+  Settings,
+  Shield,
+  Users,
 } from "lucide-react";
 
 export type UserRole =
