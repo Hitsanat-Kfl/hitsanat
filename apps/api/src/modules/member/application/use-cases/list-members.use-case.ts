@@ -4,12 +4,19 @@ import type { MemberRepository } from "../../domain/repositories/member.reposito
 
 /**
  * List Members Use Case
- * Returns paginated list of members with search
+ * Returns paginated list of members with search and filters
  */
 export class ListMembersUseCase {
   constructor(private readonly memberRepository: MemberRepository) {}
 
-  async execute(params: PaginationParams): Promise<PaginatedResponse<Member>> {
+  async execute(
+    params: PaginationParams & {
+      subDept?: string;
+      familyId?: string;
+      yearOfStudy?: string;
+      isActive?: string;
+    }
+  ): Promise<PaginatedResponse<Member>> {
     return this.memberRepository.findMany(params);
   }
 }

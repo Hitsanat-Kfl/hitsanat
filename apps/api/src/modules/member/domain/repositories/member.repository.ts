@@ -1,9 +1,9 @@
 import type {
-  Member,
   CreateEntity,
-  UpdateEntity,
-  PaginationParams,
+  Member,
   PaginatedResponse,
+  PaginationParams,
+  UpdateEntity,
 } from "@repo/schemas";
 
 /**
@@ -22,9 +22,16 @@ export interface MemberRepository {
   findByPhoneNumber(phoneNumber: string): Promise<Member | null>;
 
   /**
-   * Find many members with pagination and search
+   * Find many members with pagination, search, and filters
    */
-  findMany(params: PaginationParams): Promise<PaginatedResponse<Member>>;
+  findMany(
+    params: PaginationParams & {
+      subDept?: string;
+      familyId?: string;
+      yearOfStudy?: string;
+      isActive?: string;
+    }
+  ): Promise<PaginatedResponse<Member>>;
 
   /**
    * Create a new member

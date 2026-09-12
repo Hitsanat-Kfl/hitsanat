@@ -1,4 +1,4 @@
-import { and, count, desc, eq, getDb, ilike, or } from "@repo/database";
+import { and, count, desc, eq, getDb, ilike, inArray, or } from "@repo/database";
 import { familyMembers, members, subDepartmentMembers } from "@repo/database/schema";
 import type {
   CreateEntity,
@@ -45,21 +45,56 @@ export class DrizzleMemberRepository implements MemberRepository {
     return rows.length > 0 ? toDomain(rows[0]) : null;
   }
 
-  async findMany(params: PaginationParams): Promise<PaginatedResponse<Member>> {
+  async findMany(
+    params: PaginationParams & {
+      subDept?: string;
+      familyId?: string;
+      yearOfStudy?: string;
+      isActive?: string;
+    }
+  ): Promise<PaginatedResponse<Member>> {
     const db = getDb();
     const page = Math.max(params.page ?? 1, 1);
     const limit = Math.min(Math.max(params.limit ?? 20, 1), 100);
     const offset = (page - 1) * limit;
 
-    const searchCondition = params.search
-      ? or(
+    const conditions = [];
+
+    if (params.search) {
+      conditions.push(
+        or(
           ilike(members.fullName, `%${params.search}%`),
           ilike(members.christianName, `%${params.search}%`),
           ilike(members.phoneNumber, `%${params.search}%`)
         )
-      : undefined;
+      );
+    }
 
-    const whereClause = searchCondition ? and(searchCondition) : undefined;
+    if (params.yearOfStudy) {
+      conditions.push(eq(members.yearOfStudy, params.yearOfStudy));
+    }
+
+    if (params.isActive !== undefined) {
+      conditions.push(eq(members.isActive, params.isActive === "true"));
+    }
+
+    if (params.subDept) {
+      const subDeptMemberIds = db
+        .select({ memberId: subDepartmentMembers.memberId })
+        .from(subDepartmentMembers)
+        .where(eq(subDepartmentMembers.subDepartmentId, params.subDept));
+      conditions.push(inArray(members.id, subDeptMemberIds));
+    }
+
+    if (params.familyId) {
+      const familyMemberIds = db
+        .select({ memberId: familyMembers.memberId })
+        .from(familyMembers)
+        .where(eq(familyMembers.familyId, params.familyId));
+      conditions.push(inArray(members.id, familyMemberIds));
+    }
+
+    const whereClause = conditions.length > 0 ? and(...conditions) : undefined;
 
     const [data, countResult] = await Promise.all([
       db

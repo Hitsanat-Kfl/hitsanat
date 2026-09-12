@@ -1,11 +1,11 @@
 import { and, eq, getDb } from "@repo/database";
-import { subDepartmentMembers, familyMembers } from "@repo/database/schema";
+import { familyMembers, subDepartmentMembers } from "@repo/database/schema";
 import type { Member } from "@repo/domain";
-import type { MemberRepository } from "../../domain/repositories/member.repository.js";
 import {
-  MemberNotFoundError,
   MemberAlreadyInSubDepartmentError,
+  MemberNotFoundError,
 } from "../../domain/errors/member.error.js";
+import type { MemberRepository } from "../../domain/repositories/member.repository.js";
 
 /**
  * Update Member Stage 2 Use Case
