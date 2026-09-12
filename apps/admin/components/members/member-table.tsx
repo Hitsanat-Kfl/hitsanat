@@ -13,8 +13,8 @@ export function MemberTable({ members, loading }: MemberTableProps) {
   if (loading) {
     return (
       <div className="space-y-4">
-        {Array.from({ length: 5 }).map((_, i) => (
-          <div key={i} className="flex items-center gap-4 p-4 rounded-lg border animate-pulse">
+        {["sk-1", "sk-2", "sk-3", "sk-4", "sk-5"].map((k) => (
+          <div key={k} className="flex items-center gap-4 p-4 rounded-lg border animate-pulse">
             <div className="h-10 w-10 rounded-full bg-muted" />
             <div className="flex-1 space-y-2">
               <div className="h-4 w-32 bg-muted rounded" />
