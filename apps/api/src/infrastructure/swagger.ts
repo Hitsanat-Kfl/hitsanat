@@ -173,6 +173,61 @@ export const openApiSpec = {
           },
         },
       },
+      Child: {
+        type: "object",
+        properties: {
+          id: { type: "string", format: "uuid" },
+          fullName: { type: "string", example: "Kidist Mulugeta" },
+          christianName: { type: "string", example: "Kidist" },
+          gender: { type: "string", enum: ["Male", "Female"] },
+          dateOfBirth: { type: "string", format: "date" },
+          address: { type: "string", example: "Bole, Addis Ababa" },
+          kutrGroup: { type: "string", enum: ["Kutr 1", "Kutr 2"], description: "BR-012" },
+          collectionLocation: {
+            type: "string",
+            enum: ["Apartama", "Gende Boy", "Gende Je", "Cobalt", "Bate"],
+            description: "BR-013",
+          },
+          photoUrl: { type: "string", nullable: true },
+          isActive: { type: "boolean" },
+          createdAt: { type: "string", format: "date-time" },
+        },
+      },
+      Parent: {
+        type: "object",
+        properties: {
+          id: { type: "string", format: "uuid" },
+          fullName: { type: "string", example: "Mulugeta Tesfaye" },
+          phoneNumber: { type: "string", example: "+251911000010" },
+          secondaryPhone: { type: "string", nullable: true },
+          address: { type: "string", example: "Bole, Addis Ababa" },
+          occupation: { type: "string", nullable: true },
+          notes: { type: "string", nullable: true },
+          createdAt: { type: "string", format: "date-time" },
+        },
+      },
+      ChildParent: {
+        type: "object",
+        properties: {
+          id: { type: "string", format: "uuid" },
+          childId: { type: "string", format: "uuid" },
+          parentId: { type: "string", format: "uuid" },
+          relation: { type: "string", enum: ["Father", "Mother"], description: "BR-010" },
+          createdAt: { type: "string", format: "date-time" },
+        },
+      },
+      ParentWithRelation: {
+        allOf: [
+          { $ref: "#/components/schemas/Parent" },
+          {
+            type: "object",
+            properties: {
+              relation: { type: "string", enum: ["Father", "Mother"] },
+              childParentId: { type: "string", format: "uuid" },
+            },
+          },
+        ],
+      },
     },
   },
   paths: {
@@ -770,6 +825,345 @@ export const openApiSpec = {
             },
           },
           "404": { description: "Sub-department not found" },
+        },
+      },
+    },
+    "/children": {
+      post: {
+        summary: "Register a new child",
+        description:
+          "Creates a child record with Kutr group and collection location (FR-04.1, BR-012, BR-013)",
+        tags: ["Children"],
+        security: [{ sessionAuth: [] }, { bearerAuth: [] }],
+        requestBody: {
+          required: true,
+          content: {
+            "application/json": {
+              schema: {
+                type: "object",
+                required: [
+                  "fullName",
+                  "christianName",
+                  "gender",
+                  "dateOfBirth",
+                  "address",
+                  "kutrGroup",
+                  "collectionLocation",
+                ],
+                properties: {
+                  fullName: { type: "string", example: "Kidist Mulugeta" },
+                  christianName: { type: "string", example: "Kidist" },
+                  gender: { type: "string", enum: ["Male", "Female"] },
+                  dateOfBirth: { type: "string", format: "date", example: "2018-06-15" },
+                  address: { type: "string", example: "Bole, Addis Ababa" },
+                  kutrGroup: { type: "string", enum: ["Kutr 1", "Kutr 2"], description: "BR-012" },
+                  collectionLocation: {
+                    type: "string",
+                    enum: ["Apartama", "Gende Boy", "Gende Je", "Cobalt", "Bate"],
+                    description: "BR-013",
+                  },
+                  photoUrl: { type: "string", format: "uri" },
+                },
+              },
+            },
+          },
+        },
+        responses: {
+          "201": { description: "Child registered" },
+          "400": { description: "Validation error" },
+        },
+      },
+      get: {
+        summary: "List children",
+        description: "Returns paginated list of children with optional filters",
+        tags: ["Children"],
+        security: [{ sessionAuth: [] }, { bearerAuth: [] }],
+        parameters: [
+          { name: "page", in: "query", schema: { type: "integer", default: 1 } },
+          { name: "limit", in: "query", schema: { type: "integer", default: 20 } },
+          { name: "search", in: "query", schema: { type: "string" } },
+          {
+            name: "kutrGroup",
+            in: "query",
+            schema: { type: "string", enum: ["Kutr 1", "Kutr 2"] },
+          },
+          {
+            name: "collectionLocation",
+            in: "query",
+            schema: {
+              type: "string",
+              enum: ["Apartama", "Gende Boy", "Gende Je", "Cobalt", "Bate"],
+            },
+          },
+        ],
+        responses: {
+          "200": {
+            description: "Paginated list of children",
+            content: {
+              "application/json": {
+                schema: {
+                  type: "object",
+                  properties: {
+                    success: { type: "boolean" },
+                    data: { type: "array", items: { $ref: "#/components/schemas/Child" } },
+                    pagination: {
+                      type: "object",
+                      properties: {
+                        page: { type: "integer" },
+                        limit: { type: "integer" },
+                        total: { type: "integer" },
+                        totalPages: { type: "integer" },
+                      },
+                    },
+                  },
+                },
+              },
+            },
+          },
+        },
+      },
+    },
+    "/children/{id}": {
+      get: {
+        summary: "Get child detail",
+        description: "Returns child with parents and assignments",
+        tags: ["Children"],
+        security: [{ sessionAuth: [] }, { bearerAuth: [] }],
+        parameters: [
+          { name: "id", in: "path", required: true, schema: { type: "string", format: "uuid" } },
+        ],
+        responses: {
+          "200": { description: "Child found" },
+          "404": { description: "Child not found" },
+        },
+      },
+      patch: {
+        summary: "Update child",
+        description: "Updates child information",
+        tags: ["Children"],
+        security: [{ sessionAuth: [] }, { bearerAuth: [] }],
+        parameters: [
+          { name: "id", in: "path", required: true, schema: { type: "string", format: "uuid" } },
+        ],
+        requestBody: {
+          required: true,
+          content: {
+            "application/json": {
+              schema: { type: "object" },
+            },
+          },
+        },
+        responses: {
+          "200": { description: "Child updated" },
+          "404": { description: "Child not found" },
+        },
+      },
+      delete: {
+        summary: "Delete child",
+        description: "Soft-deletes a child record",
+        tags: ["Children"],
+        security: [{ sessionAuth: [] }, { bearerAuth: [] }],
+        parameters: [
+          { name: "id", in: "path", required: true, schema: { type: "string", format: "uuid" } },
+        ],
+        responses: {
+          "204": { description: "Child deleted" },
+          "404": { description: "Child not found" },
+        },
+      },
+    },
+    "/children/{id}/reclassify": {
+      patch: {
+        summary: "Reclassify child Kutr group",
+        description: "Changes child from Kutr 1 to Kutr 2 or vice versa",
+        tags: ["Children"],
+        security: [{ sessionAuth: [] }, { bearerAuth: [] }],
+        parameters: [
+          { name: "id", in: "path", required: true, schema: { type: "string", format: "uuid" } },
+        ],
+        requestBody: {
+          required: true,
+          content: {
+            "application/json": {
+              schema: {
+                type: "object",
+                required: ["kutrGroup"],
+                properties: {
+                  kutrGroup: { type: "string", enum: ["Kutr 1", "Kutr 2"] },
+                },
+              },
+            },
+          },
+        },
+        responses: {
+          "200": { description: "Child reclassified" },
+          "404": { description: "Child not found" },
+        },
+      },
+    },
+    "/children/birthdays/{month}": {
+      get: {
+        summary: "Find children by birthday month",
+        description: "Returns all active children born in the specified month",
+        tags: ["Children"],
+        security: [{ sessionAuth: [] }, { bearerAuth: [] }],
+        parameters: [
+          {
+            name: "month",
+            in: "path",
+            required: true,
+            schema: { type: "integer", minimum: 1, maximum: 12 },
+          },
+        ],
+        responses: {
+          "200": {
+            description: "Children with birthdays in specified month",
+            content: {
+              "application/json": {
+                schema: {
+                  type: "object",
+                  properties: {
+                    success: { type: "boolean" },
+                    data: { type: "array", items: { $ref: "#/components/schemas/Child" } },
+                  },
+                },
+              },
+            },
+          },
+        },
+      },
+    },
+    "/children/{id}/parents": {
+      get: {
+        summary: "List parents for a child",
+        description: "Returns parents linked to a child with relation type",
+        tags: ["Children"],
+        security: [{ sessionAuth: [] }, { bearerAuth: [] }],
+        parameters: [
+          { name: "id", in: "path", required: true, schema: { type: "string", format: "uuid" } },
+        ],
+        responses: {
+          "200": {
+            description: "Parents linked to child",
+            content: {
+              "application/json": {
+                schema: {
+                  type: "object",
+                  properties: {
+                    success: { type: "boolean" },
+                    data: {
+                      type: "array",
+                      items: { $ref: "#/components/schemas/ParentWithRelation" },
+                    },
+                  },
+                },
+              },
+            },
+          },
+        },
+      },
+      post: {
+        summary: "Link parent to child",
+        description:
+          "Links a parent to a child with relation type (BR-010: max 1 Father, 1 Mother)",
+        tags: ["Children"],
+        security: [{ sessionAuth: [] }, { bearerAuth: [] }],
+        parameters: [
+          { name: "id", in: "path", required: true, schema: { type: "string", format: "uuid" } },
+        ],
+        requestBody: {
+          required: true,
+          content: {
+            "application/json": {
+              schema: {
+                type: "object",
+                required: ["parentId", "relation"],
+                properties: {
+                  parentId: { type: "string", format: "uuid" },
+                  relation: { type: "string", enum: ["Father", "Mother"], description: "BR-010" },
+                },
+              },
+            },
+          },
+        },
+        responses: {
+          "201": { description: "Parent linked" },
+          "400": { description: "Duplicate relation or parent already linked" },
+          "404": { description: "Child or parent not found" },
+        },
+      },
+    },
+    "/children/{id}/parents/{parentId}": {
+      delete: {
+        summary: "Unlink parent from child",
+        description: "Removes the parent-child link",
+        tags: ["Children"],
+        security: [{ sessionAuth: [] }, { bearerAuth: [] }],
+        parameters: [
+          { name: "id", in: "path", required: true, schema: { type: "string", format: "uuid" } },
+          {
+            name: "parentId",
+            in: "path",
+            required: true,
+            schema: { type: "string", format: "uuid" },
+          },
+        ],
+        responses: {
+          "204": { description: "Parent unlinked" },
+          "404": { description: "Child or link not found" },
+        },
+      },
+    },
+    "/children/parents": {
+      post: {
+        summary: "Create a parent",
+        description: "Creates a new parent record",
+        tags: ["Parents"],
+        security: [{ sessionAuth: [] }, { bearerAuth: [] }],
+        requestBody: {
+          required: true,
+          content: {
+            "application/json": {
+              schema: {
+                type: "object",
+                required: ["fullName", "phoneNumber", "address"],
+                properties: {
+                  fullName: { type: "string", example: "Mulugeta Tesfaye" },
+                  phoneNumber: { type: "string", example: "+251911000010" },
+                  secondaryPhone: { type: "string" },
+                  address: { type: "string", example: "Bole, Addis Ababa" },
+                  occupation: { type: "string", example: "Engineer" },
+                  notes: { type: "string" },
+                },
+              },
+            },
+          },
+        },
+        responses: {
+          "201": { description: "Parent created" },
+          "400": { description: "Validation error" },
+        },
+      },
+      get: {
+        summary: "List all parents",
+        description: "Returns all parent records",
+        tags: ["Parents"],
+        security: [{ sessionAuth: [] }, { bearerAuth: [] }],
+        responses: {
+          "200": {
+            description: "List of parents",
+            content: {
+              "application/json": {
+                schema: {
+                  type: "object",
+                  properties: {
+                    success: { type: "boolean" },
+                    data: { type: "array", items: { $ref: "#/components/schemas/Parent" } },
+                  },
+                },
+              },
+            },
+          },
         },
       },
     },
