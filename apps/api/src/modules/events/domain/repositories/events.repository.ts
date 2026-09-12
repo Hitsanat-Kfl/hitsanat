@@ -1,4 +1,4 @@
-import type { Event, EventProgramAssignment } from "@repo/domain";
+import type { Event, EventAttendance, EventProgramAssignment } from "@repo/domain";
 
 export interface EventsRepository {
   findEventById(id: string): Promise<(Event & { programs: EventProgramAssignment[] }) | null>;
@@ -32,4 +32,19 @@ export interface EventsRepository {
     assignedMembers: string;
   }): Promise<EventProgramAssignment>;
   findProgramAssignmentsByEventId(eventId: string): Promise<EventProgramAssignment[]>;
+
+  // Event Attendance (BES-016)
+  createEventAttendance(data: {
+    eventId: string;
+    personType: string;
+    personId: string;
+    status: string;
+    recordedBy: string;
+  }): Promise<EventAttendance>;
+  findEventAttendanceById(id: string): Promise<EventAttendance | null>;
+  findEventAttendanceByEventId(eventId: string): Promise<EventAttendance[]>;
+  updateEventAttendance(
+    id: string,
+    data: Partial<{ status: string; confirmedAt: Date }>
+  ): Promise<EventAttendance>;
 }

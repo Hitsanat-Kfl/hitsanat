@@ -313,6 +313,55 @@ export const openApiSpec = {
           createdAt: { type: "string", format: "date-time" },
         },
       },
+      AcademicAssessment: {
+        type: "object",
+        properties: {
+          id: { type: "string", format: "uuid" },
+          curriculumId: { type: "string", format: "uuid" },
+          assessmentType: {
+            type: "string",
+            enum: ["Mid_Exam", "Final_Exam", "Quiz", "Assignment"],
+            description: "FR-07.1: Assessment type (Mid_Exam, Final_Exam, Quiz, Assignment)",
+          },
+          subjectTopic: { type: "string" },
+          maxScore: { type: "number", description: "Maximum score for the assessment" },
+          academicPeriod: { type: "string" },
+          examDate: { type: "string", format: "date-time" },
+          createdAt: { type: "string", format: "date-time" },
+        },
+      },
+      StudentScore: {
+        type: "object",
+        properties: {
+          id: { type: "string", format: "uuid" },
+          academicAssessmentId: { type: "string", format: "uuid" },
+          childId: { type: "string", format: "uuid" },
+          scoreAchieved: { type: "number", description: "Score achieved (0 to maxScore)" },
+          recordedBy: { type: "string" },
+          createdAt: { type: "string", format: "date-time" },
+        },
+      },
+      EventAttendance: {
+        type: "object",
+        properties: {
+          id: { type: "string", format: "uuid" },
+          eventId: { type: "string", format: "uuid" },
+          personType: {
+            type: "string",
+            enum: ["Member", "Child"],
+            description: "Type of person attending",
+          },
+          personId: { type: "string", format: "uuid" },
+          status: {
+            type: "string",
+            enum: ["Present", "Absent", "Excused", "Confirmed"],
+            description: "Attendance status",
+          },
+          recordedBy: { type: "string" },
+          confirmedAt: { type: "string", format: "date-time", nullable: true },
+          createdAt: { type: "string", format: "date-time" },
+        },
+      },
     },
   },
   paths: {
@@ -1645,6 +1694,240 @@ export const openApiSpec = {
         responses: {
           "201": { description: "Progress recorded" },
           "400": { description: "Validation error" },
+        },
+      },
+    },
+    "/academic/assessments": {
+      post: {
+        summary: "Create academic assessment",
+        description: "Creates a new academic assessment (quiz, exam, assignment)",
+        tags: ["Academic"],
+        security: [{ sessionAuth: [] }, { bearerAuth: [] }],
+        requestBody: {
+          required: true,
+          content: {
+            "application/json": {
+              schema: {
+                type: "object",
+                required: [
+                  "curriculumId",
+                  "assessmentType",
+                  "subjectTopic",
+                  "maxScore",
+                  "academicPeriod",
+                ],
+                properties: {
+                  curriculumId: { type: "string", format: "uuid" },
+                  assessmentType: {
+                    type: "string",
+                    enum: ["Mid_Exam", "Final_Exam", "Quiz", "Assignment"],
+                  },
+                  subjectTopic: { type: "string" },
+                  maxScore: { type: "number" },
+                  academicPeriod: { type: "string" },
+                  examDate: { type: "string", format: "date-time" },
+                },
+              },
+            },
+          },
+        },
+        responses: {
+          "201": { description: "Assessment created" },
+          "400": { description: "Validation error" },
+        },
+      },
+      get: {
+        summary: "List academic assessments",
+        description: "Returns paginated list of academic assessments with optional filters",
+        tags: ["Academic"],
+        security: [{ sessionAuth: [] }, { bearerAuth: [] }],
+        parameters: [
+          { name: "page", in: "query", schema: { type: "integer", default: 1 } },
+          { name: "limit", in: "query", schema: { type: "integer", default: 20, maximum: 100 } },
+          {
+            name: "subjectTopic",
+            in: "query",
+            schema: { type: "string" },
+            description: "Filter by subject topic",
+          },
+          {
+            name: "assessmentType",
+            in: "query",
+            schema: { type: "string", enum: ["Mid_Exam", "Final_Exam", "Quiz", "Assignment"] },
+          },
+        ],
+        responses: {
+          "200": { description: "Assessments listed" },
+        },
+      },
+    },
+    "/academic/assessments/{assessmentId}/scores": {
+      post: {
+        summary: "Record student score",
+        description: "Records a score for a student on a specific assessment",
+        tags: ["Academic"],
+        security: [{ sessionAuth: [] }, { bearerAuth: [] }],
+        parameters: [
+          {
+            name: "assessmentId",
+            in: "path",
+            required: true,
+            schema: { type: "string", format: "uuid" },
+          },
+        ],
+        requestBody: {
+          required: true,
+          content: {
+            "application/json": {
+              schema: {
+                type: "object",
+                required: ["childId", "scoreAchieved", "recordedBy"],
+                properties: {
+                  childId: { type: "string", format: "uuid" },
+                  scoreAchieved: { type: "number", description: "Score (0 to maxScore)" },
+                  recordedBy: { type: "string" },
+                },
+              },
+            },
+          },
+        },
+        responses: {
+          "201": { description: "Score recorded" },
+          "400": { description: "Score outside valid range" },
+        },
+      },
+      get: {
+        summary: "List scores by assessment",
+        description: "Returns all scores for a specific assessment",
+        tags: ["Academic"],
+        security: [{ sessionAuth: [] }, { bearerAuth: [] }],
+        parameters: [
+          {
+            name: "assessmentId",
+            in: "path",
+            required: true,
+            schema: { type: "string", format: "uuid" },
+          },
+        ],
+        responses: {
+          "200": { description: "Scores listed" },
+        },
+      },
+    },
+    "/academic/children/{childId}/scores": {
+      get: {
+        summary: "List scores by child",
+        description: "Returns all academic scores for a specific child",
+        tags: ["Academic"],
+        security: [{ sessionAuth: [] }, { bearerAuth: [] }],
+        parameters: [
+          {
+            name: "childId",
+            in: "path",
+            required: true,
+            schema: { type: "string", format: "uuid" },
+          },
+        ],
+        responses: {
+          "200": { description: "Scores listed" },
+        },
+      },
+    },
+    "/events/{id}/attendance": {
+      post: {
+        summary: "Record event attendance",
+        description: "Records attendance for a member or child at an event",
+        tags: ["Events"],
+        security: [{ sessionAuth: [] }, { bearerAuth: [] }],
+        parameters: [
+          {
+            name: "id",
+            in: "path",
+            required: true,
+            schema: { type: "string", format: "uuid" },
+            description: "Event ID",
+          },
+        ],
+        requestBody: {
+          required: true,
+          content: {
+            "application/json": {
+              schema: {
+                type: "object",
+                required: ["personType", "personId", "status", "recordedBy"],
+                properties: {
+                  personType: { type: "string", enum: ["Member", "Child"] },
+                  personId: { type: "string", format: "uuid" },
+                  status: { type: "string", enum: ["Present", "Absent", "Excused", "Confirmed"] },
+                  recordedBy: { type: "string" },
+                },
+              },
+            },
+          },
+        },
+        responses: {
+          "201": { description: "Attendance recorded" },
+          "400": { description: "Event not found" },
+        },
+      },
+      get: {
+        summary: "List event attendance",
+        description: "Returns all attendance records for an event",
+        tags: ["Events"],
+        security: [{ sessionAuth: [] }, { bearerAuth: [] }],
+        parameters: [
+          {
+            name: "id",
+            in: "path",
+            required: true,
+            schema: { type: "string", format: "uuid" },
+            description: "Event ID",
+          },
+        ],
+        responses: {
+          "200": { description: "Attendance listed" },
+        },
+      },
+    },
+    "/events/{id}/attendance/{attendanceId}": {
+      put: {
+        summary: "Update event attendance",
+        description: "Updates attendance status or confirmation for a specific record",
+        tags: ["Events"],
+        security: [{ sessionAuth: [] }, { bearerAuth: [] }],
+        parameters: [
+          {
+            name: "id",
+            in: "path",
+            required: true,
+            schema: { type: "string", format: "uuid" },
+            description: "Event ID",
+          },
+          {
+            name: "attendanceId",
+            in: "path",
+            required: true,
+            schema: { type: "string", format: "uuid" },
+            description: "Attendance record ID",
+          },
+        ],
+        requestBody: {
+          required: true,
+          content: {
+            "application/json": {
+              schema: {
+                type: "object",
+                properties: {
+                  status: { type: "string", enum: ["Present", "Absent", "Excused", "Confirmed"] },
+                  confirmedAt: { type: "string", format: "date-time" },
+                },
+              },
+            },
+          },
+        },
+        responses: {
+          "200": { description: "Attendance updated" },
+          "400": { description: "Attendance not found" },
         },
       },
     },

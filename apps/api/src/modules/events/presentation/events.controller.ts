@@ -2,7 +2,10 @@ import type { Request, Response } from "express";
 import { AssignProgramUseCase } from "../application/use-cases/assign-program.use-case.js";
 import { CreateEventUseCase } from "../application/use-cases/create-event.use-case.js";
 import { GetEventUseCase } from "../application/use-cases/get-event.use-case.js";
+import { ListEventAttendanceUseCase } from "../application/use-cases/list-event-attendance.use-case.js";
 import { ListEventsUseCase } from "../application/use-cases/list-events.use-case.js";
+import { RecordEventAttendanceUseCase } from "../application/use-cases/record-event-attendance.use-case.js";
+import { UpdateEventAttendanceUseCase } from "../application/use-cases/update-event-attendance.use-case.js";
 import { DrizzleEventsRepository } from "../infrastructure/repositories/events.repository.js";
 
 const eventsRepository = new DrizzleEventsRepository();
@@ -51,6 +54,45 @@ export async function assignProgram(req: Request, res: Response) {
       ...req.body,
     });
     res.status(201).json({ success: true, data: assignment });
+  } catch (error) {
+    const message = error instanceof Error ? error.message : "Unknown error";
+    res.status(400).json({ success: false, error: message });
+  }
+}
+
+export async function recordEventAttendance(req: Request, res: Response) {
+  try {
+    const useCase = new RecordEventAttendanceUseCase(eventsRepository);
+    const attendance = await useCase.execute({
+      eventId: req.params.id as string,
+      ...req.body,
+    });
+    res.status(201).json({ success: true, data: attendance });
+  } catch (error) {
+    const message = error instanceof Error ? error.message : "Unknown error";
+    res.status(400).json({ success: false, error: message });
+  }
+}
+
+export async function listEventAttendance(req: Request, res: Response) {
+  try {
+    const useCase = new ListEventAttendanceUseCase(eventsRepository);
+    const attendance = await useCase.execute(req.params.id as string);
+    res.status(200).json({ success: true, data: attendance });
+  } catch (error) {
+    const message = error instanceof Error ? error.message : "Unknown error";
+    res.status(500).json({ success: false, error: message });
+  }
+}
+
+export async function updateEventAttendance(req: Request, res: Response) {
+  try {
+    const useCase = new UpdateEventAttendanceUseCase(eventsRepository);
+    const attendance = await useCase.execute({
+      id: req.params.attendanceId as string,
+      ...req.body,
+    });
+    res.status(200).json({ success: true, data: attendance });
   } catch (error) {
     const message = error instanceof Error ? error.message : "Unknown error";
     res.status(400).json({ success: false, error: message });

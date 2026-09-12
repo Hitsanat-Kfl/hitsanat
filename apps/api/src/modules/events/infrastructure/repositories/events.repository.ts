@@ -1,6 +1,6 @@
 import { count, desc, eq, getDb } from "@repo/database";
-import { events, eventProgramAssignments } from "@repo/database/schema";
-import type { Event, EventProgramAssignment } from "@repo/domain";
+import { events, eventAttendance, eventProgramAssignments } from "@repo/database/schema";
+import type { Event, EventAttendance, EventProgramAssignment } from "@repo/domain";
 import type { EventsRepository } from "../../domain/repositories/events.repository.js";
 
 function toEvent(row: typeof events.$inferSelect): Event {
@@ -24,6 +24,19 @@ function toProgramAssignment(
     subDepartmentId: row.subDepartmentId,
     programTitle: row.programTitle,
     assignedMembers: row.assignedMembers ? JSON.parse(row.assignedMembers) : [],
+    createdAt: new Date(),
+  };
+}
+
+function toEventAttendance(row: typeof eventAttendance.$inferSelect): EventAttendance {
+  return {
+    id: row.id,
+    eventId: row.eventId,
+    personType: row.personType as EventAttendance["personType"],
+    personId: row.personId,
+    status: row.status as EventAttendance["status"],
+    recordedBy: row.recordedBy,
+    confirmedAt: row.confirmedAt ?? undefined,
     createdAt: new Date(),
   };
 }
@@ -159,5 +172,62 @@ export class DrizzleEventsRepository implements EventsRepository {
       .from(eventProgramAssignments)
       .where(eq(eventProgramAssignments.eventId, eventId));
     return rows.map(toProgramAssignment);
+  }
+
+  async createEventAttendance(data: {
+    eventId: string;
+    personType: string;
+    personId: string;
+    status: string;
+    recordedBy: string;
+  }): Promise<EventAttendance> {
+    const db = getDb();
+    const rows = await db
+      .insert(eventAttendance)
+      .values({
+        eventId: data.eventId,
+        personType: data.personType,
+        personId: data.personId,
+        status: data.status,
+        recordedBy: data.recordedBy,
+      })
+      .returning();
+    return toEventAttendance(rows[0]);
+  }
+
+  async findEventAttendanceById(id: string): Promise<EventAttendance | null> {
+    const db = getDb();
+    const rows = await db.select().from(eventAttendance).where(eq(eventAttendance.id, id)).limit(1);
+    return rows.length > 0 ? toEventAttendance(rows[0]) : null;
+  }
+
+  async findEventAttendanceByEventId(eventId: string): Promise<EventAttendance[]> {
+    const db = getDb();
+    const rows = await db
+      .select()
+      .from(eventAttendance)
+      .where(eq(eventAttendance.eventId, eventId));
+    return rows.map(toEventAttendance);
+  }
+
+  async updateEventAttendance(
+    id: string,
+    data: Partial<{ status: string; confirmedAt: Date }>
+  ): Promise<EventAttendance> {
+    const db = getDb();
+    const updateData: Record<string, unknown> = {};
+    if (data.status !== undefined) updateData.status = data.status;
+    if (data.confirmedAt !== undefined) updateData.confirmedAt = data.confirmedAt;
+
+    const rows = await db
+      .update(eventAttendance)
+      .set(updateData)
+      .where(eq(eventAttendance.id, id))
+      .returning();
+
+    if (rows.length === 0) {
+      throw new Error(`Event attendance not found: ${id}`);
+    }
+    return toEventAttendance(rows[0]);
   }
 }
