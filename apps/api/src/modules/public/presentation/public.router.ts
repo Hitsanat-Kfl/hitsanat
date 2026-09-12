@@ -1,5 +1,5 @@
 import { Router } from "express";
-import { getPublicStats, getPublicEvents, getPublicAnnouncements } from "./public.controller.js";
+import { getPublicAnnouncements, getPublicEvents, getPublicStats } from "./public.controller.js";
 
 export const publicRouter: Router = Router();
 

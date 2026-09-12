@@ -1,5 +1,5 @@
-import { test, expect } from "@playwright/test";
 import AxeBuilder from "@axe-core/playwright";
+import { expect, test } from "@playwright/test";
 
 test.describe("Accessibility Testing (Axe Core)", () => {
   test("portfolio home page should have no critical accessibility violations", async ({ page }) => {

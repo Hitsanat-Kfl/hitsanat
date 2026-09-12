@@ -1,4 +1,4 @@
-import type { AnnualMasterPlan, PlanGoal, PlanActivity } from "@repo/domain";
+import type { AnnualMasterPlan, PlanActivity, PlanGoal } from "@repo/domain";
 import { PlanStatus, WeightCalculationEngine } from "@repo/domain";
 import type { PlanningRepository } from "../../domain/repositories/planning.repository.js";
 

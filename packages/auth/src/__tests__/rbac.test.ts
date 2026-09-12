@@ -1,6 +1,6 @@
-import { describe, it, expect, vi, beforeEach } from "vitest";
 import { readFileSync } from "node:fs";
 import { resolve } from "node:path";
+import { beforeEach, describe, expect, it, vi } from "vitest";
 
 describe("RBAC Middleware Structure", () => {
   it("should export requireAuth and requireScopePermission functions from middleware.ts", () => {

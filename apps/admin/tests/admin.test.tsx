@@ -1,8 +1,8 @@
-import { describe, it, expect } from "vitest";
 import { render, screen } from "@testing-library/react";
+import { describe, expect, it } from "vitest";
 import ChairpersonDashboardPage from "../app/(authenticated)/page.js";
-import { ShellProvider } from "../components/shell/shell-context";
 import { I18nProvider } from "../components/shell/i18n";
+import { ShellProvider } from "../components/shell/shell-context";
 
 function TestWrapper({ children }: { children: React.ReactNode }) {
   return (

@@ -1,8 +1,8 @@
 import type { Request, Response } from "express";
-import { DrizzleReportsRepository } from "../infrastructure/repositories/reports.repository.js";
 import { GenerateReportUseCase } from "../application/use-cases/generate-report.use-case.js";
-import { ListReportsUseCase } from "../application/use-cases/list-reports.use-case.js";
 import { GetReportUseCase } from "../application/use-cases/get-report.use-case.js";
+import { ListReportsUseCase } from "../application/use-cases/list-reports.use-case.js";
+import { DrizzleReportsRepository } from "../infrastructure/repositories/reports.repository.js";
 
 const reportsRepository = new DrizzleReportsRepository();
 

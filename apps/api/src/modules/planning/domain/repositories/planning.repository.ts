@@ -1,10 +1,10 @@
 import type {
   AnnualMasterPlan,
-  PlanGoal,
   PlanActivity,
   PlanDistribution,
-  WeeklyPlan,
+  PlanGoal,
   PlanProgressRecord,
+  WeeklyPlan,
 } from "@repo/domain";
 
 export interface PaginationParams {

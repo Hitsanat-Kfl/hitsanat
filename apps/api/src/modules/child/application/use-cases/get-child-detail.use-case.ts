@@ -1,6 +1,6 @@
 import type { Child } from "@repo/domain";
-import type { ChildRepository } from "../../domain/repositories/child.repository.js";
 import { ChildNotFoundError } from "../../domain/errors/child.error.js";
+import type { ChildRepository } from "../../domain/repositories/child.repository.js";
 
 export class GetChildDetailUseCase {
   constructor(private readonly childRepository: ChildRepository) {}

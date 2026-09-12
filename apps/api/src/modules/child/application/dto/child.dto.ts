@@ -1,11 +1,11 @@
-import type { z } from "zod";
 import {
+  childParentLinkSchema,
   childRegistrationSchema,
   type childResponseSchema,
-  parentSchema,
   type parentResponseSchema,
-  childParentLinkSchema,
+  parentSchema,
 } from "@repo/validation";
+import type { z } from "zod";
 
 export type CreateChildDto = z.infer<typeof childRegistrationSchema>;
 export const createChildDto = childRegistrationSchema;

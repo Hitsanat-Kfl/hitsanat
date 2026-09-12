@@ -1,11 +1,11 @@
+import { Activity } from "lucide-react";
 import * as React from "react";
 import { cn } from "../../../lib/utils";
-import { DashboardWidget, WidgetContent, WidgetEmpty } from "./dashboard-widget";
+import type { ActivityItem, WidgetState } from "../../../types/dashboard";
 import { Avatar } from "../avatar";
 import { Badge } from "../badge";
 import { Separator } from "../separator";
-import { Activity } from "lucide-react";
-import type { ActivityItem, WidgetState } from "../../../types/dashboard";
+import { DashboardWidget, WidgetContent, WidgetEmpty } from "./dashboard-widget";
 
 interface ActivityWidgetProps extends React.HTMLAttributes<HTMLDivElement> {
   title?: string;

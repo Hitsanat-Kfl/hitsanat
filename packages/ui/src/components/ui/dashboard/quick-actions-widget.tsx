@@ -1,8 +1,8 @@
 import * as React from "react";
 import { cn } from "../../../lib/utils";
-import { Button } from "../button";
-import { DashboardWidget, WidgetHeader, WidgetContent } from "./dashboard-widget";
 import type { QuickAction, WidgetState } from "../../../types/dashboard";
+import { Button } from "../button";
+import { DashboardWidget, WidgetContent, WidgetHeader } from "./dashboard-widget";
 
 interface QuickActionsWidgetProps extends React.HTMLAttributes<HTMLDivElement> {
   title?: string;

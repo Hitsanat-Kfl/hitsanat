@@ -1,9 +1,9 @@
 import * as React from "react";
 import { cn } from "../../../lib/utils";
-import { DashboardWidget, WidgetHeader, WidgetContent } from "./dashboard-widget";
-import { StatCard } from "../stat-card";
-import { Skeleton } from "../skeleton";
 import type { KPIData, WidgetState } from "../../../types/dashboard";
+import { Skeleton } from "../skeleton";
+import { StatCard } from "../stat-card";
+import { DashboardWidget, WidgetContent, WidgetHeader } from "./dashboard-widget";
 
 interface KPIWidgetProps extends React.HTMLAttributes<HTMLDivElement> {
   data: KPIData;

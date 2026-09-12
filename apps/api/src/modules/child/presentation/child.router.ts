@@ -1,17 +1,17 @@
 import { Router } from "express";
 import {
   create,
-  list,
-  getById,
-  update,
-  remove,
-  reclassify,
-  getByBirthdayMonth,
-  listParents,
-  linkParent,
-  unlinkParent,
   createParent,
+  getByBirthdayMonth,
+  getById,
+  linkParent,
+  list,
   listAllParents,
+  listParents,
+  reclassify,
+  remove,
+  unlinkParent,
+  update,
 } from "./child.controller.js";
 
 export const childRouter: Router = Router();

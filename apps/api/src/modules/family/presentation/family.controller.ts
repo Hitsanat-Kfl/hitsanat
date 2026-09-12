@@ -1,8 +1,8 @@
 import type { Request, Response } from "express";
-import { DrizzleFamilyRepository } from "../infrastructure/repositories/family.repository.js";
 import { CreateFamilyUseCase } from "../application/use-cases/create-family.use-case.js";
-import { ListFamiliesUseCase } from "../application/use-cases/list-families.use-case.js";
 import { GetFamilyDetailUseCase } from "../application/use-cases/get-family-detail.use-case.js";
+import { ListFamiliesUseCase } from "../application/use-cases/list-families.use-case.js";
+import { DrizzleFamilyRepository } from "../infrastructure/repositories/family.repository.js";
 
 const familyRepository = new DrizzleFamilyRepository();
 

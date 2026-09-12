@@ -1,5 +1,5 @@
-import type { Request, Response, NextFunction } from "express";
 import { getDb } from "@repo/database";
+import type { NextFunction, Request, Response } from "express";
 import type { SessionUser } from "./types.js";
 
 declare global {

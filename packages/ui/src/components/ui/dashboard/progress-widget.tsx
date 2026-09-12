@@ -1,8 +1,8 @@
 import * as React from "react";
 import { cn } from "../../../lib/utils";
-import { DashboardWidget, WidgetContent } from "./dashboard-widget";
-import { Progress } from "../progress";
 import type { ProgressData, WidgetState } from "../../../types/dashboard";
+import { Progress } from "../progress";
+import { DashboardWidget, WidgetContent } from "./dashboard-widget";
 
 interface ProgressWidgetProps extends React.HTMLAttributes<HTMLDivElement> {
   data: ProgressData;

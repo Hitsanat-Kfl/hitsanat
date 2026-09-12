@@ -1,7 +1,7 @@
-import { Button } from "@repo/ui";
-import { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter } from "@repo/ui";
-import { Badge } from "@repo/ui";
 import { formatEthiopianDate, toEthiopianDate } from "@repo/calendar";
+import { Button } from "@repo/ui";
+import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@repo/ui";
+import { Badge } from "@repo/ui";
 
 export default function HomePage() {
   const today = new Date();

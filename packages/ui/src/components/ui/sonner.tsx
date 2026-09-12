@@ -1,5 +1,5 @@
+import { AlertCircle, AlertTriangle, CheckCircle, Info, X } from "lucide-react";
 import * as React from "react";
-import { X, CheckCircle, AlertCircle, AlertTriangle, Info } from "lucide-react";
 import { cn } from "../../lib/utils";
 
 type ToastVariant = "success" | "error" | "warning" | "info";

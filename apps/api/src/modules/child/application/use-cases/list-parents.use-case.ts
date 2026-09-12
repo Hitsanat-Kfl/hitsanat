@@ -1,6 +1,6 @@
+import { ChildNotFoundError } from "../../domain/errors/child.error.js";
 import type { ParentWithRelation } from "../../domain/repositories/child.repository.js";
 import type { ChildRepository } from "../../domain/repositories/child.repository.js";
-import { ChildNotFoundError } from "../../domain/errors/child.error.js";
 
 export class ListParentsUseCase {
   constructor(private readonly childRepository: ChildRepository) {}

@@ -1,5 +1,5 @@
-import { describe, it, expect } from "vitest";
-import { toEthiopianDate, toGregorianDate, formatEthiopianDate } from "./index.js";
+import { describe, expect, it } from "vitest";
+import { formatEthiopianDate, toEthiopianDate, toGregorianDate } from "./index.js";
 
 describe("Ethiopian Calendar Package", () => {
   it("should convert Gregorian date to Ethiopian date", () => {

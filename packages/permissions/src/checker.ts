@@ -1,6 +1,6 @@
-import { ActionType, GlobalRole, type ResourceType, type SubDepartmentCode } from "./types.js";
 import { PERMISSION_MATRIX } from "./matrix.js";
 import { SUB_DEPT_PERMISSIONS } from "./sub-dept-permissions.js";
+import { ActionType, GlobalRole, type ResourceType, type SubDepartmentCode } from "./types.js";
 
 export function hasGlobalPermission(
   role: GlobalRole,

@@ -1,4 +1,4 @@
-import type { User, Session } from "@repo/database/schema";
+import type { Session, User } from "@repo/database/schema";
 
 export interface SessionUser {
   id: string;

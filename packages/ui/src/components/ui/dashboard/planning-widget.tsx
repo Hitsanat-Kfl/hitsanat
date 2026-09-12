@@ -1,11 +1,11 @@
+import { ClipboardList } from "lucide-react";
 import * as React from "react";
 import { cn } from "../../../lib/utils";
-import { DashboardWidget, WidgetContent, WidgetEmpty } from "./dashboard-widget";
+import type { PlanningData, WidgetState } from "../../../types/dashboard";
+import { Badge } from "../badge";
 import { Progress } from "../progress";
 import { StatusBadge } from "../status-badge";
-import { Badge } from "../badge";
-import { ClipboardList } from "lucide-react";
-import type { PlanningData, WidgetState } from "../../../types/dashboard";
+import { DashboardWidget, WidgetContent, WidgetEmpty } from "./dashboard-widget";
 
 interface PlanningWidgetProps extends React.HTMLAttributes<HTMLDivElement> {
   title?: string;

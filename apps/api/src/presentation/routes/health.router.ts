@@ -1,5 +1,5 @@
-import { type Request, type Response, Router } from "express";
 import type { HealthResponse } from "@repo/schemas";
+import { type Request, type Response, Router } from "express";
 import { env } from "../../config/index.js";
 
 export const healthRouter: Router = Router();

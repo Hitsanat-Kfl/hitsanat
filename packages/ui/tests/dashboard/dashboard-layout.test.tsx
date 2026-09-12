@@ -1,10 +1,10 @@
-import { describe, it, expect } from "vitest";
 import { render, screen } from "@testing-library/react";
+import { describe, expect, it } from "vitest";
 import {
   DashboardContainer,
-  DashboardHeader,
   DashboardGrid,
   DashboardGridItem,
+  DashboardHeader,
   DashboardSection,
 } from "../../src/components/ui/dashboard";
 

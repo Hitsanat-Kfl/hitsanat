@@ -1,8 +1,8 @@
-import { describe, it, expect } from "vitest";
+import { describe, expect, it } from "vitest";
 import {
-  WeightCalculationEngine,
   ProgressRollUpEngine,
   ReportAggregationEngine,
+  WeightCalculationEngine,
 } from "../src/engines/index.js";
 
 describe("Cross-Module Integration: Planning → Reports Flow", () => {

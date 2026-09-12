@@ -1,5 +1,5 @@
-import { describe, it, expect, beforeAll, afterAll } from "vitest";
 import type postgres from "postgres";
+import { afterAll, beforeAll, describe, expect, it } from "vitest";
 import { createTestClient } from "./setup.js";
 
 describe("Database Migrations", () => {

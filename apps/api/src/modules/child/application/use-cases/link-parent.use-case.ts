@@ -1,6 +1,6 @@
 import type { ChildParent } from "@repo/domain";
-import type { ChildRepository } from "../../domain/repositories/child.repository.js";
 import { ChildNotFoundError } from "../../domain/errors/child.error.js";
+import type { ChildRepository } from "../../domain/repositories/child.repository.js";
 
 // TODO Israel: Add Zod validation using childParentLinkSchema from @repo/validation
 // Validate { parentId, relation } before executing. Return 400 on validation failure.

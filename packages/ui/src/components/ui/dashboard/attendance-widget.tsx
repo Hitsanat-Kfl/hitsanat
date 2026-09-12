@@ -1,9 +1,9 @@
+import { Clock, UserCheck, UserX, Users } from "lucide-react";
 import * as React from "react";
 import { cn } from "../../../lib/utils";
-import { DashboardWidget, WidgetContent } from "./dashboard-widget";
-import { Progress } from "../progress";
-import { Users, UserCheck, UserX, Clock } from "lucide-react";
 import type { AttendanceData, WidgetState } from "../../../types/dashboard";
+import { Progress } from "../progress";
+import { DashboardWidget, WidgetContent } from "./dashboard-widget";
 
 interface AttendanceWidgetProps extends React.HTMLAttributes<HTMLDivElement> {
   data: AttendanceData;

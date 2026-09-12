@@ -1,5 +1,5 @@
-import { describe, it, expect } from "vitest";
 import { render, screen } from "@testing-library/react";
+import { describe, expect, it } from "vitest";
 import { ActivityWidget } from "../../src/components/ui/dashboard";
 import type { ActivityItem } from "../../src/types/dashboard";
 

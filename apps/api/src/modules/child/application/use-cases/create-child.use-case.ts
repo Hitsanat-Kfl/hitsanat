@@ -1,6 +1,6 @@
 import type { Child, CollectionLocation, Gender, KutrGroup } from "@repo/domain";
-import type { ChildRepository } from "../../domain/repositories/child.repository.js";
 import { ChildAlreadyExistsError } from "../../domain/errors/child.error.js";
+import type { ChildRepository } from "../../domain/repositories/child.repository.js";
 
 // TODO Israel: Add Zod validation using childRegistrationSchema from @repo/validation
 // Validate req.body before passing to repository. Return 400 on validation failure.

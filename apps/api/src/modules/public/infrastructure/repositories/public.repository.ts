@@ -1,5 +1,5 @@
 import { count, eq, getDb } from "@repo/database";
-import { members, children, events, announcements } from "@repo/database/schema";
+import { events, announcements, children, members } from "@repo/database/schema";
 import type { Announcement, Event } from "@repo/domain";
 import type { PublicRepository, PublicStats } from "../../domain/repositories/public.repository.js";
 

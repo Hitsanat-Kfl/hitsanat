@@ -1,4 +1,4 @@
-import type { PeriodicReport, ReportType, ReportMetrics } from "@repo/domain";
+import type { PeriodicReport, ReportMetrics, ReportType } from "@repo/domain";
 import { ReportAggregationEngine } from "@repo/domain";
 import type { ReportsRepository } from "../../domain/repositories/reports.repository.js";
 

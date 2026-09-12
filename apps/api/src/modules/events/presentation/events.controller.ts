@@ -1,9 +1,9 @@
 import type { Request, Response } from "express";
-import { DrizzleEventsRepository } from "../infrastructure/repositories/events.repository.js";
-import { CreateEventUseCase } from "../application/use-cases/create-event.use-case.js";
-import { ListEventsUseCase } from "../application/use-cases/list-events.use-case.js";
-import { GetEventUseCase } from "../application/use-cases/get-event.use-case.js";
 import { AssignProgramUseCase } from "../application/use-cases/assign-program.use-case.js";
+import { CreateEventUseCase } from "../application/use-cases/create-event.use-case.js";
+import { GetEventUseCase } from "../application/use-cases/get-event.use-case.js";
+import { ListEventsUseCase } from "../application/use-cases/list-events.use-case.js";
+import { DrizzleEventsRepository } from "../infrastructure/repositories/events.repository.js";
 
 const eventsRepository = new DrizzleEventsRepository();
 

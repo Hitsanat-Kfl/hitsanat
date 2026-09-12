@@ -1,10 +1,10 @@
+import { Inbox } from "lucide-react";
 import * as React from "react";
 import { cn } from "../../../lib/utils";
-import { DashboardWidget, WidgetContent, WidgetEmpty } from "./dashboard-widget";
-import { List, ListItem, ListItemText } from "../list";
-import { Button } from "../button";
-import { Inbox } from "lucide-react";
 import type { ListItemData, WidgetState } from "../../../types/dashboard";
+import { Button } from "../button";
+import { List, ListItem, ListItemText } from "../list";
+import { DashboardWidget, WidgetContent, WidgetEmpty } from "./dashboard-widget";
 
 interface ListWidgetProps extends React.HTMLAttributes<HTMLDivElement> {
   title?: string;

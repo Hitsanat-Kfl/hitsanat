@@ -1,9 +1,9 @@
-import { describe, it, expect, vi, beforeEach } from "vitest";
+import { beforeEach, describe, expect, it, vi } from "vitest";
 import { CreateFamilyUseCase } from "../../src/modules/family/application/use-cases/create-family.use-case.js";
-import { ListFamiliesUseCase } from "../../src/modules/family/application/use-cases/list-families.use-case.js";
 import { GetFamilyDetailUseCase } from "../../src/modules/family/application/use-cases/get-family-detail.use-case.js";
-import type { FamilyRepository } from "../../src/modules/family/domain/repositories/family.repository.js";
+import { ListFamiliesUseCase } from "../../src/modules/family/application/use-cases/list-families.use-case.js";
 import { FamilyNotFoundError } from "../../src/modules/family/domain/errors/family.error.js";
+import type { FamilyRepository } from "../../src/modules/family/domain/repositories/family.repository.js";
 
 const mockFamily = {
   id: "family-id-123",

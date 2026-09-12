@@ -1,6 +1,6 @@
-import { describe, it, expect, vi } from "vitest";
 import { render, screen } from "@testing-library/react";
-import { KPIWidget, KPIRow } from "../../src/components/ui/dashboard";
+import { describe, expect, it, vi } from "vitest";
+import { KPIRow, KPIWidget } from "../../src/components/ui/dashboard";
 import type { KPIData } from "../../src/types/dashboard";
 
 const mockKPI: KPIData = {

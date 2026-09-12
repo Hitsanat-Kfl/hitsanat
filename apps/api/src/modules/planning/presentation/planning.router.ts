@@ -1,12 +1,12 @@
 import { Router } from "express";
 import {
   createAnnualPlan,
-  listAnnualPlans,
-  getAnnualPlan,
-  updateAnnualPlan,
-  distributePlan,
   createWeeklyPlan,
+  distributePlan,
+  getAnnualPlan,
+  listAnnualPlans,
   submitProgress,
+  updateAnnualPlan,
 } from "./planning.controller.js";
 
 export const planningRouter: Router = Router();

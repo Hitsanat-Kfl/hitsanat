@@ -1,7 +1,7 @@
-import { betterAuth } from "better-auth";
-import { drizzleAdapter } from "better-auth/adapters/drizzle";
 import { getDb } from "@repo/database";
 import * as schema from "@repo/database/schema";
+import { betterAuth } from "better-auth";
+import { drizzleAdapter } from "better-auth/adapters/drizzle";
 
 // biome-ignore lint/suspicious/noExplicitAny: Better Auth returns complex generic types that can't be narrowed
 let _auth: any = null;

@@ -1,8 +1,8 @@
 import type { Request, Response } from "express";
-import { DrizzleAnnouncementsRepository } from "../infrastructure/repositories/announcements.repository.js";
 import { CreateAnnouncementUseCase } from "../application/use-cases/create-announcement.use-case.js";
 import { ListAnnouncementsUseCase } from "../application/use-cases/list-announcements.use-case.js";
 import { PublishAnnouncementUseCase } from "../application/use-cases/publish-announcement.use-case.js";
+import { DrizzleAnnouncementsRepository } from "../infrastructure/repositories/announcements.repository.js";
 
 const announcementsRepository = new DrizzleAnnouncementsRepository();
 

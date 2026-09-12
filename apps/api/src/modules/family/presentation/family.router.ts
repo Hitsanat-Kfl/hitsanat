@@ -1,5 +1,5 @@
 import { Router } from "express";
-import { create, list, getById } from "./family.controller.js";
+import { create, getById, list } from "./family.controller.js";
 
 export const familyRouter: Router = Router();
 

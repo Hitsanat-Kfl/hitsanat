@@ -1,6 +1,6 @@
 import type { Child, CollectionLocation, Gender, KutrGroup } from "@repo/domain";
-import type { ChildRepository } from "../../domain/repositories/child.repository.js";
 import { ChildNotFoundError } from "../../domain/errors/child.error.js";
+import type { ChildRepository } from "../../domain/repositories/child.repository.js";
 
 // TODO Israel: Add Zod validation using updateChildDto from @repo/validation
 // Validate partial input before passing to repository. Return 400 on validation failure.

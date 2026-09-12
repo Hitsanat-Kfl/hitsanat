@@ -1,13 +1,13 @@
-import { describe, it, expect, vi, beforeEach } from "vitest";
+import { beforeEach, describe, expect, it, vi } from "vitest";
 import { CreateMemberStage1UseCase } from "../../src/modules/member/application/use-cases/create-member-stage1.use-case.js";
-import { UpdateMemberStage2UseCase } from "../../src/modules/member/application/use-cases/update-member-stage2.use-case.js";
-import { ListMembersUseCase } from "../../src/modules/member/application/use-cases/list-members.use-case.js";
 import { GetMemberDetailUseCase } from "../../src/modules/member/application/use-cases/get-member-detail.use-case.js";
-import type { MemberRepository } from "../../src/modules/member/domain/repositories/member.repository.js";
+import { ListMembersUseCase } from "../../src/modules/member/application/use-cases/list-members.use-case.js";
+import { UpdateMemberStage2UseCase } from "../../src/modules/member/application/use-cases/update-member-stage2.use-case.js";
 import {
   MemberAlreadyExistsError,
   MemberNotFoundError,
 } from "../../src/modules/member/domain/errors/member.error.js";
+import type { MemberRepository } from "../../src/modules/member/domain/repositories/member.repository.js";
 
 const mockMember = {
   id: "test-id-123",

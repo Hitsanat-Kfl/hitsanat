@@ -1,10 +1,10 @@
 import type { Request, Response } from "express";
-import { DrizzleAttendanceRepository } from "../infrastructure/repositories/attendance.repository.js";
+import { AssignTransportUseCase } from "../application/use-cases/assign-transport.use-case.js";
 import { CreateSessionUseCase } from "../application/use-cases/create-session.use-case.js";
 import { ListSessionsUseCase } from "../application/use-cases/list-sessions.use-case.js";
 import { SeedAttendanceUseCase } from "../application/use-cases/seed-attendance.use-case.js";
 import { VerifyAttendanceUseCase } from "../application/use-cases/verify-attendance.use-case.js";
-import { AssignTransportUseCase } from "../application/use-cases/assign-transport.use-case.js";
+import { DrizzleAttendanceRepository } from "../infrastructure/repositories/attendance.repository.js";
 
 const attendanceRepository = new DrizzleAttendanceRepository();
 

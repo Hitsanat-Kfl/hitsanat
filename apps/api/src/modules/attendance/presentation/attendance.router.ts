@@ -1,11 +1,11 @@
 import { Router } from "express";
 import {
+  assignTransport,
+  batchVerifyAttendance,
   createSession,
   listSessions,
   seedAttendance,
   verifyAttendance,
-  batchVerifyAttendance,
-  assignTransport,
 } from "./attendance.controller.js";
 
 export const attendanceRouter: Router = Router();

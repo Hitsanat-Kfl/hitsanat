@@ -1,8 +1,8 @@
 import * as React from "react";
 import { cn } from "../../../lib/utils";
-import { DashboardWidget, WidgetContent } from "./dashboard-widget";
-import { StatusBadge } from "../status-badge";
 import type { StatusSummaryItem, WidgetState } from "../../../types/dashboard";
+import { StatusBadge } from "../status-badge";
+import { DashboardWidget, WidgetContent } from "./dashboard-widget";
 
 interface StatusSummaryWidgetProps extends React.HTMLAttributes<HTMLDivElement> {
   title?: string;

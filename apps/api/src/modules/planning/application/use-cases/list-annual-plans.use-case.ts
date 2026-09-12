@@ -1,7 +1,7 @@
 import type { AnnualMasterPlan } from "@repo/domain";
 import type {
-  PlanningRepository,
   PaginatedResponse,
+  PlanningRepository,
 } from "../../domain/repositories/planning.repository.js";
 
 interface ListAnnualPlansInput {

@@ -1,12 +1,12 @@
+import { ClipboardList } from "lucide-react";
 import * as React from "react";
 import { cn } from "../../../lib/utils";
-import { DashboardWidget, WidgetContent, WidgetEmpty } from "./dashboard-widget";
+import type { AssignmentItem, WidgetState } from "../../../types/dashboard";
 import { Avatar } from "../avatar";
-import { StatusBadge } from "../status-badge";
 import { Badge } from "../badge";
 import { Separator } from "../separator";
-import { ClipboardList } from "lucide-react";
-import type { AssignmentItem, WidgetState } from "../../../types/dashboard";
+import { StatusBadge } from "../status-badge";
+import { DashboardWidget, WidgetContent, WidgetEmpty } from "./dashboard-widget";
 
 interface AssignmentWidgetProps extends React.HTMLAttributes<HTMLDivElement> {
   title?: string;

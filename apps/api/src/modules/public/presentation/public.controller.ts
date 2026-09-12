@@ -1,8 +1,8 @@
 import type { Request, Response } from "express";
-import { DrizzlePublicRepository } from "../infrastructure/repositories/public.repository.js";
-import { GetPublicStatsUseCase } from "../application/use-cases/get-public-stats.use-case.js";
-import { GetPublicEventsUseCase } from "../application/use-cases/get-public-events.use-case.js";
 import { GetPublicAnnouncementsUseCase } from "../application/use-cases/get-public-announcements.use-case.js";
+import { GetPublicEventsUseCase } from "../application/use-cases/get-public-events.use-case.js";
+import { GetPublicStatsUseCase } from "../application/use-cases/get-public-stats.use-case.js";
+import { DrizzlePublicRepository } from "../infrastructure/repositories/public.repository.js";
 
 const publicRepository = new DrizzlePublicRepository();
 

@@ -1,18 +1,18 @@
+import { AlertCircle, RefreshCw } from "lucide-react";
 import * as React from "react";
 import { cn } from "../../../lib/utils";
+import type { WidgetState } from "../../../types/dashboard";
+import { Button } from "../button";
 import {
   Card,
+  CardAction,
   CardContent,
   CardDescription,
+  CardFooter,
   CardHeader,
   CardTitle,
-  CardAction,
-  CardFooter,
 } from "../card";
 import { Skeleton } from "../skeleton";
-import { AlertCircle, RefreshCw } from "lucide-react";
-import { Button } from "../button";
-import type { WidgetState } from "../../../types/dashboard";
 
 // ============================================================
 // WidgetHeader

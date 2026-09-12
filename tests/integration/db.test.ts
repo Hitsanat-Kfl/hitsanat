@@ -1,6 +1,6 @@
-import { afterAll, beforeAll, describe, expect, it } from "vitest";
-import type postgres from "postgres";
 import { createDatabaseClient } from "@repo/database";
+import type postgres from "postgres";
+import { afterAll, beforeAll, describe, expect, it } from "vitest";
 import { getTestDbUrl } from "./setup.js";
 
 const testDbUrl = getTestDbUrl();

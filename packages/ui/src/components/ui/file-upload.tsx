@@ -1,5 +1,5 @@
+import { FileIcon, ImageIcon, Upload, X } from "lucide-react";
 import * as React from "react";
-import { Upload, X, FileIcon, ImageIcon } from "lucide-react";
 import { cn } from "../../lib/utils";
 
 interface FileUploadProps extends Omit<React.ComponentProps<"div">, "onChange" | "onError"> {

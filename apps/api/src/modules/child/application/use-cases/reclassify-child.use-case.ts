@@ -1,6 +1,6 @@
 import type { Child, CollectionLocation, KutrGroup } from "@repo/domain";
-import type { ChildRepository } from "../../domain/repositories/child.repository.js";
 import { ChildNotFoundError } from "../../domain/errors/child.error.js";
+import type { ChildRepository } from "../../domain/repositories/child.repository.js";
 
 // BR-012: Kutr group constrained to 'Kutr 1' or 'Kutr 2'
 // BR-013: Collection location constrained to 5 routes
