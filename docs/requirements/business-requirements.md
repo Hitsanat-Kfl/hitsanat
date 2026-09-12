@@ -55,7 +55,7 @@ graph TD
 | **Secretary** (ጸሐፊ) | `LEADERSHIP_SECRETARY` | Official records manager and registrar | Full CRUD on Members, Children, Parents, Families, and Classifications. |
 | **Timihrt Leader** (የትምህርት ኃላፊ) | `SUB_LEAD_TIMIHRT` | Leads curriculum planning, teacher assignments, and exam scores | Timihrt dashboard; manages educational roadmap, teacher roster, academic records. |
 | **Mezmur Leader** (የመዝሙር ኃላፊ) | `SUB_LEAD_MEZMUR` | Leads hymn training, choir conductors (Astegni), Awdemerit | Mezmur dashboard; song repository, rehearsal schedules, Awdemerit preparation. |
-| **Kutitr Leader** (የቁጥር ኃላፊ) | `SUB_LEAD_KUTITR` | Oversees attendance, safety, collection points, and family tracking | Kutitr dashboard; Saturday/Sunday attendance, 5 collection routes, activity attendance. |
+| **Kutitr Leader** (የቁጥጥር ኃላፊ) | `SUB_LEAD_KUTITR` | Oversees attendance, safety, collection points, and family tracking | Kutitr dashboard; Saturday/Sunday attendance, 5 collection routes, activity attendance. |
 | **Ekd Leader** (የዕቅድ ኃላፊ) | `SUB_LEAD_EKD` | Directs Annual Master Plan, event schedules, and periodic reports | Ekd dashboard; master plan creation, sub-dept distribution, progress roll-up, reports. |
 | **Kinetibeb Leader** (የኪነ-ጥበብ ኃላፊ) | `SUB_LEAD_KINETIBEB` | Directs religious films, puppet theater, Yeteret Abat sessions | Kinetibeb dashboard; program scheduling, script/film assets, event segments. |
 | **Regular Member** (አባል) | `MEMBER_REGULAR` | Student servants participating in teaching, choir, and transport | **No Admin Portal Access**; interacts via Public Portfolio Website & Telegram. |

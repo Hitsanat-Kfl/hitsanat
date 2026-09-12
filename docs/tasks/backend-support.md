@@ -73,7 +73,7 @@ N/A — Documentation already exists
 
 ### 14. Acceptance Criteria
 - [ ] 5 sub-departments seeded
-- [ ] Amharic names correct (ትምህርት, መዝሙር, ቁጥር, እቅድ, ቅንጥብጥብ)
+- [ ] Amharic names correct (ትምህርት, መዝሙር, ቁጥጥር, እቅድ, ኪነ-ጥበብ)
 - [ ] English names correct (Timihrt, Mezmur, Kutitr, Ekd, Kinetibeb)
 - [ ] Seed is idempotent (safe to run multiple times)
 

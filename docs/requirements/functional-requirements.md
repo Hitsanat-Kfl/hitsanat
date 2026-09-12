@@ -60,9 +60,9 @@ graph LR
 - **FR-03.1 (Sub-Department Registry):** Supports the five fixed sub-departments:
   1. **Timihrt (ትምህርት):** Spiritual curriculum, syllabus, teaching assignments.
   2. **Mezmur (መዝሙር):** Liturgical chants, hymn playlists, hymn conductor assignments.
-  3. **Kutitr (ቁጥር):** Attendance, transport logistics, headcount oversight.
+  3. **Kutitr (ቁጥጥር):** Attendance, transport logistics, headcount oversight.
   4. **Ekd (እቅድ):** Strategic master planning, event scheduling, consolidated reports.
-  5. **Kinetibeb (ቅንጥብጥብ):** Religious films, theater, puppets, *Yeteret Abat* storytelling.
+  5. **Kinetibeb (ኪነ-ጥበብ):** Religious films, theater, puppets, *Yeteret Abat* storytelling.
 - **FR-03.2 (Scoped Dashboards):** Authenticated leaders access only their assigned sub-department's tools and datasets.
 
 ### 2.4 Module M-04: Children Management (Beneficiaries)

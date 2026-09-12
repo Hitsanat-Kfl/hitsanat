@@ -66,7 +66,7 @@ export const navigationConfig: NavItem[] = [
   },
   {
     title: 'Attendance (Kutitr)',
-    titleAm: 'ቁጥር ክፍል',
+    titleAm: 'ቁጥጥር ክፍል',
     href: '/kutitr',
     icon: 'CheckSquare',
     requiredSubDeptScope: 'KUTITR',
