@@ -207,3 +207,98 @@ export interface ProgressSummaryItem {
   totalNumeric: number;
   latestStatus: string | null;
 }
+
+export type AttendanceStatus = "Present" | "Absent" | "Excused" | "Late";
+export type SessionStatus = "Scheduled" | "In_Progress" | "Completed" | "Cancelled";
+
+export interface AttendanceSession {
+  id: string;
+  sessionDate: string;
+  subDepartmentId: string;
+  sessionType: string;
+  topic: string;
+  status: SessionStatus;
+  createdBy: string;
+  createdAt: string;
+}
+
+export interface AttendanceRecord {
+  id: string;
+  sessionId: string;
+  memberId: string;
+  memberName: string;
+  status: AttendanceStatus;
+  notes: string | null;
+  transportAssigned: boolean;
+  verifiedBy: string | null;
+  verifiedAt: string | null;
+  createdAt: string;
+}
+
+export interface AttendanceFilters {
+  page?: number;
+  limit?: number;
+  subDepartmentId?: string;
+  status?: string;
+  startDate?: string;
+  endDate?: string;
+}
+
+export type ReportType = "Weekly" | "Monthly" | "Quarterly" | "Half_Year" | "Annual";
+export type ReportStatus = "Draft" | "Submitted" | "Reviewed" | "Approved";
+export type SubmissionStatus = "Submitted" | "Under_Review" | "Accepted" | "Returned";
+
+export interface PeriodicReport {
+  id: string;
+  reportType: ReportType;
+  periodLabel: string;
+  periodStart: string;
+  periodEnd: string;
+  subDepartmentId: string | null;
+  generatedBy: string;
+  status: ReportStatus;
+  metrics: Record<string, unknown> | null;
+  challenges: string | null;
+  notes: string | null;
+  createdAt: string;
+}
+
+export interface ReportSubmission {
+  id: string;
+  reportType: ReportType;
+  periodLabel: string;
+  subDepartmentId: string;
+  submittedBy: string;
+  status: SubmissionStatus;
+  metrics: Record<string, unknown> | null;
+  challenges: string | null;
+  notes: string | null;
+  reviewedBy: string | null;
+  reviewedAt: string | null;
+  createdAt: string;
+}
+
+export interface PublicStats {
+  activeMembers: number;
+  enrolledChildren: number;
+  completedEvents: number;
+}
+
+export interface PublicEvent {
+  id: string;
+  title: string;
+  eventDate: string;
+  venue: string;
+  description: string;
+}
+
+export interface PublicAnnouncement {
+  id: string;
+  title: string;
+  content: string;
+  targetAudience: string;
+  isPublished: boolean;
+  publishedAt: string | null;
+  createdBy: string;
+  createdAt: string;
+}

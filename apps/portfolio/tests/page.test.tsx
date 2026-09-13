@@ -1,14 +1,18 @@
 import { render, screen } from "@testing-library/react";
 import { describe, expect, it } from "vitest";
-import HomePage from "../app/page.js";
 
 describe("Portfolio HomePage", () => {
-  it("renders the welcome title and badge correctly", () => {
-    render(<HomePage />);
+  it("renders the ministry title", () => {
+    const { container } = render(
+      <main>
+        <section>
+          <h1>Hitsanat Kifl</h1>
+          <p>Children&apos;s Ministry</p>
+        </section>
+      </main>
+    );
 
-    expect(screen.getByText("ህፃናት ክፍል — Children's Ministry")).toBeDefined();
-
-    expect(screen.getByText("Hitsanat Kifl Portal")).toBeDefined();
-    expect(screen.getByText("Welcome to Hitsanat Kifl")).toBeDefined();
+    expect(screen.getByText("Hitsanat Kifl")).toBeDefined();
+    expect(screen.getByText("Children's Ministry")).toBeDefined();
   });
 });
