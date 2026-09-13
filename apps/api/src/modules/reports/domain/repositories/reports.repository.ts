@@ -1,4 +1,4 @@
-import type { PeriodicReport, ReportMetrics } from "@repo/domain";
+import type { PeriodicReport, ReportMetrics, ReportSubmission } from "@repo/domain";
 
 export interface ReportsRepository {
   findReportById(id: string): Promise<PeriodicReport | null>;
@@ -34,4 +34,30 @@ export interface ReportsRepository {
     }>
   ): Promise<PeriodicReport>;
   deleteReport(id: string): Promise<void>;
+
+  // Sub-Department Submissions (BES-019)
+  createSubmission(data: {
+    reportType: string;
+    periodLabel: string;
+    subDepartmentId: string;
+    submittedBy: string;
+    metrics?: ReportMetrics;
+    challenges?: string;
+    notes?: string;
+  }): Promise<ReportSubmission>;
+  findSubmissionById(id: string): Promise<ReportSubmission | null>;
+  findManySubmissions(params: {
+    page?: number;
+    limit?: number;
+    subDepartmentId?: string;
+    status?: string;
+  }): Promise<{
+    success: boolean;
+    data: ReportSubmission[];
+    pagination: { page: number; limit: number; total: number; totalPages: number };
+  }>;
+  reviewSubmission(
+    id: string,
+    data: { reviewedBy: string; status: string }
+  ): Promise<ReportSubmission>;
 }

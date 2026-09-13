@@ -362,6 +362,60 @@ export const openApiSpec = {
           createdAt: { type: "string", format: "date-time" },
         },
       },
+      PeriodicReport: {
+        type: "object",
+        properties: {
+          id: { type: "string", format: "uuid" },
+          reportType: {
+            type: "string",
+            enum: ["Weekly", "Monthly", "Quarterly", "Half_Year", "Annual"],
+          },
+          periodLabel: { type: "string" },
+          periodStart: { type: "string", format: "date-time" },
+          periodEnd: { type: "string", format: "date-time" },
+          subDepartmentId: { type: "string", format: "uuid", nullable: true },
+          generatedBy: { type: "string" },
+          status: { type: "string", enum: ["Draft", "Submitted", "Reviewed", "Approved"] },
+          metrics: { type: "object", nullable: true },
+          challenges: { type: "string", nullable: true },
+          notes: { type: "string", nullable: true },
+          createdAt: { type: "string", format: "date-time" },
+        },
+      },
+      ReportSubmission: {
+        type: "object",
+        properties: {
+          id: { type: "string", format: "uuid" },
+          reportType: {
+            type: "string",
+            enum: ["Weekly", "Monthly", "Quarterly", "Half_Year", "Annual"],
+          },
+          periodLabel: { type: "string" },
+          subDepartmentId: { type: "string", format: "uuid" },
+          submittedBy: { type: "string" },
+          status: { type: "string", enum: ["Submitted", "Under_Review", "Accepted", "Returned"] },
+          metrics: { type: "object", nullable: true },
+          challenges: { type: "string", nullable: true },
+          notes: { type: "string", nullable: true },
+          reviewedBy: { type: "string", nullable: true },
+          reviewedAt: { type: "string", format: "date-time", nullable: true },
+          createdAt: { type: "string", format: "date-time" },
+        },
+      },
+      Announcement: {
+        type: "object",
+        properties: {
+          id: { type: "string", format: "uuid" },
+          title: { type: "string" },
+          content: { type: "string" },
+          targetAudience: { type: "string", enum: ["Public", "Members", "Parents"] },
+          isPublished: { type: "boolean" },
+          publishToTelegram: { type: "boolean" },
+          publishedAt: { type: "string", format: "date-time", nullable: true },
+          createdBy: { type: "string" },
+          createdAt: { type: "string", format: "date-time" },
+        },
+      },
     },
   },
   paths: {
@@ -1928,6 +1982,189 @@ export const openApiSpec = {
         responses: {
           "200": { description: "Attendance updated" },
           "400": { description: "Attendance not found" },
+        },
+      },
+    },
+    "/reports/submissions": {
+      post: {
+        summary: "Submit sub-department report",
+        description: "Sub-departments submit periodic performance data to Ekd for review",
+        tags: ["Reporting"],
+        security: [{ sessionAuth: [] }, { bearerAuth: [] }],
+        requestBody: {
+          required: true,
+          content: {
+            "application/json": {
+              schema: {
+                type: "object",
+                required: ["reportType", "periodLabel", "subDepartmentId", "submittedBy"],
+                properties: {
+                  reportType: {
+                    type: "string",
+                    enum: ["Weekly", "Monthly", "Quarterly", "Half_Year", "Annual"],
+                  },
+                  periodLabel: { type: "string" },
+                  subDepartmentId: { type: "string", format: "uuid" },
+                  submittedBy: { type: "string" },
+                  metrics: { type: "object" },
+                  challenges: { type: "string" },
+                  notes: { type: "string" },
+                },
+              },
+            },
+          },
+        },
+        responses: {
+          "201": { description: "Submission created" },
+          "400": { description: "Validation error" },
+        },
+      },
+      get: {
+        summary: "List report submissions",
+        description: "Returns paginated list of sub-department report submissions",
+        tags: ["Reporting"],
+        security: [{ sessionAuth: [] }, { bearerAuth: [] }],
+        parameters: [
+          { name: "page", in: "query", schema: { type: "integer", default: 1 } },
+          { name: "limit", in: "query", schema: { type: "integer", default: 20, maximum: 100 } },
+          { name: "subDepartmentId", in: "query", schema: { type: "string", format: "uuid" } },
+          {
+            name: "status",
+            in: "query",
+            schema: { type: "string", enum: ["Submitted", "Under_Review", "Accepted", "Returned"] },
+          },
+        ],
+        responses: {
+          "200": { description: "Submissions listed" },
+        },
+      },
+    },
+    "/reports/submissions/{submissionId}/review": {
+      put: {
+        summary: "Review submission",
+        description:
+          "Ekd reviews a sub-department report submission (Under_Review, Accepted, Returned)",
+        tags: ["Reporting"],
+        security: [{ sessionAuth: [] }, { bearerAuth: [] }],
+        parameters: [
+          {
+            name: "submissionId",
+            in: "path",
+            required: true,
+            schema: { type: "string", format: "uuid" },
+          },
+        ],
+        requestBody: {
+          required: true,
+          content: {
+            "application/json": {
+              schema: {
+                type: "object",
+                required: ["reviewedBy", "status"],
+                properties: {
+                  reviewedBy: { type: "string" },
+                  status: { type: "string", enum: ["Under_Review", "Accepted", "Returned"] },
+                },
+              },
+            },
+          },
+        },
+        responses: {
+          "200": { description: "Submission reviewed" },
+          "400": { description: "Submission not found" },
+        },
+      },
+    },
+    "/announcements": {
+      post: {
+        summary: "Create announcement",
+        description: "Creates a new announcement for the specified target audience",
+        tags: ["Announcements"],
+        security: [{ sessionAuth: [] }, { bearerAuth: [] }],
+        requestBody: {
+          required: true,
+          content: {
+            "application/json": {
+              schema: {
+                type: "object",
+                required: ["title", "content", "targetAudience", "createdBy"],
+                properties: {
+                  title: { type: "string" },
+                  content: { type: "string" },
+                  targetAudience: { type: "string", enum: ["Public", "Members", "Parents"] },
+                  createdBy: { type: "string" },
+                },
+              },
+            },
+          },
+        },
+        responses: {
+          "201": { description: "Announcement created" },
+          "400": { description: "Validation error" },
+        },
+      },
+      get: {
+        summary: "List announcements",
+        description: "Returns paginated list of announcements with optional filters",
+        tags: ["Announcements"],
+        security: [{ sessionAuth: [] }, { bearerAuth: [] }],
+        parameters: [
+          { name: "page", in: "query", schema: { type: "integer", default: 1 } },
+          { name: "limit", in: "query", schema: { type: "integer", default: 20, maximum: 100 } },
+          {
+            name: "targetAudience",
+            in: "query",
+            schema: { type: "string", enum: ["Public", "Members", "Parents"] },
+          },
+          { name: "isPublished", in: "query", schema: { type: "string", enum: ["true", "false"] } },
+        ],
+        responses: {
+          "200": { description: "Announcements listed" },
+        },
+      },
+    },
+    "/announcements/{id}/publish": {
+      put: {
+        summary: "Publish announcement",
+        description: "Publishes an announcement making it visible to the target audience",
+        tags: ["Announcements"],
+        security: [{ sessionAuth: [] }, { bearerAuth: [] }],
+        parameters: [
+          { name: "id", in: "path", required: true, schema: { type: "string", format: "uuid" } },
+        ],
+        responses: {
+          "200": { description: "Announcement published" },
+          "400": { description: "Announcement not found" },
+        },
+      },
+    },
+    "/public/stats": {
+      get: {
+        summary: "Public ministry statistics",
+        description: "Returns sanitized aggregate statistics (no PII) for the public portfolio",
+        tags: ["Public"],
+        responses: {
+          "200": { description: "Public stats" },
+        },
+      },
+    },
+    "/public/events": {
+      get: {
+        summary: "Public published events",
+        description: "Returns published events with countdown data for the public portfolio",
+        tags: ["Public"],
+        responses: {
+          "200": { description: "Public events" },
+        },
+      },
+    },
+    "/public/announcements": {
+      get: {
+        summary: "Public published announcements",
+        description: "Returns published announcements for the public portfolio",
+        tags: ["Public"],
+        responses: {
+          "200": { description: "Public announcements" },
         },
       },
     },

@@ -1,5 +1,12 @@
 import { Router } from "express";
-import { generateReport, getReport, listReports } from "./reports.controller.js";
+import {
+  generateReport,
+  getReport,
+  listReports,
+  listSubmissions,
+  reviewSubmission,
+  submitReport,
+} from "./reports.controller.js";
 
 export const reportsRouter: Router = Router();
 
@@ -8,20 +15,10 @@ reportsRouter.post("/generate", generateReport);
 reportsRouter.get("/", listReports);
 reportsRouter.get("/:id", getReport);
 
-// TODO RPT-003 (Backend Support - Israel): Sub-Department Submission API
-// POST /api/v1/reports/submissions - Sub-departments submit periodic data
-// GET /api/v1/reports/submissions - List submissions
-// PUT /api/v1/reports/submissions/:id/review - Ekd reviews submission
-
-// TODO RPT-007 (Backend Support - Israel): Integration Tests
-// Test report generation, submission, retrieval workflows
-// Test RBAC enforcement on all endpoints
-// Test aggregation accuracy
-
-// TODO RPT-008 (Backend Support - Israel): OpenAPI Reporting Documentation
-// Document all reporting endpoints
-// Define report schema
-// Document error responses
+// Sub-Department Submissions (BES-019)
+reportsRouter.post("/submissions", submitReport);
+reportsRouter.get("/submissions/list", listSubmissions);
+reportsRouter.put("/submissions/:submissionId/review", reviewSubmission);
 
 // TODO RPT-004 (Frontend 2): Executive Dashboard - Chairperson Overview
 // Build Chairperson executive dashboard in apps/admin
