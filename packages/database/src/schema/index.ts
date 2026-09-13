@@ -14,22 +14,22 @@ export type SystemMetadata = typeof systemMetadata.$inferSelect;
 export type NewSystemMetadata = typeof systemMetadata.$inferInsert;
 
 // Identity & Governance
-export * from "./identity";
+export * from "./identity.js";
 
 // Beneficiaries & Parents
-export * from "./beneficiaries";
+export * from "./beneficiaries.js";
 
 // Planning & Strategy
-export * from "./planning";
+export * from "./planning.js";
 
 // Attendance & Events
-export * from "./attendance";
+export * from "./attendance.js";
 
 // Academic & Announcements
-export * from "./academic";
+export * from "./academic.js";
 
 // Reports & Analytics
-export * from "./reports";
+export * from "./reports.js";
 
 // Auth & Session Management
-export * from "./auth";
+export * from "./auth.js";

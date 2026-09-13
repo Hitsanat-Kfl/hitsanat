@@ -276,6 +276,25 @@ importers:
         specifier: ^3.0.7
         version: 3.2.7(@types/node@22.20.1)(jiti@1.21.7)(jsdom@26.1.0)(tsx@4.23.12)
 
+  apps/telegram:
+    dependencies:
+      '@repo/database':
+        specifier: workspace:*
+        version: link:../../packages/database
+      dotenv:
+        specifier: ^16.4.7
+        version: 16.6.1
+    devDependencies:
+      '@repo/typescript-config':
+        specifier: workspace:*
+        version: link:../../packages/typescript-config
+      tsx:
+        specifier: ^4.19.3
+        version: 4.23.12
+      typescript:
+        specifier: ^5.7.3
+        version: 5.9.3
+
   packages/auth:
     dependencies:
       '@repo/database':
