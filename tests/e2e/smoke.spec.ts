@@ -5,12 +5,12 @@ test.describe("Frontend Smoke Tests", () => {
     await page.goto("http://localhost:3000");
     await expect(page).toHaveTitle(/Hitsanat Kifl/);
     await expect(page.getByText("Children's Ministry").first()).toBeVisible();
-    await expect(page.getByRole("heading", { name: "Hitsanat Kifl" })).toBeVisible();
+    await expect(page.getByRole("heading", { name: "Hitsanat Kifl" }).first()).toBeVisible();
   });
 
   test("admin application loads and displays login page", async ({ page }) => {
     await page.goto("http://localhost:3002");
     await expect(page).toHaveTitle(/Hitsanat Kifl/);
-    await expect(page.getByRole("heading", { name: "Hitsanat Kifl" })).toBeVisible();
+    await expect(page.getByRole("heading", { name: "Hitsanat Kifl" }).first()).toBeVisible();
   });
 });
