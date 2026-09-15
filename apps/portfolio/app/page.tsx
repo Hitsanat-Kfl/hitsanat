@@ -1,47 +1,71 @@
 import { formatEthiopianDate, toEthiopianDate } from "@repo/calendar";
-import { Button } from "@repo/ui";
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@repo/ui";
-import { Badge } from "@repo/ui";
+import { Header } from "../components/header";
+import { Hero } from "../components/hero";
+import { Stats } from "../components/stats";
+import { Programs } from "../components/programs";
+import { About } from "../components/about";
+import { Events } from "../components/events";
+import { Announcements } from "../components/announcements";
+import { Footer } from "../components/footer";
 
-export default function HomePage() {
-  const today = new Date();
-  const ethDate = toEthiopianDate({
-    year: today.getFullYear(),
-    month: today.getMonth() + 1,
-    day: today.getDate(),
-  });
-  const formattedEthDate = formatEthiopianDate(ethDate);
+const API_BASE = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3001";
+
+async function fetchPublicStats() {
+  try {
+    const res = await fetch(`${API_BASE}/api/v1/public/stats`, {
+      next: { revalidate: 60 },
+    });
+    if (!res.ok) return null;
+    const data = await res.json();
+    return data.success ? data.data : null;
+  } catch {
+    return null;
+  }
+}
+
+async function fetchPublicEvents() {
+  try {
+    const res = await fetch(`${API_BASE}/api/v1/public/events`, {
+      next: { revalidate: 60 },
+    });
+    if (!res.ok) return [];
+    const data = await res.json();
+    return data.success ? data.data : [];
+  } catch {
+    return [];
+  }
+}
+
+async function fetchPublicAnnouncements() {
+  try {
+    const res = await fetch(`${API_BASE}/api/v1/public/announcements`, {
+      next: { revalidate: 60 },
+    });
+    if (!res.ok) return [];
+    const data = await res.json();
+    return data.success ? data.data : [];
+  } catch {
+    return [];
+  }
+}
+
+export default async function PortfolioPage() {
+  const [stats, events, announcements] = await Promise.all([
+    fetchPublicStats(),
+    fetchPublicEvents(),
+    fetchPublicAnnouncements(),
+  ]);
 
   return (
-    <main className="flex min-h-screen flex-col items-center justify-center p-8 bg-surface-muted">
-      <div className="max-w-xl w-full space-y-6">
-        <div className="text-center space-y-2">
-          <Badge variant="secondary" className="mb-2">
-            Hitsanat Kifl Portal
-          </Badge>
-          <h1 className="text-3xl font-bold tracking-tight text-foreground">
-            ህፃናት ክፍል — Children's Ministry
-          </h1>
-          <p className="text-muted-foreground text-sm">ዛሬ {formattedEthDate}</p>
-        </div>
-
-        <Card>
-          <CardHeader>
-            <CardTitle>Welcome to Hitsanat Kifl</CardTitle>
-            <CardDescription>Public Ministry Foundation &amp; Announcements</CardDescription>
-          </CardHeader>
-          <CardContent>
-            <p className="text-sm text-muted-foreground">
-              Repository foundation is active. Monorepo packages, shared UI components, and calendar
-              system are linked and operational.
-            </p>
-          </CardContent>
-          <CardFooter className="flex justify-end gap-2">
-            <Button variant="outline">Learn More</Button>
-            <Button>Get Started</Button>
-          </CardFooter>
-        </Card>
-      </div>
+    <main className="min-h-screen">
+      <Header />
+      <Hero />
+      <Stats stats={stats} />
+      <Programs />
+      <Events events={events} />
+      <Announcements announcements={announcements} />
+      <About />
+      <Footer />
     </main>
   );
 }

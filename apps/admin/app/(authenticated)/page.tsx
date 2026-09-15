@@ -12,19 +12,12 @@ import {
   type ProgressData,
   ProgressWidget,
   QuickActionsWidget,
+  Spinner,
   StatusSummaryWidget,
   UpcomingEventsWidget,
 } from "@repo/ui";
 import * as React from "react";
-import {
-  getChairpersonActivity,
-  getChairpersonApprovals,
-  getChairpersonEvents,
-  getChairpersonKPIs,
-  getChairpersonProgress,
-  getChairpersonQuickActions,
-  getChairpersonStatusSummary,
-} from "../../components/dashboard/chairperson-fixtures";
+import { useChairpersonDashboard } from "../../components/dashboard/use-chairperson-dashboard";
 import { PageShell } from "../../components/shell/page-shell";
 
 function useCurrentDate(): string {
@@ -46,13 +39,35 @@ function useCurrentDate(): string {
 
 export default function ChairpersonDashboardPage() {
   const currentDate = useCurrentDate();
-  const kpis = React.useMemo(() => getChairpersonKPIs(), []);
-  const approvals = React.useMemo(() => getChairpersonApprovals(), []);
-  const progress = React.useMemo(() => getChairpersonProgress(), []);
-  const statusSummary = React.useMemo(() => getChairpersonStatusSummary(), []);
-  const events = React.useMemo(() => getChairpersonEvents(), []);
-  const activity = React.useMemo(() => getChairpersonActivity(), []);
-  const quickActions = React.useMemo(() => getChairpersonQuickActions(), []);
+  const {
+    kpis,
+    approvals,
+    progress,
+    statusSummary,
+    events,
+    activity,
+    quickActions,
+    loading,
+    error,
+  } = useChairpersonDashboard();
+
+  if (loading) {
+    return (
+      <PageShell breadcrumbs={[{ label: "Home", href: "/" }, { label: "Chairperson Dashboard" }]}>
+        <div className="flex items-center justify-center py-12">
+          <Spinner size="lg" />
+        </div>
+      </PageShell>
+    );
+  }
+
+  if (error) {
+    return (
+      <PageShell breadcrumbs={[{ label: "Home", href: "/" }, { label: "Chairperson Dashboard" }]}>
+        <div className="rounded-md bg-destructive/10 p-4 text-destructive">{error}</div>
+      </PageShell>
+    );
+  }
 
   return (
     <PageShell breadcrumbs={[{ label: "Home", href: "/" }, { label: "Chairperson Dashboard" }]}>
