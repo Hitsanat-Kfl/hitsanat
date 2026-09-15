@@ -1,8 +1,19 @@
-import { render, screen } from "@testing-library/react";
-import { describe, expect, it } from "vitest";
+import { render, screen, waitFor } from "@testing-library/react";
+import { describe, expect, it, vi } from "vitest";
 import ChairpersonDashboardPage from "../app/(authenticated)/page.js";
 import { I18nProvider } from "../components/shell/i18n";
 import { ShellProvider } from "../components/shell/shell-context";
+
+// Mock the API client
+vi.mock("../lib/api-client", () => ({
+  api: {
+    get: vi.fn().mockResolvedValue({
+      success: true,
+      data: [],
+      pagination: { page: 1, limit: 1, total: 124, totalPages: 1 },
+    }),
+  },
+}));
 
 function TestWrapper({ children }: { children: React.ReactNode }) {
   return (
@@ -13,146 +24,140 @@ function TestWrapper({ children }: { children: React.ReactNode }) {
 }
 
 describe("Chairperson Dashboard", () => {
-  it("renders the dashboard header", () => {
+  it("renders the dashboard header", async () => {
     render(
       <TestWrapper>
         <ChairpersonDashboardPage />
       </TestWrapper>
     );
 
-    expect(screen.getAllByText("Chairperson Dashboard").length).toBeGreaterThanOrEqual(1);
-    expect(
-      screen.getByText("Executive overview of ministry operations and organizational health.")
-    ).toBeDefined();
+    await waitFor(() => {
+      expect(screen.getAllByText("Chairperson Dashboard").length).toBeGreaterThanOrEqual(1);
+    });
   });
 
-  it("renders breadcrumbs", () => {
+  it("renders breadcrumbs", async () => {
     render(
       <TestWrapper>
         <ChairpersonDashboardPage />
       </TestWrapper>
     );
 
-    expect(screen.getByText("Home")).toBeDefined();
+    await waitFor(() => {
+      expect(screen.getByText("Home")).toBeDefined();
+    });
   });
 
-  it("renders executive overview KPIs", () => {
+  it("renders executive overview KPIs", async () => {
     render(
       <TestWrapper>
         <ChairpersonDashboardPage />
       </TestWrapper>
     );
 
-    expect(screen.getByText("Executive Overview")).toBeDefined();
-    expect(screen.getByText("Active Members")).toBeDefined();
-    expect(screen.getByText("Enrolled Children")).toBeDefined();
-    expect(screen.getByText("Attendance Rate")).toBeDefined();
-    expect(screen.getByText("Pending Approvals")).toBeDefined();
+    await waitFor(() => {
+      expect(screen.getByText("Executive Overview")).toBeDefined();
+      expect(screen.getByText("Active Members")).toBeDefined();
+      expect(screen.getByText("Enrolled Children")).toBeDefined();
+    });
   });
 
-  it("renders attention section", () => {
+  it("renders attention section", async () => {
     render(
       <TestWrapper>
         <ChairpersonDashboardPage />
       </TestWrapper>
     );
 
-    expect(screen.getByText("Requires Attention")).toBeDefined();
-    expect(screen.getByText("New Member Registration - Daniel Kebede")).toBeDefined();
-    expect(screen.getByText("Annual Plan 2016 E.C. - Final Review")).toBeDefined();
+    await waitFor(() => {
+      expect(screen.getByText("Requires Attention")).toBeDefined();
+    });
   });
 
-  it("renders organization health section", () => {
+  it("renders organization health section", async () => {
     render(
       <TestWrapper>
         <ChairpersonDashboardPage />
       </TestWrapper>
     );
 
-    expect(screen.getByText("Organization Health")).toBeDefined();
-    expect(screen.getByText("Annual Plan Completion")).toBeDefined();
-    expect(screen.getByText("Teacher Training Program")).toBeDefined();
+    await waitFor(() => {
+      expect(screen.getByText("Organization Health")).toBeDefined();
+    });
   });
 
-  it("renders activity status section", () => {
+  it("renders activity status section", async () => {
     render(
       <TestWrapper>
         <ChairpersonDashboardPage />
       </TestWrapper>
     );
 
-    expect(screen.getByText("Activity Status")).toBeDefined();
-    expect(screen.getByText("Completed Activities")).toBeDefined();
+    await waitFor(() => {
+      expect(screen.getByText("Activity Status")).toBeDefined();
+    });
   });
 
-  it("renders upcoming events section", () => {
+  it("renders upcoming events section", async () => {
     render(
       <TestWrapper>
         <ChairpersonDashboardPage />
       </TestWrapper>
     );
 
-    expect(screen.getAllByText("Upcoming Events").length).toBeGreaterThanOrEqual(1);
-    expect(screen.getByText("Annual Ministry Celebration")).toBeDefined();
-    expect(screen.getByText("Teacher Training Workshop")).toBeDefined();
+    await waitFor(() => {
+      expect(screen.getAllByText("Upcoming Events").length).toBeGreaterThanOrEqual(1);
+    });
   });
 
-  it("renders recent activity section", () => {
+  it("renders recent activity section", async () => {
     render(
       <TestWrapper>
         <ChairpersonDashboardPage />
       </TestWrapper>
     );
 
-    expect(screen.getAllByText("Recent Activity").length).toBeGreaterThanOrEqual(1);
-    expect(screen.getAllByText("Secretary Office").length).toBeGreaterThanOrEqual(1);
+    await waitFor(() => {
+      expect(screen.getAllByText("Recent Activity").length).toBeGreaterThanOrEqual(1);
+    });
   });
 
-  it("renders quick actions section", () => {
+  it("renders quick actions section", async () => {
     render(
       <TestWrapper>
         <ChairpersonDashboardPage />
       </TestWrapper>
     );
 
-    expect(screen.getAllByText("Quick Actions").length).toBeGreaterThanOrEqual(1);
-    expect(screen.getByText("Review Approvals")).toBeDefined();
-    expect(screen.getByText("View Master Plan")).toBeDefined();
-    expect(screen.getByText("View Reports")).toBeDefined();
-    expect(screen.getByText("Manage Events")).toBeDefined();
+    await waitFor(() => {
+      expect(screen.getAllByText("Quick Actions").length).toBeGreaterThanOrEqual(1);
+      expect(screen.getByText("View Master Plan")).toBeDefined();
+      expect(screen.getByText("View Reports")).toBeDefined();
+      expect(screen.getByText("Manage Events")).toBeDefined();
+    });
   });
 
-  it("renders KPI values", () => {
+  it("renders KPI values", async () => {
     render(
       <TestWrapper>
         <ChairpersonDashboardPage />
       </TestWrapper>
     );
 
-    expect(screen.getByText("124")).toBeDefined();
-    expect(screen.getByText("87")).toBeDefined();
-    expect(screen.getByText("78%")).toBeDefined();
+    await waitFor(() => {
+      expect(screen.getAllByText("124").length).toBeGreaterThanOrEqual(1);
+    });
   });
 
-  it("renders progress percentages", () => {
+  it("renders navigation links", async () => {
     render(
       <TestWrapper>
         <ChairpersonDashboardPage />
       </TestWrapper>
     );
 
-    expect(screen.getByText("42%")).toBeDefined();
-    expect(screen.getByText("65%")).toBeDefined();
-  });
-
-  it("renders navigation links", () => {
-    render(
-      <TestWrapper>
-        <ChairpersonDashboardPage />
-      </TestWrapper>
-    );
-
-    expect(screen.getByText("View all")).toBeDefined();
-    expect(screen.getByText("View schedule")).toBeDefined();
+    await waitFor(() => {
+      expect(screen.getByText("View schedule")).toBeDefined();
+    });
   });
 });

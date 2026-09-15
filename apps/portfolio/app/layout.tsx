@@ -1,18 +1,27 @@
 import type { Metadata } from "next";
+import { Inter } from "next/font/google";
 import "./globals.css";
+
+const inter = Inter({
+  subsets: ["latin"],
+  variable: "--font-inter",
+  display: "swap",
+});
 
 export const metadata: Metadata = {
   title: "Hitsanat Kifl - Children's Ministry",
-  description: "Children's Ministry Management and Community Portal",
+  description:
+    "Spiritual education and community building at Haramaya University Gibi Gubae - Orthodox Tewahedo Student Association",
+  keywords: ["Hitsanat", "Children's Ministry", "Haramaya University", "Ethiopian Orthodox"],
 };
 
 export default function RootLayout({
   children,
-}: Readonly<{
+}: {
   children: React.ReactNode;
-}>) {
+}) {
   return (
-    <html lang="am" suppressHydrationWarning>
+    <html lang="am" className={inter.variable}>
       <body className="min-h-screen bg-background font-sans antialiased">{children}</body>
     </html>
   );
