@@ -16,9 +16,7 @@ interface UseEventsResult {
 
 export function useEvents(initialFilters: EventFilters = {}): UseEventsResult {
   const [events, setEvents] = useState<Event[]>([]);
-  const [pagination, setPagination] = useState<PaginatedResponse<Event>["pagination"] | null>(
-    null
-  );
+  const [pagination, setPagination] = useState<PaginatedResponse<Event>["pagination"] | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [filters, setFilters] = useState<EventFilters>(initialFilters);
