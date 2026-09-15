@@ -15,7 +15,9 @@ for (const device of mobileViewports) {
     });
 
     test("renders the ministry title", async ({ page }) => {
-      await expect(page.getByRole("heading", { name: "Hitsanat Kifl", exact: true }).first()).toBeVisible();
+      await expect(
+        page.getByRole("heading", { name: "Hitsanat Kifl", exact: true }).first()
+      ).toBeVisible();
     });
 
     test("shows mobile menu button", async ({ page }) => {

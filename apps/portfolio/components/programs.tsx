@@ -48,14 +48,19 @@ export function Programs() {
           {programs.map((program) => {
             const Icon = program.icon;
             return (
-              <Card key={program.code} className="group transition-shadow hover:shadow-elevation-md">
+              <Card
+                key={program.code}
+                className="group transition-shadow hover:shadow-elevation-md"
+              >
                 <CardContent className="p-4">
                   <div className="mb-3 flex h-10 w-10 items-center justify-center rounded-lg bg-primary-muted text-primary transition-colors group-hover:bg-primary group-hover:text-primary-foreground">
                     <Icon className="h-5 w-5" />
                   </div>
                   <h3 className="text-h4 text-foreground">{program.nameEn}</h3>
                   <p className="text-caption text-muted-foreground">{program.nameAm}</p>
-                  <p className="mt-2 text-body-small text-muted-foreground">{program.description}</p>
+                  <p className="mt-2 text-body-small text-muted-foreground">
+                    {program.description}
+                  </p>
                   <a
                     href={`/programs/${program.code}`}
                     className="mt-3 inline-block text-body-small font-medium text-primary hover:underline"

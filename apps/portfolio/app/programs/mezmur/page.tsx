@@ -27,9 +27,9 @@ export default function MezmurPage() {
             <CardContent className="p-6">
               <h2 className="text-h2 text-foreground">About Mezmur</h2>
               <p className="mt-3 text-body text-muted-foreground">
-                The Mezmur sub-department leads the music ministry of the children's group.
-                We teach traditional Ethiopian Orthodox hymns (mezmur), organize choir
-                performances, and prepare children for liturgical participation.
+                The Mezmur sub-department leads the music ministry of the children's group. We teach
+                traditional Ethiopian Orthodox hymns (mezmur), organize choir performances, and
+                prepare children for liturgical participation.
               </p>
             </CardContent>
           </Card>

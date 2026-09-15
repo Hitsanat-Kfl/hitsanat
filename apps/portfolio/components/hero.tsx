@@ -9,7 +9,14 @@ function EthiopianCrossPattern() {
       aria-hidden="true"
     >
       <defs>
-        <pattern id="ethiopian-cross" x="0" y="0" width="60" height="60" patternUnits="userSpaceOnUse">
+        <pattern
+          id="ethiopian-cross"
+          x="0"
+          y="0"
+          width="60"
+          height="60"
+          patternUnits="userSpaceOnUse"
+        >
           <path
             d="M30 10 L30 50 M10 30 L50 30 M20 20 L40 40 M40 20 L20 40"
             stroke="currentColor"
@@ -47,13 +54,9 @@ export function Hero() {
 
         <h1 className="text-display">Hitsanat Kifl</h1>
 
-        <p className="mt-2 text-body-large text-primary-foreground/80">
-          Children&apos;s Ministry
-        </p>
+        <p className="mt-2 text-body-large text-primary-foreground/80">Children&apos;s Ministry</p>
 
-        <p className="mt-1 text-caption text-primary-foreground/60">
-          ዛሬ {formattedEthDate}
-        </p>
+        <p className="mt-1 text-caption text-primary-foreground/60">ዛሬ {formattedEthDate}</p>
 
         <p className="mx-auto mt-4 max-w-2xl text-body text-primary-foreground/80">
           Nurturing spiritual growth and building community at Haramaya University Gibi Gubae

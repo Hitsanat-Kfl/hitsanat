@@ -26,7 +26,9 @@ for (const dept of subDepts) {
     });
 
     test("has header navigation", async ({ page }) => {
-      await expect(page.getByRole("heading", { name: "Hitsanat Kifl", exact: true }).first()).toBeVisible();
+      await expect(
+        page.getByRole("heading", { name: "Hitsanat Kifl", exact: true }).first()
+      ).toBeVisible();
     });
 
     test("has footer", async ({ page }) => {

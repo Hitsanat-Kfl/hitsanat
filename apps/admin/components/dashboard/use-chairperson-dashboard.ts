@@ -48,35 +48,26 @@ export function useChairpersonDashboard(): UseChairpersonDashboardResult {
 
     try {
       // Fetch all data in parallel
-      const [
-        membersRes,
-        childrenRes,
-        eventsRes,
-        announcementsRes,
-        reportsRes,
-        plansRes,
-      ] = await Promise.allSettled([
-        api.get<PaginatedResponse<unknown>>("/members?limit=1"),
-        api.get<PaginatedResponse<unknown>>("/children?limit=1"),
-        api.get<PaginatedResponse<PublicEvent>>("/events?upcoming=true&limit=5"),
-        api.get<PaginatedResponse<PublicAnnouncement>>("/announcements?limit=5"),
-        api.get<PaginatedResponse<PeriodicReport>>("/reports?limit=5"),
-        api.get<PaginatedResponse<AnnualMasterPlan>>("/annual-plans?limit=1"),
-      ]);
+      const [membersRes, childrenRes, eventsRes, announcementsRes, reportsRes, plansRes] =
+        await Promise.allSettled([
+          api.get<PaginatedResponse<unknown>>("/members?limit=1"),
+          api.get<PaginatedResponse<unknown>>("/children?limit=1"),
+          api.get<PaginatedResponse<PublicEvent>>("/events?upcoming=true&limit=5"),
+          api.get<PaginatedResponse<PublicAnnouncement>>("/announcements?limit=5"),
+          api.get<PaginatedResponse<PeriodicReport>>("/reports?limit=5"),
+          api.get<PaginatedResponse<AnnualMasterPlan>>("/annual-plans?limit=1"),
+        ]);
 
       // Extract totals
       const memberTotal =
-        membersRes.status === "fulfilled" ? membersRes.value.pagination?.total ?? 0 : 0;
+        membersRes.status === "fulfilled" ? (membersRes.value.pagination?.total ?? 0) : 0;
       const childTotal =
-        childrenRes.status === "fulfilled" ? childrenRes.value.pagination?.total ?? 0 : 0;
-      const eventsList =
-        eventsRes.status === "fulfilled" ? (eventsRes.value.data ?? []) : [];
+        childrenRes.status === "fulfilled" ? (childrenRes.value.pagination?.total ?? 0) : 0;
+      const eventsList = eventsRes.status === "fulfilled" ? (eventsRes.value.data ?? []) : [];
       const announcementsList =
         announcementsRes.status === "fulfilled" ? (announcementsRes.value.data ?? []) : [];
-      const reportsList =
-        reportsRes.status === "fulfilled" ? (reportsRes.value.data ?? []) : [];
-      const plansList =
-        plansRes.status === "fulfilled" ? (plansRes.value.data ?? []) : [];
+      const reportsList = reportsRes.status === "fulfilled" ? (reportsRes.value.data ?? []) : [];
+      const plansList = plansRes.status === "fulfilled" ? (plansRes.value.data ?? []) : [];
 
       // Build KPIs
       const newKpis: KPIData[] = [
@@ -109,7 +100,11 @@ export function useChairpersonDashboard(): UseChairpersonDashboardResult {
         title: ann.title,
         requester: ann.targetAudience,
         date: ann.publishedAt
-          ? new Date(ann.publishedAt).toLocaleDateString("en-ET", { month: "short", day: "numeric", year: "numeric" })
+          ? new Date(ann.publishedAt).toLocaleDateString("en-ET", {
+              month: "short",
+              day: "numeric",
+              year: "numeric",
+            })
           : "Draft",
         status: ann.publishedAt ? "active" : "pending",
         onView: () => {},
@@ -124,17 +119,33 @@ export function useChairpersonDashboard(): UseChairpersonDashboardResult {
         target: 0,
         status: plan.status === "Completed" ? "success" : "default",
       }));
-      setProgress(newProgress.length > 0 ? newProgress : [
-        { label: "Annual Plan Completion", percentage: 0, completed: 0, target: 0, status: "default" },
-      ]);
+      setProgress(
+        newProgress.length > 0
+          ? newProgress
+          : [
+              {
+                label: "Annual Plan Completion",
+                percentage: 0,
+                completed: 0,
+                target: 0,
+                status: "default",
+              },
+            ]
+      );
 
       // Build Status Summary
       const completedReports = reportsList.filter((r) => r.status === "Approved").length;
-      const pendingReports = reportsList.filter((r) => r.status === "Draft" || r.status === "Submitted").length;
+      const pendingReports = reportsList.filter(
+        (r) => r.status === "Draft" || r.status === "Submitted"
+      ).length;
       setStatusSummary([
         { status: "completed", label: "Approved Reports", count: completedReports },
         { status: "in-progress", label: "Pending Review", count: pendingReports },
-        { status: "pending", label: "Draft Reports", count: reportsList.length - completedReports - pendingReports },
+        {
+          status: "pending",
+          label: "Draft Reports",
+          count: reportsList.length - completedReports - pendingReports,
+        },
       ]);
 
       // Build Events
@@ -142,7 +153,10 @@ export function useChairpersonDashboard(): UseChairpersonDashboardResult {
         id: evt.id,
         title: evt.title,
         date: evt.eventDate,
-        time: new Date(evt.eventDate).toLocaleTimeString("en-ET", { hour: "numeric", minute: "2-digit" }),
+        time: new Date(evt.eventDate).toLocaleTimeString("en-ET", {
+          hour: "numeric",
+          minute: "2-digit",
+        }),
         location: evt.venue ?? "TBD",
         responsibleRole: "Events Committee",
       }));

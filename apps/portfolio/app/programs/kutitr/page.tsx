@@ -27,9 +27,9 @@ export default function KutitrPage() {
             <CardContent className="p-6">
               <h2 className="text-h2 text-foreground">About Kutitr</h2>
               <p className="mt-3 text-body text-muted-foreground">
-                The Kutitr sub-department organizes children into age-based groups (Kutr 1 and
-                Kutr 2) for pastoral care, mentorship, and attendance tracking. Each group has
-                dedicated leaders who provide spiritual guidance and monitor children's progress.
+                The Kutitr sub-department organizes children into age-based groups (Kutr 1 and Kutr
+                2) for pastoral care, mentorship, and attendance tracking. Each group has dedicated
+                leaders who provide spiritual guidance and monitor children's progress.
               </p>
             </CardContent>
           </Card>

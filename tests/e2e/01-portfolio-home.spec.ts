@@ -6,7 +6,9 @@ test.describe("Portfolio Home Page", () => {
   });
 
   test("renders the ministry title and tagline", async ({ page }) => {
-    await expect(page.getByRole("heading", { name: "Hitsanat Kifl", exact: true }).first()).toBeVisible();
+    await expect(
+      page.getByRole("heading", { name: "Hitsanat Kifl", exact: true }).first()
+    ).toBeVisible();
     await expect(page.getByText("Children's Ministry").first()).toBeVisible();
   });
 

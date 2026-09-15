@@ -28,8 +28,8 @@ export default function EkdPage() {
               <h2 className="text-h2 text-foreground">About Ekd</h2>
               <p className="mt-3 text-body text-muted-foreground">
                 The Ekd sub-department focuses on structured biblical studies and scripture
-                memorization. We develop lesson plans, organize recitation competitions, and
-                track children's progress in learning the Word of God.
+                memorization. We develop lesson plans, organize recitation competitions, and track
+                children's progress in learning the Word of God.
               </p>
             </CardContent>
           </Card>

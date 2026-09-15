@@ -13,17 +13,17 @@ export function About() {
               <p>
                 Hitsanat Kifl is the children's ministry of the Orthodox Tewahedo Students'
                 Association at Haramaya University Gibi Gubae. We are dedicated to nurturing
-                spiritual growth and building community among children through traditional
-                Orthodox education.
+                spiritual growth and building community among children through traditional Orthodox
+                education.
               </p>
               <p>
-                Our ministry follows the rich traditions of the Ethiopian Orthodox Tewahedo
-                Church, incorporating prayer, hymns, scripture study, and community service
-                into our programs.
+                Our ministry follows the rich traditions of the Ethiopian Orthodox Tewahedo Church,
+                incorporating prayer, hymns, scripture study, and community service into our
+                programs.
               </p>
               <p>
-                We serve children from various backgrounds, providing them with a strong
-                spiritual foundation while fostering a sense of belonging and community.
+                We serve children from various backgrounds, providing them with a strong spiritual
+                foundation while fostering a sense of belonging and community.
               </p>
             </div>
           </div>
@@ -33,9 +33,9 @@ export function About() {
               <CardContent className="p-4">
                 <h3 className="text-h3 text-foreground">Our Mission</h3>
                 <p className="mt-2 text-body text-muted-foreground">
-                  To nurture spiritual growth and build community among children through
-                  Orthodox Tewahedo education, preserving our sacred traditions while
-                  preparing the next generation of faithful believers.
+                  To nurture spiritual growth and build community among children through Orthodox
+                  Tewahedo education, preserving our sacred traditions while preparing the next
+                  generation of faithful believers.
                 </p>
               </CardContent>
             </Card>

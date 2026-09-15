@@ -20,7 +20,15 @@ export function Header() {
       <div className="mx-auto flex h-11 max-w-6xl items-center justify-between px-4">
         <Link href="/" className="flex items-center gap-2">
           <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary text-primary-foreground">
-            <svg viewBox="0 0 24 24" className="h-4 w-4" fill="none" stroke="currentColor" strokeWidth="2" role="img" aria-label="Hitsanat Kifl logo">
+            <svg
+              viewBox="0 0 24 24"
+              className="h-4 w-4"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2"
+              role="img"
+              aria-label="Hitsanat Kifl logo"
+            >
               <path d="M12 2v20M2 12h20M12 2l4 4M12 2l-4 4M12 22l4-4M12 22l-4-4M2 12l4 4M2 12l4-4M22 12l-4 4M22 12l-4-4" />
             </svg>
           </div>
@@ -42,7 +50,9 @@ export function Header() {
           ))}
           <Button
             size="sm"
-            onClick={() => document.getElementById("contact")?.scrollIntoView({ behavior: "smooth" })}
+            onClick={() =>
+              document.getElementById("contact")?.scrollIntoView({ behavior: "smooth" })
+            }
           >
             Get Involved
           </Button>

@@ -27,8 +27,8 @@ export default function TimihrtPage() {
             <CardContent className="p-6">
               <h2 className="text-h2 text-foreground">About Timihrt</h2>
               <p className="mt-3 text-body text-muted-foreground">
-                The Timihrt sub-department is responsible for the spiritual education of children
-                in the ministry. We develop and deliver curriculum that covers biblical stories,
+                The Timihrt sub-department is responsible for the spiritual education of children in
+                the ministry. We develop and deliver curriculum that covers biblical stories,
                 Orthodox traditions, prayer practices, and moral teachings.
               </p>
             </CardContent>
