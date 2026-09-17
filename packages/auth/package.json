@@ -22,8 +22,7 @@
   "dependencies": {
     "@repo/database": "workspace:*",
     "@repo/permissions": "workspace:*",
-    "better-auth": "^1.2.8",
-    "drizzle-orm": "^0.39.3",
+    "@supabase/supabase-js": "^2.49.4",
     "express": "^4.21.2"
   },
   "devDependencies": {

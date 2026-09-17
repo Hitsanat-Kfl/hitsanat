@@ -1,5 +1,18 @@
-import type { AnnualMasterPlan, PlanActivity, PlanGoal } from "@repo/domain";
-import { PlanStatus, WeightCalculationEngine } from "@repo/domain";
+import type {
+  AnnualMasterPlan,
+  PlanActivity,
+  PlanGoal,
+  PlanStatus as PlanStatusEnum,
+} from "@repo/domain";
+import { WeightCalculationEngine } from "../../infrastructure/engines/weight-calculation.js";
+
+const PlanStatus = {
+  DRAFT: "Draft",
+  DISTRIBUTED: "Distributed",
+  ACTIVE: "Active",
+  COMPLETED: "Completed",
+  ARCHIVED: "Archived",
+} as const;
 import type { PlanningRepository } from "../../domain/repositories/planning.repository.js";
 
 interface CreateAnnualPlanInput {
@@ -55,7 +68,7 @@ export class CreateAnnualPlanUseCase {
       totalBudget: batchResult.totals.budget,
       totalPeople: batchResult.totals.people,
       totalTime: batchResult.totals.time,
-      status: PlanStatus.DRAFT,
+      status: PlanStatus.DRAFT as PlanStatusEnum,
       createdBy: input.createdBy,
     });
 

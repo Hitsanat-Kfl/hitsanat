@@ -1,19 +1,46 @@
-import { boolean, pgTable, text, timestamp, uuid, varchar } from "drizzle-orm/pg-core";
+import { boolean, pgTable, text, timestamp, unique, uuid, varchar } from "drizzle-orm/pg-core";
+import { members } from "./identity.js";
 
 /**
- * Users table for Better Auth
- * Stores leadership accounts only (ADR-0007: regular members have no accounts)
+ * Leadership roles that REQUIRE a linked member (BR-007).
  */
-export const users = pgTable("users", {
-  id: uuid("id").primaryKey().defaultRandom(),
-  name: varchar("name", { length: 255 }).notNull(),
-  email: varchar("email", { length: 255 }).notNull().unique(),
-  emailVerified: boolean("email_verified").default(false).notNull(),
-  image: text("image"),
-  role: varchar("role", { length: 64 }).default("MEMBER_REGULAR").notNull(),
-  createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
-  updatedAt: timestamp("updated_at", { withTimezone: true }).defaultNow().notNull(),
-});
+export const LEADERSHIP_ROLES = [
+  "SUPER_ADMIN",
+  "CHAIRPERSON",
+  "SUB_CHAIRPERSON",
+  "SECRETARY",
+] as const;
+
+export type LeadershipRole = (typeof LEADERSHIP_ROLES)[number];
+
+/**
+ * Users table
+ * Stores leadership accounts only (ADR-0007: regular members have no accounts).
+ *
+ * BR-007: Every leadership account MUST be linked to a registered member
+ * via `memberId`. Enforced by the `users_leadership_requires_member_check`
+ * constraint in migration 0003.
+ */
+export const users = pgTable(
+  "users",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    name: varchar("name", { length: 255 }).notNull(),
+    email: varchar("email", { length: 255 }).notNull().unique(),
+    emailVerified: boolean("email_verified").default(false).notNull(),
+    image: text("image"),
+    role: varchar("role", { length: 64 }).default("MEMBER_REGULAR").notNull(),
+    memberId: uuid("member_id").references(() => members.id),
+    createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
+    updatedAt: timestamp("updated_at", { withTimezone: true }).defaultNow().notNull(),
+  },
+  (table) => [
+    // One user account per member (supports BR-007 leadership linking)
+    {
+      usersMemberIdUnique: unique().on(table.memberId),
+    },
+  ]
+);
 
 export type User = typeof users.$inferSelect;
 export type NewUser = typeof users.$inferInsert;
@@ -44,6 +71,7 @@ export const accounts = pgTable("accounts", {
   id: uuid("id").primaryKey().defaultRandom(),
   accountId: varchar("account_id", { length: 255 }).notNull(),
   providerId: varchar("provider_id", { length: 255 }).notNull(),
+  issuer: varchar("issuer", { length: 255 }),
   userId: uuid("user_id")
     .notNull()
     .references(() => users.id, { onDelete: "cascade" }),

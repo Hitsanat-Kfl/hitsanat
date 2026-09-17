@@ -1,5 +1,11 @@
 import type { ProgramSessionAttendance } from "@repo/domain";
-import { AttendanceStatus } from "@repo/domain";
+
+const AttendanceStatus = {
+  EXPECTED: "Expected",
+  PRESENT: "Present",
+  ABSENT: "Absent",
+  EXCUSED: "Excused",
+} as const;
 import type { AttendanceRepository } from "../../domain/repositories/attendance.repository.js";
 
 export class VerifyAttendanceUseCase {
@@ -15,7 +21,7 @@ export class VerifyAttendanceUseCase {
       AttendanceStatus.ABSENT,
       AttendanceStatus.EXCUSED,
     ];
-    if (!validStatuses.includes(status as AttendanceStatus)) {
+    if (!(validStatuses as readonly string[]).includes(status)) {
       throw new Error(`Invalid status: ${status}. Must be one of: ${validStatuses.join(", ")}`);
     }
 
@@ -35,7 +41,7 @@ export class VerifyAttendanceUseCase {
       AttendanceStatus.EXCUSED,
     ];
     for (const record of records) {
-      if (!validStatuses.includes(record.status as AttendanceStatus)) {
+      if (!(validStatuses as readonly string[]).includes(record.status)) {
         throw new Error(
           `Invalid status: ${record.status}. Must be one of: ${validStatuses.join(", ")}`
         );

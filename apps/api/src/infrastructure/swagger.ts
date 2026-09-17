@@ -149,7 +149,7 @@ export const openApiSpec = {
           memberId: { type: "string", format: "uuid" },
           memberName: { type: "string" },
           christianName: { type: "string" },
-          role: { type: "string", example: "LEAD" },
+          role: { type: "string", example: "Leader" },
           isPrimary: { type: "boolean" },
           assignedAt: { type: "string", format: "date-time" },
         },

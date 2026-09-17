@@ -50,8 +50,8 @@ graph TD
 
 | Role Identifier | Role Level | Assigned Scope | Key System Responsibilities |
 | :--- | :--- | :--- | :--- |
-| `SUPER_ADMIN` | System | Global (`*`) | Full system administration, database maintenance, user permissions. |
-| `CHAIRPERSON` | Ministry Executive | Global (`*`) | Full operational visibility, plan approvals, final report sign-offs. |
+| `SUPER_ADMIN` | System | Global (`*`) | Full system administration, database maintenance, leader user account creation & permission management. |
+| `CHAIRPERSON` | Ministry Executive | Global (`*`) | Full operational visibility, leader user account creation/role updates, plan approvals, final report sign-offs. |
 | `SUB_CHAIRPERSON` | Ministry Executive | Global (`*`) | Assists Chairperson; delegated cross-departmental oversight. |
 | `SECRETARY` | Ministry Executive | Administrative Core | Member registration, child/parent registration, family allocation. |
 | `SUB_DEPT_LEADER` | Sub-Department | `Timihrt` | Curriculum, teacher assignments, academic score management. |
@@ -60,7 +60,7 @@ graph TD
 | `SUB_DEPT_LEADER` | Sub-Department | `Ekd` | Master annual plan, event creation, progress aggregation, reports. |
 | `SUB_DEPT_LEADER` | Sub-Department | `Kinetibeb` | Religious film library, puppet theater, Yeteret Abat schedules. |
 | `SUB_DEPT_SECRETARY` | Sub-Department | Department Scope | Records notes, assists leader in score/attendance/progress entry. |
-| `REGULAR_MEMBER` | Member | None | **No admin portal access**. Interacts via Public Website & Telegram. |
+| `MEMBER_REGULAR` | Member | None | **No admin portal access**. Interacts via Public Website & Telegram. |
 
 ---
 
@@ -93,8 +93,19 @@ The matrix below defines permissions across all API resources: `C` (Create), `R`
 ## 4. API Authorization Guard Implementation
 
 Permission evaluation at the Express controller level uses two composable middlewares:
-1. `requireAuth()`: Verifies a valid Better Auth session.
+1. `requireAuth()`: Verifies a valid Supabase JWT session (cookie or `Authorization: Bearer` header).
 2. `requireScopePermission(resource, action, subDeptScope?)`:
    - Checks if the user holds a Global Executive Role (`SUPER_ADMIN`, `CHAIRPERSON`, `SUB_CHAIRPERSON`).
    - If not global, checks if the user holds an active leadership role for the targeted sub-department (`subDeptScope`).
    - If authorization fails, returns `HTTP 403 Forbidden` with error code `FORBIDDEN_INSUFFICIENT_SCOPE`.
+
+### 4.1 One Leadership Post Rule (BR-009)
+
+A member holds **at most one leadership post** across the whole organization:
+
+- Executive roles (`SUPER_ADMIN`, `CHAIRPERSON`, `SUB_CHAIRPERSON`, `SECRETARY`) are mutually exclusive with each other.
+- An executive role excludes sub-department `Leader`/`Sub-Leader` posts, and vice versa.
+- A member may be `Leader` or `Sub-Leader` of **at most one** sub-department.
+- Plain sub-department `Member` and sub-department `Secretary` roles may be held in any number of departments regardless of leadership status.
+
+Enforced in the users module use-cases and by a database trigger (`0004_one_leadership_post.sql`).

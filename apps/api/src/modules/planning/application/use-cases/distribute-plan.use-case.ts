@@ -1,5 +1,13 @@
-import type { PlanDistribution } from "@repo/domain";
-import { PlanDistributionStatus } from "@repo/domain";
+import type {
+  PlanDistribution,
+  PlanDistributionStatus as PlanDistributionStatusEnum,
+} from "@repo/domain";
+
+const PlanDistributionStatus = {
+  ASSIGNED: "Assigned",
+  IN_PROGRESS: "In_Progress",
+  COMPLETED: "Completed",
+} as const;
 import type { PlanningRepository } from "../../domain/repositories/planning.repository.js";
 
 interface DistributePlanInput {
@@ -22,7 +30,7 @@ export class DistributePlanUseCase {
       const distribution = await this.repo.createDistribution({
         planActivityId: input.activityId,
         subDepartmentId,
-        status: PlanDistributionStatus.ASSIGNED,
+        status: PlanDistributionStatus.ASSIGNED as PlanDistributionStatusEnum,
         assignedAt: new Date(),
       });
       distributions.push(distribution);

@@ -2,16 +2,21 @@ import { readFileSync } from "node:fs";
 import { resolve } from "node:path";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
+// The auth middleware imports @repo/database for resolveUserScopes — mock it.
+vi.mock("@repo/database", () => ({
+  getDb: vi.fn(),
+}));
+
 describe("RBAC Middleware Structure", () => {
   it("should export requireAuth and requireScopePermission functions from middleware.ts", () => {
     const middlewarePath = resolve(__dirname, "../middleware.ts");
     const content = readFileSync(middlewarePath, "utf-8");
-    expect(content).toContain("export function requireAuth()");
-    expect(content).toContain("export function requireScopePermission(");
+    expect(content).toContain("requireAuth");
+    expect(content).toContain("requireScopePermission");
   });
 
   it("should have RequireScopePermissionOptions interface", () => {
-    const middlewarePath = resolve(__dirname, "../middleware.ts");
+    const middlewarePath = resolve(__dirname, "../index.ts");
     const content = readFileSync(middlewarePath, "utf-8");
     expect(content).toContain("allowedGlobalRoles");
     expect(content).toContain("requiredSubDeptCode");
@@ -19,53 +24,53 @@ describe("RBAC Middleware Structure", () => {
   });
 
   it("should return 401 when no session token is provided", () => {
-    const middlewarePath = resolve(__dirname, "../middleware.ts");
-    const content = readFileSync(middlewarePath, "utf-8");
-    expect(content).toContain("status(401)");
+    const indexPath = resolve(__dirname, "../index.ts");
+    const content = readFileSync(indexPath, "utf-8");
+    expect(content).toContain("401");
     expect(content).toContain("AUTH_UNAUTHORIZED");
     expect(content).toContain("Authentication required");
   });
 
   it("should return 403 for insufficient permissions", () => {
-    const middlewarePath = resolve(__dirname, "../middleware.ts");
-    const content = readFileSync(middlewarePath, "utf-8");
-    expect(content).toContain("status(403)");
+    const indexPath = resolve(__dirname, "../index.ts");
+    const content = readFileSync(indexPath, "utf-8");
+    expect(content).toContain("403");
     expect(content).toContain("FORBIDDEN_INSUFFICIENT_SCOPE");
   });
 
   it("should allow SUPER_ADMIN to bypass all permission checks", () => {
-    const middlewarePath = resolve(__dirname, "../middleware.ts");
-    const content = readFileSync(middlewarePath, "utf-8");
+    const indexPath = resolve(__dirname, "../index.ts");
+    const content = readFileSync(indexPath, "utf-8");
     expect(content).toContain("SUPER_ADMIN");
     expect(content).toContain("user.globalRoles.includes");
   });
 
   it("should check sub-department scoped roles", () => {
-    const middlewarePath = resolve(__dirname, "../middleware.ts");
-    const content = readFileSync(middlewarePath, "utf-8");
+    const indexPath = resolve(__dirname, "../index.ts");
+    const content = readFileSync(indexPath, "utf-8");
     expect(content).toContain("subDeptRoles.find");
     expect(content).toContain("subDepartmentCode");
   });
 
-  it("should extract token from cookie or Authorization header", () => {
-    const middlewarePath = resolve(__dirname, "../middleware.ts");
-    const content = readFileSync(middlewarePath, "utf-8");
+  it("should extract token from Supabase cookie or Authorization header", () => {
+    const indexPath = resolve(__dirname, "../index.ts");
+    const content = readFileSync(indexPath, "utf-8");
     expect(content).toContain("extractToken");
-    expect(content).toContain("better-auth.session_token");
+    expect(content).toContain("-auth-token");
     expect(content).toContain("Bearer ");
   });
 
-  it("should resolve user scopes from database", () => {
-    const middlewarePath = resolve(__dirname, "../middleware.ts");
-    const content = readFileSync(middlewarePath, "utf-8");
+  it("should resolve user scopes from database via member link (BR-007)", () => {
+    const indexPath = resolve(__dirname, "../index.ts");
+    const content = readFileSync(indexPath, "utf-8");
     expect(content).toContain("resolveUserScopes");
     expect(content).toContain("db.query.users.findFirst");
-    expect(content).toContain("db.query.subDepartmentMembers.findMany");
+    expect(content).toContain("user.memberId");
   });
 
   it("should set sessionUser on request object", () => {
-    const middlewarePath = resolve(__dirname, "../middleware.ts");
-    const content = readFileSync(middlewarePath, "utf-8");
+    const indexPath = resolve(__dirname, "../index.ts");
+    const content = readFileSync(indexPath, "utf-8");
     expect(content).toContain("req.sessionUser = sessionUser");
   });
 });
@@ -83,12 +88,89 @@ describe("SessionUser Types", () => {
     expect(content).toContain("subDepartmentCode: string");
   });
 
-  it("should define AuthContext interface", () => {
-    const typesPath = resolve(__dirname, "../types.ts");
-    const content = readFileSync(typesPath, "utf-8");
-    expect(content).toContain("AuthContext");
-    expect(content).toContain("user: User");
-    expect(content).toContain("session: Session");
-    expect(content).toContain("sessionUser: SessionUser");
+  it("should declare sessionUser on Express Request", () => {
+    const indexPath = resolve(__dirname, "../index.ts");
+    const content = readFileSync(indexPath, "utf-8");
+    expect(content).toContain("sessionUser?: SessionUser");
+  });
+});
+
+describe("RBAC Middleware Behavior", () => {
+  let mockReq: {
+    headers: Record<string, string>;
+    cookies?: Record<string, string>;
+    sessionUser?: unknown;
+  };
+  let mockRes: {
+    status: ReturnType<typeof vi.fn>;
+    json: ReturnType<typeof vi.fn>;
+  };
+  let mockNext: ReturnType<typeof vi.fn>;
+
+  beforeEach(() => {
+    vi.clearAllMocks();
+    mockReq = { headers: {} };
+    mockRes = {
+      status: vi.fn().mockReturnThis(),
+      json: vi.fn().mockReturnThis(),
+    };
+    mockNext = vi.fn();
+  });
+
+  it("should return 401 when sessionUser is missing in requireScopePermission", async () => {
+    const { requireScopePermission } = await import("../index.js");
+    const middleware = requireScopePermission({ allowedGlobalRoles: ["CHAIRPERSON"] });
+
+    middleware(mockReq as never, mockRes as never, mockNext);
+
+    expect(mockRes.status).toHaveBeenCalledWith(401);
+    expect(mockNext).not.toHaveBeenCalled();
+  });
+
+  it("should allow SUPER_ADMIN to bypass scope checks", async () => {
+    const { requireScopePermission } = await import("../index.js");
+    const middleware = requireScopePermission({ allowedGlobalRoles: ["CHAIRPERSON"] });
+
+    const req = {
+      ...mockReq,
+      sessionUser: {
+        id: "u1",
+        email: "a@b.c",
+        name: "Admin",
+        role: "SUPER_ADMIN",
+        memberId: "m1",
+        globalRoles: ["SUPER_ADMIN"],
+        subDeptRoles: [],
+      },
+    };
+
+    middleware(req as never, mockRes as never, mockNext);
+
+    expect(mockNext).toHaveBeenCalled();
+  });
+
+  it("should deny non-leadership access (ADR-0007)", async () => {
+    const { requireScopePermission } = await import("../index.js");
+    const middleware = requireScopePermission({
+      allowedGlobalRoles: ["CHAIRPERSON", "SECRETARY"],
+    });
+
+    const req = {
+      ...mockReq,
+      sessionUser: {
+        id: "u1",
+        email: "m@b.c",
+        name: "Member",
+        role: "MEMBER_REGULAR",
+        memberId: null,
+        globalRoles: [],
+        subDeptRoles: [],
+      },
+    };
+
+    middleware(req as never, mockRes as never, mockNext);
+
+    expect(mockRes.status).toHaveBeenCalledWith(403);
+    expect(mockNext).not.toHaveBeenCalled();
   });
 });

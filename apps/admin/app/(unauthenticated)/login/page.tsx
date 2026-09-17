@@ -3,11 +3,13 @@
 import { useRouter, useSearchParams } from "next/navigation";
 import type * as React from "react";
 import { Suspense, useState } from "react";
+import { createClient } from "../../../lib/supabase/client";
 
 function LoginForm() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const redirect = searchParams.get("redirect") || "/";
+  const supabase = createClient();
 
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -20,25 +22,20 @@ function LoginForm() {
     setLoading(true);
 
     try {
-      const response = await fetch("/api/v1/auth/sign-in/email", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ email, password }),
-        credentials: "include",
+      const { data, error: signInError } = await supabase.auth.signInWithPassword({
+        email,
+        password,
       });
 
-      const data = await response.json();
-
-      if (!response.ok) {
-        setError(data.error?.message || "Invalid email or password");
+      if (signInError) {
+        setError(signInError.message || "Invalid email or password");
         return;
       }
 
-      // Success - redirect to intended page
-      router.push(redirect);
-      router.refresh();
+      if (data?.session) {
+        router.push(redirect);
+        router.refresh();
+      }
     } catch {
       setError("An error occurred. Please try again.");
     } finally {
@@ -49,7 +46,6 @@ function LoginForm() {
   return (
     <div className="flex min-h-screen items-center justify-center bg-background px-4">
       <div className="w-full max-w-md space-y-8">
-        {/* Logo and Header */}
         <div className="text-center">
           <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-xl bg-primary text-primary-foreground text-2xl font-bold">
             H
@@ -60,7 +56,6 @@ function LoginForm() {
           </p>
         </div>
 
-        {/* Login Form */}
         <form onSubmit={handleSubmit} className="mt-8 space-y-6">
           {error && (
             <div className="rounded-md bg-destructive/10 p-4 text-sm text-destructive">{error}</div>
@@ -140,7 +135,6 @@ function LoginForm() {
           </button>
         </form>
 
-        {/* Footer */}
         <p className="mt-6 text-center text-xs text-muted-foreground">
           Hitsanat Kifl Children&apos;s Ministry Management System
         </p>

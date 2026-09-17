@@ -1,45 +1,34 @@
-import { randomBytes, scrypt } from "node:crypto";
-import { resolve } from "node:path";
+import { dirname, resolve } from "node:path";
+import { fileURLToPath } from "node:url";
+import { createClient } from "@supabase/supabase-js";
 import dotenv from "dotenv";
 import { sql } from "drizzle-orm";
 import { drizzle } from "drizzle-orm/postgres-js";
 import postgres from "postgres";
 
-// Load .env from packages/database directory
+const __dirname = dirname(fileURLToPath(import.meta.url));
+dotenv.config({ path: resolve(__dirname, "../../../.env") });
 dotenv.config({ path: resolve(__dirname, "../../.env") });
+dotenv.config();
 
 const connectionString =
   process.env.DATABASE_URL || "postgresql://postgres:postgrespassword@localhost:5432/hitsanat_dev";
+const supabaseUrl = process.env.SUPABASE_URL || process.env.NEXT_PUBLIC_SUPABASE_URL;
+const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
 
-// Better Auth scrypt config (matches @better-auth/utils/password)
-const SCRYPT_CONFIG = { N: 16384, r: 16, p: 1, dkLen: 64 };
-
-function hexEncode(bytes: Uint8Array): string {
-  return Array.from(bytes)
-    .map((b) => b.toString(16).padStart(2, "0"))
-    .join("");
+if (!supabaseUrl || !supabaseServiceKey) {
+  console.error("Missing SUPABASE_URL or SUPABASE_SERVICE_ROLE_KEY in .env");
+  console.error("You can find the service role key in Supabase Dashboard > Settings > API");
+  process.exit(1);
 }
 
-async function hashPassword(password: string): Promise<string> {
-  const salt = randomBytes(16);
-  const key = await new Promise<Buffer>((resolve, reject) => {
-    scrypt(
-      password.normalize("NFKC"),
-      salt,
-      SCRYPT_CONFIG.dkLen,
-      {
-        N: SCRYPT_CONFIG.N,
-        r: SCRYPT_CONFIG.r,
-        p: SCRYPT_CONFIG.p,
-        maxmem: 128 * SCRYPT_CONFIG.N * SCRYPT_CONFIG.r * 2,
-      },
-      (err, result) => (err ? reject(err) : resolve(result))
-    );
-  });
-  return `${hexEncode(salt)}:${hexEncode(key)}`;
-}
+// Supabase admin client (bypasses RLS)
+const supabase = createClient(supabaseUrl, supabaseServiceKey);
 
 // ─── Test users for each role ────────────────────────────────────────────────
+// BR-007: every leadership account MUST be linked to a registered member.
+// Members are matched by email; if a matching member does not exist yet,
+// one is created first so the leadership account has a valid member link.
 const users = [
   {
     name: "Super Admin",
@@ -72,6 +61,8 @@ const users = [
     role: "CHAIRPERSON",
   },
   {
+    // Regular members do not need dashboard access (ADR-0007/BR-021);
+    // no member link is required for MEMBER_REGULAR accounts.
     name: "Regular Member",
     email: "member@hitsanat.org",
     password: "password123",
@@ -79,41 +70,134 @@ const users = [
   },
 ];
 
+/**
+ * Ensure a member row exists for the given leader (BR-007).
+ * Matches on phone_number derived from email, falling back to email
+ * lookup via telegram-less full-name matching is unreliable, so we
+ * create a deterministic placeholder member per leader account.
+ */
+async function ensureLeaderMember(
+  db: ReturnType<typeof drizzle>,
+  user: { name: string; email: string; role: string }
+): Promise<string> {
+  // Reuse an existing linked member if one is already assigned
+  const existingLink = await db.execute(sql`
+    SELECT member_id FROM users WHERE email = ${user.email} AND member_id IS NOT NULL LIMIT 1
+  `);
+  const linked = (existingLink as unknown as Array<{ member_id: string }>)[0];
+  if (linked) return linked.member_id;
+
+  // Match a member by their full name
+  const byName = await db.execute(sql`
+    SELECT id, is_active FROM members
+    WHERE full_name = ${user.name} OR CONCAT(full_name, ' ', christian_name) = ${user.name}
+    ORDER BY created_at ASC LIMIT 1
+  `);
+  const memberRow = (byName as unknown as Array<{ id: string; is_active: boolean }>)[0];
+  if (memberRow) {
+    if (!memberRow.is_active) {
+      throw new Error(
+        `BR-007 violation: member "${user.name}" is inactive — cannot link leadership account ${user.email}`
+      );
+    }
+
+    // BR-009: a member who already holds a sub-dept leadership post elsewhere
+    // cannot receive an executive role (or a second leadership post).
+    const conflicts = await db.execute(sql`
+      SELECT sd.code, sdm.role FROM sub_department_members sdm
+      JOIN sub_departments sd ON sd.id = sdm.sub_department_id
+      WHERE sdm.member_id = ${memberRow.id} AND sdm.role IN ('Leader', 'Sub-Leader')
+      LIMIT 1
+    `);
+    const conflict = (conflicts as unknown as Array<{ code: string; role: string }>)[0];
+    if (conflict) {
+      throw new Error(
+        `BR-009 violation: member "${user.name}" already holds ${conflict.role} of ${conflict.code} — cannot also be ${user.role}`
+      );
+    }
+
+    return memberRow.id;
+  }
+
+  // Create a placeholder member so the leadership account is valid (BR-007)
+  const created = await db.execute(sql`
+    INSERT INTO members (full_name, christian_name, phone_number, year_of_study,
+                         academic_department, campus, gender)
+    VALUES (${user.name}, ${user.name}, ${`SEED-${user.email}`}, 'GC', 'Leadership', 'Main Campus', 'Male')
+    RETURNING id
+  `);
+  const newMember = (created as unknown as Array<{ id: string }>)[0];
+  console.log(`  Created placeholder member for leader: ${user.name}`);
+  return newMember.id;
+}
+
 async function seed() {
   const client = postgres(connectionString);
   const db = drizzle(client);
 
-  console.log("Seeding users...\n");
+  console.log("Seeding users via Supabase Auth...\n");
 
   for (const user of users) {
-    const hashedPassword = await hashPassword(user.password);
+    let authUserId: string | undefined;
 
-    // Insert user
-    const result = await db.execute(sql`
-      INSERT INTO users (name, email, email_verified, role)
-      VALUES (${user.name}, ${user.email}, true, ${user.role})
-      ON CONFLICT (email) DO UPDATE SET
-        name = ${user.name},
-        role = ${user.role},
-        updated_at = NOW()
-      RETURNING id
-    `);
+    // Create or update user in Supabase Auth
+    const { data: authData, error: authError } = await supabase.auth.admin.createUser({
+      email: user.email,
+      password: user.password,
+      email_confirm: true,
+      user_metadata: {
+        name: user.name,
+        role: user.role,
+      },
+    });
 
-    const userId = result[0]?.id;
-    if (!userId) {
-      console.log(`  Skipped: ${user.email} (already exists)`);
-      continue;
+    if (authError) {
+      // Find existing user and update password & metadata
+      const { data: listData } = await supabase.auth.admin.listUsers();
+      const existingUser = listData?.users.find((u) => u.email === user.email);
+      if (existingUser) {
+        const { data: updateData, error: updateError } = await supabase.auth.admin.updateUserById(
+          existingUser.id,
+          {
+            password: user.password,
+            email_confirm: true,
+            user_metadata: {
+              name: user.name,
+              role: user.role,
+            },
+          }
+        );
+        if (updateError) {
+          console.error(`  Error updating user ${user.email}:`, updateError.message);
+          continue;
+        }
+        authUserId = updateData.user.id;
+        console.log(`  Updated: ${user.email} (${user.role}) / password: ${user.password}`);
+      } else {
+        console.error(`  Error creating auth user ${user.email}:`, authError.message);
+        continue;
+      }
+    } else {
+      authUserId = authData.user.id;
+      console.log(`  Created: ${user.email} (${user.role}) / password: ${user.password}`);
     }
 
-    // Insert account with hashed password
-    // Better Auth stores accounts with provider_id = "credential" for email/password
-    // Delete existing account first since accounts table may not have a unique constraint on (account_id, provider_id)
-    await db.execute(
-      sql`DELETE FROM accounts WHERE account_id = ${user.email} AND provider_id = 'credential'`
-    );
+    // BR-007: leadership accounts must have a member link
+    const leadershipRoles = ["SUPER_ADMIN", "CHAIRPERSON", "SUB_CHAIRPERSON", "SECRETARY"];
+    const memberId = leadershipRoles.includes(user.role)
+      ? await ensureLeaderMember(db, user)
+      : null;
+
+    // Insert corresponding row in our users table
     await db.execute(sql`
-      INSERT INTO accounts (account_id, provider_id, user_id, password)
-      VALUES (${user.email}, 'credential', ${userId}, ${hashedPassword})
+      INSERT INTO users (id, name, email, email_verified, role, member_id)
+      VALUES (${authUserId}, ${user.name}, ${user.email}, true, ${user.role}, ${memberId})
+      ON CONFLICT (email) DO UPDATE SET
+        id = ${authUserId},
+        name = ${user.name},
+        role = ${user.role},
+        member_id = ${memberId},
+        updated_at = NOW()
     `);
 
     console.log(`  Created: ${user.email} (${user.role}) / password: ${user.password}`);

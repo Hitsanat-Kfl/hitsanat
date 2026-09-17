@@ -39,7 +39,7 @@ docs/
 │   ├── domain-model.md                        # Ubiquitous language, Aggregates, Entities, Value Objects
 │   ├── module-architecture.md                 # Structure of apps/api/src/modules/
 │   ├── data-architecture.md                   # Relational modeling, Gregorian storage, audit logs
-│   ├── security-architecture.md               # Better Auth, Scoped guards, PII protection
+│   ├── security-architecture.md               # Supabase Auth, Scoped guards, PII protection
 │   └── deployment-architecture.md             # Cloud topology (Vercel & Railway)
 │
 ├── database/                                  # Database Design & Modeling
@@ -51,7 +51,7 @@ docs/
 │
 ├── api/                                       # REST API & OpenAPI Specifications
 │   ├── overview.md                            # Conventions, standard envelope, query filtering
-│   ├── authentication.md                      # Better Auth endpoints, session cookies
+│   ├── authentication.md                      # Supabase Auth endpoints, session cookies
 │   ├── authorization.md                       # Scoped RBAC guards (requireScopePermission)
 │   ├── endpoints.md                           # Exhaustive endpoint catalog across all 11 modules
 │   ├── openapi.md                             # Zod-to-OpenAPI generation pipeline
@@ -92,7 +92,7 @@ docs/
 │   ├── architecture.md                        # DDD layers, Presentation/Application/Domain/Infra
 │   ├── express.md                             # Server bootstrap, security middlewares, health check
 │   ├── modules.md                             # Module boundaries & vertical slice organization
-│   ├── authentication.md                      # Better Auth Drizzle adapter & cookie configs
+│   ├── authentication.md                      # Supabase Auth adapter & cookie configs
 │   └── authorization.md                       # Scoped RBAC evaluation algorithm
 │
 ├── testing/                                   # Layered Quality Assurance Strategy
@@ -169,7 +169,7 @@ graph TD
 
     subgraph Backend
         Express[Express.js + TypeScript]
-        BetterAuth[Better Auth]
+        SupabaseAuth[Supabase Auth]
         Drizzle[Drizzle ORM]
         Zod[Zod Validation]
         Swagger[OpenAPI 3.1 / Swagger UI]

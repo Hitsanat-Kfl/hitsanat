@@ -1,5 +1,10 @@
 import type { ProgramSession } from "@repo/domain";
-import { SessionType } from "@repo/domain";
+
+const SessionType = {
+  SATURDAY: "Saturday",
+  SUNDAY: "Sunday",
+} as const;
+type SessionType = (typeof SessionType)[keyof typeof SessionType];
 import type { AttendanceRepository } from "../../domain/repositories/attendance.repository.js";
 
 interface CreateSessionInput {

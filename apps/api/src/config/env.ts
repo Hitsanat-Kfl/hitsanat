@@ -10,10 +10,8 @@ const envSchema = z.object({
   DATABASE_URL: z.string().optional(),
   CORS_ORIGIN: z.string().default("*"),
   API_PREFIX: z.string().default("/api/v1"),
-  AUTH_SECRET: z
-    .string()
-    .min(16, "AUTH_SECRET must be at least 16 characters")
-    .default("dev-secret-change-in-production-16chars"),
+  SUPABASE_URL: z.string().url("SUPABASE_URL must be a valid URL"),
+  SUPABASE_ANON_KEY: z.string().min(1, "SUPABASE_ANON_KEY is required"),
 });
 
 export const env = envSchema.parse({
@@ -22,5 +20,6 @@ export const env = envSchema.parse({
   DATABASE_URL: process.env.DATABASE_URL,
   CORS_ORIGIN: process.env.CORS_ORIGIN,
   API_PREFIX: process.env.API_PREFIX,
-  AUTH_SECRET: process.env.AUTH_SECRET,
+  SUPABASE_URL: process.env.SUPABASE_URL,
+  SUPABASE_ANON_KEY: process.env.SUPABASE_ANON_KEY,
 });
