@@ -23,7 +23,8 @@
     "@repo/database": "workspace:*",
     "@repo/permissions": "workspace:*",
     "@supabase/supabase-js": "^2.49.4",
-    "express": "^4.21.2"
+    "express": "^4.21.2",
+    "drizzle-orm": "^0.39.3"
   },
   "devDependencies": {
     "@repo/typescript-config": "workspace:*",
