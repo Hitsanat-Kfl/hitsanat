@@ -8,7 +8,10 @@ import {
   ListUsersUseCase,
   UpdateUserAccountUseCase,
 } from "../application/use-cases/user.use-cases.js";
-import { UserManagementForbiddenError } from "../domain/errors/user.error.js";
+import {
+  LeadershipConflictError,
+  UserManagementForbiddenError,
+} from "../domain/errors/user.error.js";
 import { DrizzleUserRepository } from "../infrastructure/repositories/user.repository.js";
 import { SupabaseAdminAuthService } from "../infrastructure/supabase-admin.service.js";
 
@@ -131,6 +134,8 @@ function handleError(res: Response, error: unknown): void {
     res.status(404).json({ success: false, error: { code: "NOT_FOUND", message } });
   } else if (message.includes("Only SUPER_ADMIN")) {
     res.status(403).json({ success: false, error: { code: "FORBIDDEN", message } });
+  } else if (error instanceof LeadershipConflictError) {
+    res.status(409).json({ success: false, error: { code: "LEADERSHIP_CONFLICT", message } });
   } else if (message.includes("BR-009")) {
     res.status(409).json({ success: false, error: { code: "LEADERSHIP_CONFLICT", message } });
   } else if (

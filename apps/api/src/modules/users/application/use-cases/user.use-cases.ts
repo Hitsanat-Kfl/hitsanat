@@ -2,6 +2,7 @@ import { checkLeadershipExclusivity, type MembershipRow } from "@repo/permission
 import type { CreateUserInput, UpdateUserInput } from "@repo/validation";
 import {
   LeaderMustBeMemberError,
+  LeadershipConflictError,
   type MemberNotFoundError,
   UserAccountExistsError,
   UserNotFoundError,
@@ -45,8 +46,10 @@ function assertLeadershipAllowed(params: {
 }): void {
   const result = checkLeadershipExclusivity(params);
   if (!result.allowed) {
-    throw new LeaderMustBeMemberError(
-      params.proposedMemberships.map((m) => `${m.role}@${m.subDepartmentCode}`).join(", ") || "-",
+    throw new LeadershipConflictError(
+      params.proposedMemberships.map((m) => `${m.role}@${m.subDepartmentCode}`).join(", ") ||
+        params.executiveRole ||
+        "-",
       result.reason
     );
   }

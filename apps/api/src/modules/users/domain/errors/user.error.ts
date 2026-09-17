@@ -18,6 +18,17 @@ export class LeaderMustBeMemberError extends Error {
   }
 }
 
+/**
+ * BR-009: one leadership post per member — the proposed role/assignment
+ * conflicts with a leadership post the member already holds.
+ */
+export class LeadershipConflictError extends Error {
+  constructor(proposed: string, reason: string) {
+    super(`BR-009 violation: cannot assign ${proposed}: ${reason}`);
+    this.name = "LeadershipConflictError";
+  }
+}
+
 export class UserAccountExistsError extends Error {
   constructor(email: string) {
     super(`User account already exists: ${email}`);
