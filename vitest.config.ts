@@ -9,7 +9,7 @@ export default defineConfig({
       {
         // Admin app's tsconfig "@/*" mapping (scoped regex so @repo/* is untouched)
         find: /^@\/(.*)$/,
-        replacement: path.resolve(__dirname, "./apps/admin") + "/$1",
+        replacement: `${path.resolve(__dirname, "./apps/admin")}/$1`,
       },
       {
         find: "@repo/ui/components",

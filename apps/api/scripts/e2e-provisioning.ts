@@ -20,10 +20,20 @@ import { createClient } from "@supabase/supabase-js";
 import postgres from "postgres";
 
 const API = process.env.API_BASE_URL ?? "http://localhost:3001/api/v1";
-const SUPABASE_URL = process.env.SUPABASE_URL!;
-const ANON_KEY = process.env.SUPABASE_ANON_KEY!;
-const SERVICE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY!;
-const DB_URL = process.env.DATABASE_URL!;
+
+function requireEnv(name: string): string {
+  const value = process.env[name];
+  if (!value) {
+    console.error(`Missing required env var: ${name}`);
+    process.exit(1);
+  }
+  return value;
+}
+
+const SUPABASE_URL = requireEnv("SUPABASE_URL");
+const ANON_KEY = requireEnv("SUPABASE_ANON_KEY");
+const SERVICE_KEY = requireEnv("SUPABASE_SERVICE_ROLE_KEY");
+const DB_URL = requireEnv("DATABASE_URL");
 
 const anon = createClient(SUPABASE_URL, ANON_KEY, {
   auth: { autoRefreshToken: false, persistSession: false },
@@ -47,7 +57,11 @@ async function main() {
     password: "password123",
   });
   check("Super admin sign-in", !signInErr && !!signIn.session, signInErr?.message);
-  const adminToken = signIn.session!.access_token;
+  if (!signIn?.session) {
+    console.error("Cannot continue without an admin session.");
+    process.exit(1);
+  }
+  const adminToken = signIn.session.access_token;
 
   const authHeaders = { Authorization: `Bearer ${adminToken}`, "Content-Type": "application/json" };
 
@@ -151,8 +165,14 @@ async function main() {
     email: "member@hitsanat.org",
     password: "password123",
   });
+  const regToken = regSignIn?.session?.access_token;
+  check("MEMBER_REGULAR sign-in", !!regToken);
+  if (!regToken) {
+    console.error("Cannot continue without a member session.");
+    process.exit(1);
+  }
   const regRes = await fetch(`${API}/users`, {
-    headers: { Authorization: `Bearer ${regSignIn!.session.access_token}` },
+    headers: { Authorization: `Bearer ${regToken}` },
   });
   check("MEMBER_REGULAR GET /users → 403", regRes.status === 403, `status=${regRes.status}`);
 
