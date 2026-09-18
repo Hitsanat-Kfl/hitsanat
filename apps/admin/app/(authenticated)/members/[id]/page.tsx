@@ -3,8 +3,8 @@
 import { Button, Card, CardContent, CardHeader, Spinner } from "@repo/ui";
 import { useParams, useRouter } from "next/navigation";
 import { useCallback, useEffect, useState } from "react";
-import { MemberProfileCard } from "../../../../components/members/member-profile-card";
-import { PageShell } from "../../../../components/shell/page-shell";
+import { MemberProfileCard } from "@/features/members";
+import { PageShell } from "@/features/shell";
 import { type ApiResponse, api } from "../../../../lib/api-client";
 import type { Member } from "../../../../lib/types";
 

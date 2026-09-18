@@ -17,8 +17,8 @@ import {
   UpcomingEventsWidget,
 } from "@repo/ui";
 import * as React from "react";
-import { useChairpersonDashboard } from "../../components/dashboard/use-chairperson-dashboard";
-import { PageShell } from "../../components/shell/page-shell";
+import { useChairpersonDashboard } from "@/features/dashboard";
+import { PageShell } from "@/features/shell";
 
 function useCurrentDate(): string {
   const [dateStr, setDateStr] = React.useState("");

@@ -12,8 +12,8 @@ import {
   Spinner,
 } from "@repo/ui";
 import { useState } from "react";
-import { PageShell } from "../../../components/shell/page-shell";
-import { useTransport } from "../../../components/transport/use-transport";
+import { PageShell } from "@/features/shell";
+import { useTransport } from "@/features/transport";
 
 export default function TransportPage() {
   const { sessions, loading, error, refresh } = useTransport();

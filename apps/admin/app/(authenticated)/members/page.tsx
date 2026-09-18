@@ -1,11 +1,11 @@
 "use client";
 
 import { Button } from "@repo/ui";
-import { MemberFiltersBar } from "../../../components/members/member-filters";
-import { MemberPagination } from "../../../components/members/member-pagination";
-import { MemberTable } from "../../../components/members/member-table";
-import { useMembers } from "../../../components/members/use-members";
-import { PageShell } from "../../../components/shell/page-shell";
+import { MemberFiltersBar } from "@/features/members";
+import { MemberPagination } from "@/features/members";
+import { MemberTable } from "@/features/members";
+import { useMembers } from "@/features/members";
+import { PageShell } from "@/features/shell";
 
 export default function MemberListPage() {
   const { members, pagination, loading, error, filters, setFilters, refresh } = useMembers({

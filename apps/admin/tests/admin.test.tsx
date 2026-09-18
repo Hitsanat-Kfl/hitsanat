@@ -1,8 +1,8 @@
 import { render, screen, waitFor } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
 import ChairpersonDashboardPage from "../app/(authenticated)/page.js";
-import { I18nProvider } from "../components/shell/i18n";
-import { ShellProvider } from "../components/shell/shell-context";
+import { I18nProvider } from "../features/shell";
+import { ShellProvider } from "../features/shell";
 
 // Mock the API client
 vi.mock("../lib/api-client", () => ({

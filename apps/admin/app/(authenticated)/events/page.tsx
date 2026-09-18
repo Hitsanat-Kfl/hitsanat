@@ -1,9 +1,9 @@
 "use client";
 
 import { Button, Select } from "@repo/ui";
-import { EventList } from "../../../components/events/event-list";
-import { useEvents } from "../../../components/events/use-events";
-import { PageShell } from "../../../components/shell/page-shell";
+import { EventList } from "@/features/events";
+import { useEvents } from "@/features/events";
+import { PageShell } from "@/features/shell";
 import type { EventType } from "../../../lib/types";
 
 const EVENT_TYPES: { value: string; label: string }[] = [

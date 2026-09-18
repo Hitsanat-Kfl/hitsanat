@@ -2,8 +2,8 @@
 
 import { Badge, Button, Card, CardContent, EmptyState, Spinner } from "@repo/ui";
 import Link from "next/link";
-import { useAttendanceSessions } from "../../../components/attendance/use-attendance";
-import { PageShell } from "../../../components/shell/page-shell";
+import { useAttendanceSessions } from "@/features/attendance";
+import { PageShell } from "@/features/shell";
 import type { SessionStatus } from "../../../lib/types";
 
 const statusVariant: Record<SessionStatus, "default" | "secondary" | "destructive" | "outline"> = {

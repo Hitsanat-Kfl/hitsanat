@@ -1,11 +1,11 @@
 "use client";
 
 import { Button } from "@repo/ui";
-import { ChildFiltersBar } from "../../../components/children/child-filters";
-import { ChildList } from "../../../components/children/child-list";
-import { ChildPagination } from "../../../components/children/child-pagination";
-import { useChildren } from "../../../components/children/use-children";
-import { PageShell } from "../../../components/shell/page-shell";
+import { ChildFiltersBar } from "@/features/children";
+import { ChildList } from "@/features/children";
+import { ChildPagination } from "@/features/children";
+import { useChildren } from "@/features/children";
+import { PageShell } from "@/features/shell";
 
 export default function ChildListPage() {
   const { children, pagination, loading, error, filters, setFilters, refresh } = useChildren({
