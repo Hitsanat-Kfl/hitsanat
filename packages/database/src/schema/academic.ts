@@ -1,4 +1,13 @@
-import { boolean, numeric, pgTable, text, timestamp, uuid, varchar } from "drizzle-orm/pg-core";
+import {
+  boolean,
+  index,
+  numeric,
+  pgTable,
+  text,
+  timestamp,
+  uuid,
+  varchar,
+} from "drizzle-orm/pg-core";
 
 /**
  * Academic Assessments table
@@ -54,18 +63,29 @@ export type NewAnnouncement = typeof announcements.$inferInsert;
 
 /**
  * Audit Logs table
- * Records system actions for security and compliance
+ * Records system actions for security and compliance.
+ * Append-only: the API only ever inserts; `operator_id` is NOT a foreign key
+ * so rows survive auth-user deletion. `resource_type`/`resource_id` identify
+ * the affected record; for user-account actions resource_id holds the auth
+ * user id and target details live in `payload_diff` (never secrets).
  */
-export const auditLogs = pgTable("audit_logs", {
-  id: uuid("id").primaryKey().defaultRandom(),
-  operatorId: uuid("operator_id").notNull(),
-  action: varchar("action", { length: 64 }).notNull(),
-  resourceType: varchar("resource_type", { length: 64 }).notNull(),
-  resourceId: uuid("resource_id").notNull(),
-  payloadDiff: text("payload_diff"),
-  ipAddress: varchar("ip_address", { length: 45 }),
-  timestamp: timestamp("timestamp", { withTimezone: true }).defaultNow().notNull(),
-});
+export const auditLogs = pgTable(
+  "audit_logs",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    operatorId: uuid("operator_id").notNull(),
+    action: varchar("action", { length: 64 }).notNull(),
+    resourceType: varchar("resource_type", { length: 64 }).notNull(),
+    resourceId: uuid("resource_id").notNull(),
+    payloadDiff: text("payload_diff"),
+    ipAddress: varchar("ip_address", { length: 45 }),
+    timestamp: timestamp("timestamp", { withTimezone: true }).defaultNow().notNull(),
+  },
+  (table) => [
+    // Recent-activity queries (dashboard, audit overview) scan newest first.
+    { auditLogsTimestampIdx: index("audit_logs_timestamp_idx").on(table.timestamp) },
+  ]
+);
 
 export type AuditLog = typeof auditLogs.$inferSelect;
 export type NewAuditLog = typeof auditLogs.$inferInsert;

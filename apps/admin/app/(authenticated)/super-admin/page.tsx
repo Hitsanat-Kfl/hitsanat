@@ -1,4 +1,4 @@
-import SuperAdminDashboardPage from "@/features/dashboard/components/super-admin-dashboard";
+import { SuperAdminDashboardPage } from "@/features/dashboard";
 
 export const metadata = {
   title: "Super Admin | Hitsanat Kifl",

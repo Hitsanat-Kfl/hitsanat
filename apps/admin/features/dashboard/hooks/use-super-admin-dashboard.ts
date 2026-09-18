@@ -86,6 +86,12 @@ export function useSuperAdminDashboard(): UseSuperAdminDashboardResult {
   const [healthError, setHealthError] = useState<string | null>(null);
   const [quickActions] = useState<QuickAction[]>([
     {
+      id: "qa-users",
+      label: "Manage Users",
+      onClick: () => window.location.assign("/users"),
+      variant: "outline",
+    },
+    {
       id: "qa-members",
       label: "Manage Members",
       onClick: () => window.location.assign("/members"),

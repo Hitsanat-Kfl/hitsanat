@@ -1,7 +1,11 @@
 import type { Request, Response } from "express";
 import { requireAuth, requireScopePermission } from "@repo/auth";
 import { createUserSchema, resetPasswordSchema, updateUserSchema } from "@repo/validation";
+import { RecordAuditLogUseCase } from "../../audit/application/use-cases/record-audit-log.use-case.js";
+import { DrizzleAuditLogRepository } from "../../audit/infrastructure/repositories/audit-log.repository.js";
 import {
+  type UserAuditContext,
+  type UserAuditSink,
   CreateUserAccountUseCase,
   DeactivateUserUseCase,
   GetUserUseCase,
@@ -16,6 +20,27 @@ import { DrizzleUserRepository } from "../infrastructure/repositories/user.repos
 import { SupabaseAdminAuthService } from "../infrastructure/supabase-admin.service.js";
 
 const userRepository = new DrizzleUserRepository();
+
+/**
+ * Shared best-effort audit sink — records administrative actions in the
+ * audit_logs table. Failures inside the sink never fail the primary action.
+ */
+const recordAuditLog = new RecordAuditLogUseCase(new DrizzleAuditLogRepository());
+
+const auditSink: UserAuditSink = {
+  record: (actor, input) => recordAuditLog.execute(actor, input),
+};
+
+/**
+ * Builds the audit context from the verified session: who performed the
+ * action. Returns undefined when no session user is present (use-cases
+ * treat that as "skip audit", though management endpoints always have one).
+ */
+function auditContext(req: Request): UserAuditContext | undefined {
+  const user = req.sessionUser;
+  if (!user) return undefined;
+  return { auditSink, actor: { id: user.id, email: user.email } };
+}
 
 /**
  * Supabase Admin API adapter (BR-008 credential management).
@@ -43,7 +68,11 @@ export async function createUser(req: Request, res: Response) {
   try {
     assertManagementPermission(req);
     const input = createUserSchema.parse(req.body);
-    const useCase = new CreateUserAccountUseCase(userRepository, supabaseAdminService);
+    const useCase = new CreateUserAccountUseCase(
+      userRepository,
+      supabaseAdminService,
+      auditContext(req)
+    );
     const user = await useCase.execute({ ...input, memberId: input.memberId ?? null });
     res.status(201).json({ success: true, data: user });
   } catch (error) {
@@ -55,7 +84,11 @@ export async function updateUser(req: Request, res: Response) {
   try {
     assertManagementPermission(req);
     const input = updateUserSchema.parse(req.body);
-    const useCase = new UpdateUserAccountUseCase(userRepository, supabaseAdminService);
+    const useCase = new UpdateUserAccountUseCase(
+      userRepository,
+      supabaseAdminService,
+      auditContext(req)
+    );
     const user = await useCase.execute(req.params.id as string, input);
     res.status(200).json({ success: true, data: user });
   } catch (error) {
@@ -69,8 +102,21 @@ export async function resetPassword(req: Request, res: Response) {
     resetPasswordSchema.parse(req.body);
     // 404 early if the local user doesn't exist, before touching Supabase.
     const getUser = new GetUserUseCase(userRepository);
-    await getUser.execute(req.params.id as string);
+    const user = await getUser.execute(req.params.id as string);
     await supabaseAdminService.updatePassword(req.params.id as string, req.body.newPassword);
+
+    if (req.sessionUser) {
+      await recordAuditLog.execute(
+        { id: req.sessionUser.id, email: req.sessionUser.email },
+        {
+          action: "PASSWORD_RESET",
+          resourceType: "user",
+          resourceId: user.id,
+          payloadDiff: `email=${user.email}`,
+        }
+      );
+    }
+
     res.status(200).json({ success: true, message: "Password has been reset" });
   } catch (error) {
     handleError(res, error);
@@ -80,7 +126,11 @@ export async function resetPassword(req: Request, res: Response) {
 export async function deactivateUser(req: Request, res: Response) {
   try {
     assertManagementPermission(req);
-    const useCase = new DeactivateUserUseCase(userRepository, supabaseAdminService);
+    const useCase = new DeactivateUserUseCase(
+      userRepository,
+      supabaseAdminService,
+      auditContext(req)
+    );
     await useCase.execute(req.params.id as string);
     res.status(200).json({ success: true, message: "User deactivated" });
   } catch (error) {

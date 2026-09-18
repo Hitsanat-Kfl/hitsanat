@@ -1,6 +1,7 @@
 "use client";
 
 import {
+  ActivityWidget,
   DashboardContainer,
   DashboardGrid,
   DashboardGridItem,
@@ -10,10 +11,12 @@ import {
   type ListItemData,
   ListWidget,
   QuickActionsWidget,
+  Skeleton,
   type StatusSummaryItem,
   StatusSummaryWidget,
 } from "@repo/ui";
 import { PageShell } from "@/features/shell";
+import { useAuditLogs } from "../hooks/use-audit-logs";
 import { useSuperAdminDashboard, type AdminUserRow } from "../hooks/use-super-admin-dashboard";
 
 // ============================================================
@@ -63,6 +66,14 @@ export default function SuperAdminDashboardPage() {
     error,
     refresh,
   } = useSuperAdminDashboard();
+
+  // LEVEL 4 — real audit trail (no fabricated events; omitted content when unavailable)
+  const {
+    activity,
+    loading: auditLoading,
+    error: auditError,
+    refresh: refreshAudit,
+  } = useAuditLogs();
 
   const attentionItems: ListItemData[] = deactivatedAccounts.map(accountItem);
   const recentItems: ListItemData[] = recentAccounts.map(accountItem);
@@ -186,6 +197,23 @@ export default function SuperAdminDashboardPage() {
                   ? `API health unavailable — ${healthError}.`
                   : "API health information is not available."}
               </output>
+            )}
+          </DashboardSection>
+
+          {/* LEVEL 4 — System Activity (real audit trail) */}
+          <DashboardSection title="System Activity" titleAm="የስርዓት ተግባር">
+            {auditLoading ? (
+              <div className="space-y-2" aria-busy="true">
+                <Skeleton className="h-12 w-full" />
+                <Skeleton className="h-12 w-full" />
+                <Skeleton className="h-12 w-full" />
+              </div>
+            ) : auditError ? (
+              <output className="block rounded-md bg-warning/10 p-4 text-sm text-warning-foreground">
+                {auditError}
+              </output>
+            ) : (
+              <ActivityWidget items={activity} maxItems={6} />
             )}
           </DashboardSection>
 

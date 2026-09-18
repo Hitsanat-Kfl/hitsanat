@@ -61,10 +61,26 @@ const fixtures = vi.hoisted(() => {
     version: "1.0.0",
     environment: "development",
   };
+  const auditPage = {
+    success: true,
+    data: [
+      {
+        id: "a1",
+        operatorId: "u1",
+        action: "USER_CREATED",
+        resourceType: "user",
+        resourceId: "u2",
+        payloadDiff: "email=leader@hitsanat.org; role=SECRETARY",
+        ipAddress: null,
+        timestamp: "2026-03-01T10:00:00Z",
+      },
+    ],
+  };
   const getFixture = (endpoint: string): unknown => {
     if (endpoint.startsWith("/users")) return usersPage;
     if (endpoint === "/sub-departments") return departmentsPage;
     if (endpoint === "/health") return healthPage;
+    if (endpoint.startsWith("/audit-logs")) return auditPage;
     return { success: true, data: [] };
   };
   return { getFixture };
@@ -176,9 +192,20 @@ describe("Super Admin Dashboard", () => {
     await waitFor(() => {
       expect(screen.getAllByText("Quick Actions").length).toBeGreaterThanOrEqual(1);
       // Scoped to buttons — "Sub-Departments" also appears as a nav section label.
+      expect(screen.getByRole("button", { name: "Manage Users" })).toBeDefined();
       expect(screen.getByRole("button", { name: "Manage Members" })).toBeDefined();
       expect(screen.getByRole("button", { name: "Sub-Departments" })).toBeDefined();
       expect(screen.getByRole("button", { name: "View Reports" })).toBeDefined();
+    });
+  });
+
+  it("renders system activity from the audit trail", async () => {
+    renderDashboard();
+
+    await waitFor(() => {
+      expect(screen.getByText("System Activity")).toBeDefined();
+      expect(screen.getByText(/created user account/)).toBeDefined();
+      expect(screen.getByText("leader@hitsanat.org")).toBeDefined();
     });
   });
 

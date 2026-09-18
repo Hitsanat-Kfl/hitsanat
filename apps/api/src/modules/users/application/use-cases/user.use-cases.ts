@@ -33,6 +33,33 @@ export type CreateUserWithMemberInput = Omit<CreateUserInput, "memberId"> & {
   memberId: string | null;
 };
 
+export interface AuditActorInfo {
+  id: string;
+  email: string;
+}
+
+/**
+ * Best-effort audit sink for administrative actions. Implemented by the
+ * audit module's RecordAuditLogUseCase; optional so existing callers and
+ * tests are unaffected. Failures inside the sink never fail the action.
+ */
+export interface UserAuditSink {
+  record(
+    actor: AuditActorInfo,
+    input: {
+      action: string;
+      resourceType: string;
+      resourceId: string;
+      payloadDiff?: string;
+    }
+  ): Promise<void>;
+}
+
+export interface UserAuditContext {
+  auditSink?: UserAuditSink;
+  actor?: AuditActorInfo | null;
+}
+
 /**
  * BR-009 — One Leadership Post Rule.
  * Validates the proposed (role, sub-dept assignments) combination before
@@ -58,7 +85,8 @@ function assertLeadershipAllowed(params: {
 export class CreateUserAccountUseCase {
   constructor(
     private readonly userRepository: UserRepository,
-    private readonly supabaseAdmin: SupabaseAdminService
+    private readonly supabaseAdmin: SupabaseAdminService,
+    private readonly audit?: UserAuditContext
   ) {}
 
   async execute(input: CreateUserWithMemberInput): Promise<UserWithSubDepartments> {
@@ -87,14 +115,26 @@ export class CreateUserAccountUseCase {
       role: input.role,
     });
 
-    return this.userRepository.create(authUserId, input);
+    const created = await this.userRepository.create(authUserId, input);
+
+    if (this.audit?.actor && this.audit.auditSink) {
+      await this.audit.auditSink.record(this.audit.actor, {
+        action: "USER_CREATED",
+        resourceType: "user",
+        resourceId: created.id,
+        payloadDiff: `email=${input.email}; role=${input.role}`,
+      });
+    }
+
+    return created;
   }
 }
 
 export class UpdateUserAccountUseCase {
   constructor(
     private readonly userRepository: UserRepository,
-    private readonly supabaseAdmin: SupabaseAdminService
+    private readonly supabaseAdmin: SupabaseAdminService,
+    private readonly audit?: UserAuditContext
   ) {}
 
   async execute(id: string, input: UpdateUserInput): Promise<UserWithSubDepartments> {
@@ -142,6 +182,15 @@ export class UpdateUserAccountUseCase {
 
     const updated = await this.userRepository.update(id, input);
 
+    if (this.audit?.actor && this.audit.auditSink) {
+      await this.audit.auditSink.record(this.audit.actor, {
+        action: "USER_UPDATED",
+        resourceType: "user",
+        resourceId: updated.id,
+        payloadDiff: `fields=${Object.keys(input).join(",")}`,
+      });
+    }
+
     if (input.subDepartmentIds && updated.memberId) {
       await this.userRepository.setSubDepartments(updated.memberId, input.subDepartmentIds);
       return (await this.userRepository.findById(id)) ?? updated;
@@ -172,7 +221,8 @@ export class GetUserUseCase {
 export class DeactivateUserUseCase {
   constructor(
     private readonly userRepository: UserRepository,
-    private readonly supabaseAdmin: SupabaseAdminService
+    private readonly supabaseAdmin: SupabaseAdminService,
+    private readonly audit?: UserAuditContext
   ) {}
 
   async execute(id: string): Promise<void> {
@@ -182,6 +232,15 @@ export class DeactivateUserUseCase {
     // mark the local mirror as unverified.
     await this.supabaseAdmin.deactivate(user.id);
     await this.userRepository.setEmailVerified(id, false);
+
+    if (this.audit?.actor && this.audit.auditSink) {
+      await this.audit.auditSink.record(this.audit.actor, {
+        action: "USER_DEACTIVATED",
+        resourceType: "user",
+        resourceId: user.id,
+        payloadDiff: `email=${user.email}`,
+      });
+    }
   }
 }
 
