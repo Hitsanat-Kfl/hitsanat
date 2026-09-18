@@ -52,7 +52,7 @@ function roleItems(roleCounts: Array<{ role: string; count: number }>): ListItem
 // Super Admin Dashboard — Phase 11
 // ============================================================
 
-export default function SuperAdminDashboardPage() {
+export function SuperAdminDashboardPage() {
   const {
     kpis,
     deactivatedAccounts,

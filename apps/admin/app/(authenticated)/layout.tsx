@@ -1,7 +1,7 @@
 "use client";
 
 import type * as React from "react";
-import { RouteGuard } from "@/features/auth/route-guard";
+import { RouteGuard } from "@/features/auth";
 import { AppShell } from "@/features/shell";
 
 interface DashboardLayoutProps {
