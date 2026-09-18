@@ -4,6 +4,7 @@ import helmet from "helmet";
 import swaggerUi from "swagger-ui-express";
 import { env } from "./config/index.js";
 import { openApiSpec, swaggerJsonHandler } from "./infrastructure/swagger.js";
+import { auditRouter } from "./modules/audit/presentation/audit.router.js";
 import { announcementsRouter } from "./modules/announcements/presentation/announcements.router.js";
 import { academicRouter } from "./modules/academic/presentation/academic.router.js";
 import { attendanceRouter } from "./modules/attendance/presentation/attendance.router.js";
@@ -54,6 +55,9 @@ export function createApp(): Express {
 
   // User management (BR-008: SUPER_ADMIN & CHAIRPERSON only)
   app.use(`${env.API_PREFIX}/users`, usersRouter);
+
+  // System audit trail (SUPER_ADMIN & CHAIRPERSON only)
+  app.use(`${env.API_PREFIX}/audit-logs`, auditRouter);
 
   // Member routes
   app.use(`${env.API_PREFIX}/members`, memberRouter);

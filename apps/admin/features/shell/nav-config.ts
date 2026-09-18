@@ -12,6 +12,7 @@ import {
   Settings,
   Shield,
   Target,
+  UserCog,
   Users,
 } from "lucide-react";
 
@@ -149,6 +150,23 @@ export const navigationConfig: NavSection[] = [
         section: "programs",
         allowedRoles: ["chairperson", "kutitr-leader", "super-admin"],
         priority: 8,
+      },
+    ],
+  },
+  {
+    id: "administration",
+    label: "Administration",
+    labelAm: "አስተዳደር",
+    items: [
+      {
+        id: "users",
+        label: "User Accounts",
+        labelAm: "የተጠቃሚ መገለጫዎች",
+        icon: UserCog,
+        href: "/users",
+        section: "administration",
+        allowedRoles: ["super-admin"],
+        priority: 11,
       },
     ],
   },
