@@ -5,6 +5,7 @@ import { useEffect } from "react";
 import { useAuthUser } from "@/features/auth";
 import { ChairpersonDashboardPage } from "./chairperson-dashboard-page";
 import { ExecutiveDashboardPage } from "./executive-dashboard-page";
+import { SubChairpersonDashboardPage } from "./sub-chairperson-dashboard";
 import { SuperAdminDashboardPage } from "./super-admin-dashboard";
 
 /** Sub-dept officer posts that grant admin-portal access (ADR-0007). */
@@ -24,8 +25,8 @@ function LoadingPane() {
  * Maps the resolved session roles to dashboards that actually exist:
  * - SUPER_ADMIN        → Super Admin dashboard (system administration)
  * - CHAIRPERSON        → Chairperson dashboard (ministry operations)
- * - SUB_CHAIRPERSON /
- *   SECRETARY          → Executive dashboard (org-wide stats view)
+ * - SUB_CHAIRPERSON    → Vice-Chairperson dashboard (delegated oversight)
+ * - SECRETARY          → Executive dashboard (org-wide stats view)
  * - Sub-dept officer   → redirected to /sub-departments/<code>/dashboard
  *
  * This is presentation-level routing only — the RouteGuard still owns
@@ -63,7 +64,10 @@ export function DashboardRouter() {
   if (globalRoles.includes("CHAIRPERSON")) {
     return <ChairpersonDashboardPage />;
   }
-  if (globalRoles.includes("SUB_CHAIRPERSON") || globalRoles.includes("SECRETARY")) {
+  if (globalRoles.includes("SUB_CHAIRPERSON")) {
+    return <SubChairpersonDashboardPage />;
+  }
+  if (globalRoles.includes("SECRETARY")) {
     return <ExecutiveDashboardPage />;
   }
 

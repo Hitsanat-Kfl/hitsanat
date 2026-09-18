@@ -6,7 +6,17 @@ export { useAuditLogs } from "./hooks/use-audit-logs";
 export { SuperAdminDashboardPage } from "./components/super-admin-dashboard";
 export { ChairpersonDashboardPage } from "./components/chairperson-dashboard-page";
 export { ExecutiveDashboardPage } from "./components/executive-dashboard-page";
+export { SubChairpersonDashboardPage } from "./components/sub-chairperson-dashboard";
 export { DashboardRouter } from "./components/dashboard-router";
+export {
+  useSubChairpersonDashboard,
+  departmentDrillDownHref,
+} from "./hooks/use-sub-chairperson-dashboard";
+export type {
+  DepartmentStatus,
+  ReviewItem,
+  UseSubChairpersonDashboardResult,
+} from "./hooks/use-sub-chairperson-dashboard";
 export type { AuditEntry } from "./hooks/use-audit-logs";
 export type {
   AdminUserRow,
