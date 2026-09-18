@@ -1,24 +1,56 @@
 import { render, screen, waitFor } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
-import ChairpersonDashboardPage from "../app/(authenticated)/page.js";
-import { I18nProvider } from "../features/shell";
-import { ShellProvider } from "../features/shell";
+import { AuthUserProvider } from "../features/auth";
+import { ChairpersonDashboardPage, DashboardRouter } from "../features/dashboard";
+import { I18nProvider, ShellProvider } from "../features/shell";
 
 // Mock the API client
 vi.mock("../lib/api-client", () => ({
   api: {
-    get: vi.fn().mockResolvedValue({
-      success: true,
-      data: [],
-      pagination: { page: 1, limit: 1, total: 124, totalPages: 1 },
+    get: vi.fn().mockImplementation((endpoint: string) => {
+      if (endpoint.startsWith("/users")) {
+        return Promise.resolve({
+          success: true,
+          data: [],
+          pagination: { page: 1, limit: 1, total: 124, totalPages: 1 },
+        });
+      }
+      return Promise.resolve({
+        success: true,
+        data: [],
+        pagination: { page: 1, limit: 1, total: 124, totalPages: 1 },
+      });
     }),
   },
 }));
 
-function TestWrapper({ children }: { children: React.ReactNode }) {
+vi.mock("next/navigation", () => ({
+  useRouter: () => ({ push: vi.fn(), replace: vi.fn() }),
+  usePathname: () => "/",
+}));
+
+const chairpersonUser = {
+  id: "u1",
+  email: "chair@hitsanat.org",
+  name: "Chairperson",
+  role: "CHAIRPERSON",
+  memberId: null,
+  globalRoles: ["CHAIRPERSON"],
+  subDeptRoles: [],
+};
+
+function TestWrapper({
+  children,
+  user = chairpersonUser,
+}: {
+  children: React.ReactNode;
+  user?: Parameters<typeof AuthUserProvider>[0]["user"];
+}) {
   return (
     <I18nProvider>
-      <ShellProvider>{children}</ShellProvider>
+      <ShellProvider>
+        <AuthUserProvider user={user}>{children}</AuthUserProvider>
+      </ShellProvider>
     </I18nProvider>
   );
 }
@@ -158,6 +190,74 @@ describe("Chairperson Dashboard", () => {
 
     await waitFor(() => {
       expect(screen.getByText("View schedule")).toBeDefined();
+    });
+  });
+});
+
+describe("DashboardRouter", () => {
+  it("renders the Super Admin dashboard for SUPER_ADMIN", async () => {
+    render(
+      <TestWrapper
+        user={{
+          ...chairpersonUser,
+          role: "SUPER_ADMIN",
+          globalRoles: ["SUPER_ADMIN"],
+        }}
+      >
+        <DashboardRouter />
+      </TestWrapper>
+    );
+
+    await waitFor(() => {
+      expect(screen.getByText("Super Admin Dashboard")).toBeDefined();
+    });
+  });
+
+  it("renders the Chairperson dashboard for CHAIRPERSON", async () => {
+    render(
+      <TestWrapper>
+        <DashboardRouter />
+      </TestWrapper>
+    );
+
+    await waitFor(() => {
+      expect(screen.getAllByText("Chairperson Dashboard").length).toBeGreaterThanOrEqual(1);
+    });
+  });
+
+  it("renders the Executive dashboard for SECRETARY", async () => {
+    render(
+      <TestWrapper
+        user={{
+          ...chairpersonUser,
+          role: "SECRETARY",
+          globalRoles: ["SECRETARY"],
+        }}
+      >
+        <DashboardRouter />
+      </TestWrapper>
+    );
+
+    await waitFor(() => {
+      expect(screen.getByText("Executive Dashboard")).toBeDefined();
+    });
+  });
+
+  it("renders the Executive dashboard for SUB_CHAIRPERSON", async () => {
+    render(
+      <TestWrapper
+        user={{
+          ...chairpersonUser,
+          role: "SUB_CHAIRPERSON",
+          globalRoles: ["SUB_CHAIRPERSON"],
+        }}
+      >
+        <DashboardRouter />
+      </TestWrapper>
+    );
+
+    await waitFor(() => {
+      expect(screen.getByText("Executive Dashboard")).toBeDefined();
     });
   });
 });

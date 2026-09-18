@@ -1,11 +1,11 @@
 "use client";
 
 import { usePathname, useRouter } from "next/navigation";
-import type * as React from "react";
+import * as React from "react";
 import { useEffect, useState } from "react";
 import { createClient } from "@/lib/supabase/client";
 
-interface SessionUser {
+export interface SessionUser {
   id: string;
   email: string;
   name: string;
@@ -19,6 +19,34 @@ interface SessionUser {
 
 interface RouteGuardProps {
   children: React.ReactNode;
+}
+
+// ============================================================
+// Auth user context — shares the resolved session user with the
+// rest of the app (dashboard router, navigation, role-aware UI).
+// ============================================================
+
+const AuthUserContext = React.createContext<SessionUser | null>(null);
+
+/**
+ * Returns the session user resolved by the RouteGuard, or null while
+ * loading / outside the guard (e.g. tests).
+ */
+export function useAuthUser(): SessionUser | null {
+  return React.useContext(AuthUserContext);
+}
+
+/**
+ * Test/reuse seam: provide a session user without mounting the guard.
+ */
+export function AuthUserProvider({
+  user,
+  children,
+}: {
+  user: SessionUser | null;
+  children: React.ReactNode;
+}) {
+  return <AuthUserContext.Provider value={user}>{children}</AuthUserContext.Provider>;
 }
 
 const LEADERSHIP_ROLES = ["SUPER_ADMIN", "CHAIRPERSON", "SUB_CHAIRPERSON", "SECRETARY"];
@@ -150,5 +178,5 @@ export function RouteGuard({ children }: RouteGuardProps) {
     );
   }
 
-  return <>{children}</>;
+  return <AuthUserContext.Provider value={user}>{children}</AuthUserContext.Provider>;
 }

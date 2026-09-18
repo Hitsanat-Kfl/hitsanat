@@ -1,6 +1,6 @@
 import { render, screen, waitFor } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
-import SuperAdminDashboardPage from "../features/dashboard/components/super-admin-dashboard";
+import { SuperAdminDashboardPage } from "../features/dashboard/components/super-admin-dashboard";
 import { I18nProvider, ShellProvider } from "../features/shell";
 
 // Shared endpoint-keyed fixtures (hoisted so the vi.mock factory can use them).
