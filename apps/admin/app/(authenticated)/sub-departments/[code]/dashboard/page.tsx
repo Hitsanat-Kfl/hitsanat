@@ -2,11 +2,11 @@
 
 import { Button, Spinner } from "@repo/ui";
 import { useParams, useRouter } from "next/navigation";
-import { SubDeptAttendanceSummary } from "../../../../../components/sub-departments/subdept-attendance-summary";
-import { SubDeptKpiCards } from "../../../../../components/sub-departments/subdept-kpi-cards";
-import { SubDeptProgressTracker } from "../../../../../components/sub-departments/subdept-progress-tracker";
-import { useSubDeptDashboard } from "../../../../../components/sub-departments/use-subdept-dashboard";
-import { PageShell } from "../../../../../components/shell/page-shell";
+import { SubDeptAttendanceSummary } from "@/features/sub-departments";
+import { SubDeptKpiCards } from "@/features/sub-departments";
+import { SubDeptProgressTracker } from "@/features/sub-departments";
+import { useSubDeptDashboard } from "@/features/sub-departments";
+import { PageShell } from "@/features/shell";
 
 const DEPT_NAMES: Record<string, { en: string; am: string }> = {
   TIMIHRT: { en: "Timihrt", am: "ትምህርት" },

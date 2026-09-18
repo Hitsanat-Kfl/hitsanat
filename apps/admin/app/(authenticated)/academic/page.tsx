@@ -1,8 +1,8 @@
 "use client";
 
-import { AssessmentList } from "../../../components/academic/assessment-list";
-import { useAssessments } from "../../../components/academic/use-assessments";
-import { PageShell } from "../../../components/shell/page-shell";
+import { AssessmentList } from "@/features/academic";
+import { useAssessments } from "@/features/academic";
+import { PageShell } from "@/features/shell";
 
 export default function AcademicPage() {
   const { assessments, loading, error } = useAssessments();

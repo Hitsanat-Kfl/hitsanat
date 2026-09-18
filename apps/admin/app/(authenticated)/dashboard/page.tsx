@@ -2,8 +2,8 @@
 
 import { Badge, Button, Card, CardContent, CardHeader, Spinner } from "@repo/ui";
 import Link from "next/link";
-import { useDashboard } from "../../../components/dashboard/use-dashboard";
-import { PageShell } from "../../../components/shell/page-shell";
+import { useDashboard } from "@/features/dashboard";
+import { PageShell } from "@/features/shell";
 
 export default function ExecutiveDashboardPage() {
   const { stats, recentEvents, recentAnnouncements, recentReports, loading, error, refresh } =

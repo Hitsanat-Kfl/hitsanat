@@ -14,9 +14,9 @@ import {
   TabsTrigger,
 } from "@repo/ui";
 import { useState } from "react";
-import { ReportGenerationForm } from "../../../components/reports/report-generation-form";
-import { useReports } from "../../../components/reports/use-reports";
-import { PageShell } from "../../../components/shell/page-shell";
+import { ReportGenerationForm } from "@/features/reports";
+import { useReports } from "@/features/reports";
+import { PageShell } from "@/features/shell";
 import type { ReportStatus, SubmissionStatus } from "../../../lib/types";
 
 const reportStatusVariant: Record<

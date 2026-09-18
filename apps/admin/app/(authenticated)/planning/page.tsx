@@ -2,8 +2,8 @@
 
 import { Badge, Button, Card, CardContent, CardHeader, Spinner } from "@repo/ui";
 import Link from "next/link";
-import { usePlans } from "../../../components/planning/use-plans";
-import { PageShell } from "../../../components/shell/page-shell";
+import { usePlans } from "@/features/planning";
+import { PageShell } from "@/features/shell";
 
 export default function PlanningListPage() {
   const { plans, loading, error, refresh } = usePlans();

@@ -2,10 +2,10 @@
 
 import { Spinner } from "@repo/ui";
 import { useParams, useRouter } from "next/navigation";
-import { ScoreEntryForm } from "../../../../components/academic/score-entry-form";
-import { ScoreSummary } from "../../../../components/academic/score-summary";
-import { useScores } from "../../../../components/academic/use-scores";
-import { PageShell } from "../../../../components/shell/page-shell";
+import { ScoreEntryForm } from "@/features/academic";
+import { ScoreSummary } from "@/features/academic";
+import { useScores } from "@/features/academic";
+import { PageShell } from "@/features/shell";
 
 export default function AssessmentDetailPage() {
   const params = useParams();

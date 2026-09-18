@@ -3,8 +3,8 @@
 import { Button, Spinner } from "@repo/ui";
 import { useParams, useRouter } from "next/navigation";
 import { useCallback, useEffect, useState } from "react";
-import { ChildProfileCard } from "../../../../components/children/child-profile-card";
-import { PageShell } from "../../../../components/shell/page-shell";
+import { ChildProfileCard } from "@/features/children";
+import { PageShell } from "@/features/shell";
 import { type ApiResponse, api } from "../../../../lib/api-client";
 import type { Child, ParentWithRelation } from "../../../../lib/types";
 

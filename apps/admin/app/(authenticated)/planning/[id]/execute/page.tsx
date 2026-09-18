@@ -2,12 +2,12 @@
 
 import { Button, Spinner, Tabs, TabsContent, TabsList, TabsTrigger } from "@repo/ui";
 import { useParams, useRouter } from "next/navigation";
-import { DistributionStatusCard } from "../../../../../components/planning/distribution-status-card";
-import { ProgressRecordingForm } from "../../../../../components/planning/progress-recording-form";
-import { useDistributionStatus } from "../../../../../components/planning/use-distribution-status";
-import { usePlanDetail } from "../../../../../components/planning/use-plan-detail";
-import { WeeklyPlanList } from "../../../../../components/planning/weekly-plan-list";
-import { PageShell } from "../../../../../components/shell/page-shell";
+import { DistributionStatusCard } from "@/features/planning";
+import { ProgressRecordingForm } from "@/features/planning";
+import { useDistributionStatus } from "@/features/planning";
+import { usePlanDetail } from "@/features/planning";
+import { WeeklyPlanList } from "@/features/planning";
+import { PageShell } from "@/features/shell";
 
 export default function PlanExecutionPage() {
   const params = useParams();
