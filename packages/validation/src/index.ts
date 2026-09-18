@@ -5,4 +5,5 @@ export * from "./child.js";
 export * from "./planning.js";
 export * from "./attendance.js";
 export * from "./academic.js";
+export * from "./user.js";
 export * from "./response.js";

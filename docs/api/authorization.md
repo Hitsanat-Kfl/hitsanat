@@ -28,7 +28,7 @@ flowchart TD
 ## 2. Middleware Declarations & Usage
 
 ### 2.1 `requireAuth`
-Extracts and verifies the Better Auth session token from cookies or `Authorization: Bearer` headers. Attaches `req.user` to the Express Request context:
+Extracts and verifies the Supabase JWT session token from cookies or `Authorization: Bearer` headers. Attaches `req.user` to the Express Request context:
 
 ```typescript
 export interface RequestUser {

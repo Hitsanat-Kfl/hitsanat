@@ -1,6 +1,7 @@
 import type { Announcement } from "@repo/domain";
-import { TargetAudience } from "@repo/domain";
 import type { AnnouncementsRepository } from "../../domain/repositories/announcements.repository.js";
+
+const VALID_AUDIENCES = ["Public", "Members", "Parents"] as const;
 
 interface CreateAnnouncementInput {
   title: string;
@@ -13,10 +14,9 @@ export class CreateAnnouncementUseCase {
   constructor(private readonly repo: AnnouncementsRepository) {}
 
   async execute(input: CreateAnnouncementInput): Promise<Announcement> {
-    const validAudiences = Object.values(TargetAudience);
-    if (!validAudiences.includes(input.targetAudience as TargetAudience)) {
+    if (!(VALID_AUDIENCES as readonly string[]).includes(input.targetAudience)) {
       throw new Error(
-        `Invalid target audience: ${input.targetAudience}. Must be one of: ${validAudiences.join(", ")}`
+        `Invalid target audience: ${input.targetAudience}. Must be one of: ${VALID_AUDIENCES.join(", ")}`
       );
     }
 

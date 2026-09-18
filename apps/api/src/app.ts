@@ -1,4 +1,3 @@
-import { getAuth } from "@repo/auth";
 import cors from "cors";
 import express, { type Express } from "express";
 import helmet from "helmet";
@@ -16,9 +15,11 @@ import { planningRouter } from "./modules/planning/presentation/planning.router.
 import { publicRouter } from "./modules/public/presentation/public.router.js";
 import { reportsRouter } from "./modules/reports/presentation/reports.router.js";
 import { subDepartmentRouter } from "./modules/sub-department/presentation/sub-department.router.js";
+import { usersRouter } from "./modules/users/presentation/users.router.js";
+import { authRouter } from "./presentation/routes/auth.router.js";
 import { healthRouter } from "./presentation/routes/health.router.js";
 import { errorHandler, notFoundHandler } from "./shared/middleware/error-handler.js";
-import { authRateLimiter, publicRateLimiter } from "./shared/middleware/rate-limiter.js";
+import { publicRateLimiter } from "./shared/middleware/rate-limiter.js";
 
 export function createApp(): Express {
   const app = express();
@@ -34,42 +35,6 @@ export function createApp(): Express {
   app.use(express.json());
   app.use(express.urlencoded({ extended: true }));
 
-  // Better Auth handlers with rate limiting
-  app.all("/api/v1/auth/*", authRateLimiter, async (req, res) => {
-    const url = new URL(req.url, `http://${req.headers.host}`);
-    const headers = new Headers();
-    for (const [key, value] of Object.entries(req.headers)) {
-      if (value) headers.set(key, Array.isArray(value) ? value[0] : value);
-    }
-
-    try {
-      // Cast to any to resolve type mismatch between Express Request and Web API Request
-      // Better Auth expects standard Web API Request but Express has a different shape
-      const response = await getAuth().handler({
-        method: req.method,
-        headers,
-        url: url.toString(),
-        body: req.body,
-        // biome-ignore lint/suspicious/noExplicitAny: Better Auth Web API Request type mismatch
-      } as any);
-
-      res.status(response.status);
-      for (const [key, value] of response.headers.entries()) {
-        res.setHeader(key, value);
-      }
-
-      const body = await response.text();
-      res.send(body);
-    } catch (error) {
-      console.error("Auth handler error:", error);
-      res.status(500).json({
-        type: "https://hitsanat.kfl/errors/500",
-        title: "Internal Server Error",
-        status: 500,
-      });
-    }
-  });
-
   // API Documentation (OpenAPI / Swagger)
   app.get("/docs.json", swaggerJsonHandler);
   app.use(
@@ -83,6 +48,12 @@ export function createApp(): Express {
   // Health check endpoint at root level and versioned prefix
   app.use("/health", healthRouter);
   app.use(`${env.API_PREFIX}/health`, healthRouter);
+
+  // Auth session endpoint (Supabase JWT verification)
+  app.use(`${env.API_PREFIX}/auth`, authRouter);
+
+  // User management (BR-008: SUPER_ADMIN & CHAIRPERSON only)
+  app.use(`${env.API_PREFIX}/users`, usersRouter);
 
   // Member routes
   app.use(`${env.API_PREFIX}/members`, memberRouter);

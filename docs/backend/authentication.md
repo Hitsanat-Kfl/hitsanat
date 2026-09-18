@@ -1,50 +1,87 @@
 # Backend Authentication Implementation
 
 ## Hitsanat Kifl Children's Ministry Management System
-**Document Version:** 2.1  
-**Authentication Engine:** Better Auth (`packages/auth`)  
+**Document Version:** 3.0  
+**Authentication Provider:** Supabase Auth (GoTrue)  
 
 ---
 
-## 1. Better Auth Initialization (`packages/auth/src/index.ts`)
+## 1. Supabase Auth Overview
 
+Authentication is handled entirely by **Supabase Auth** — no custom auth library is needed. Supabase manages:
+- Email/password sign-in
+- JWT session tokens (HttpOnly cookies)
+- Password hashing (bcrypt)
+- User metadata storage
+
+The admin app (`apps/admin`) communicates directly with Supabase via `@supabase/ssr`. The API (`apps/api`) verifies Supabase JWTs for protected routes.
+
+---
+
+## 2. Supabase Client Setup (`packages/auth`)
+
+### Server-side client (Express API)
 ```typescript
-import { betterAuth } from 'better-auth';
-import { drizzleAdapter } from 'better-auth/adapters/drizzle';
-import { db } from '@hitsanat/database';
-import * as schema from '@hitsanat/database/schema';
+import { createClient } from "@supabase/supabase-js";
 
-export const auth = betterAuth({
-  database: drizzleAdapter(db, {
-    provider: 'pg',
-    schema: {
-      user: schema.users,
-      session: schema.sessions,
-      account: schema.accounts,
-    },
-  }),
-  emailAndPassword: {
-    enabled: true,
-    requireEmailVerification: false, // Internal leadership accounts provisioned by SuperAdmin/Secretary
-  },
-  session: {
-    expiresIn: 60 * 60 * 24 * 7, // 7 days rolling
-    updateAge: 60 * 60 * 24, // Update session every 24 hours
-    cookie: {
-      name: 'better-auth.session_token',
-      httpOnly: true,
-      secure: process.env.NODE_ENV === 'production',
-      sameSite: 'strict',
-    },
-  },
-});
+export function getSupabase() {
+  return createClient(
+    process.env.SUPABASE_URL,
+    process.env.SUPABASE_ANON_KEY,
+    { auth: { autoRefreshToken: false, persistSession: false } }
+  );
+}
+```
+
+### Browser client (Next.js Admin)
+```typescript
+import { createBrowserClient } from "@supabase/ssr";
+
+export function createClient() {
+  return createBrowserClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL,
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
+  );
+}
 ```
 
 ---
 
-## 2. Express Integration
+## 3. Session Verification (API Middleware)
 
-Better Auth handlers are mounted onto the Express application in `apps/api/src/server.ts`:
+The API uses `requireAuth()` middleware (`packages/auth/src/middleware.ts`) which:
+1. Extracts the Supabase JWT from the `sb-<project-ref>-auth-token` cookie or `Authorization: Bearer` header
+2. Verifies the token via `supabase.auth.getUser()` (calls Supabase auth server)
+3. Looks up the user in the `users` table and resolves roles/scopes
+4. Attaches `req.sessionUser` with the full `SessionUser` object
+
 ```typescript
-app.all('/api/v1/auth/*', toNodeHandler(auth));
+import { requireAuth, requireScopePermission } from "@repo/auth/middleware";
+
+router.get(
+  "/members",
+  requireAuth(),
+  requireScopePermission({ allowedGlobalRoles: ["SUPER_ADMIN", "CHAIRPERSON"] }),
+  memberController.list
+);
 ```
+
+---
+
+## 4. Auth Flow
+
+1. **Login:** Admin app calls `supabase.auth.signInWithPassword({ email, password })` directly
+2. **Cookie:** Supabase sets an HttpOnly cookie (`sb-<ref>-auth-token`) on the admin domain
+3. **API calls:** Admin app makes requests to API via Next.js rewrites (same-origin proxy)
+4. **Verification:** API extracts JWT from cookie, verifies via Supabase, resolves user from DB
+5. **Logout:** Admin app calls `supabase.auth.signOut()` which clears the cookie
+
+---
+
+## 5. User Provisioning
+
+Users are created in two places:
+1. **Supabase Auth** (`auth.users`) — via `supabase.auth.admin.createUser()` in the seed script
+2. **Application users table** — inserted with matching UUID
+
+The seed script (`packages/database/src/seeds/users.ts`) handles both. Requires `SUPABASE_SERVICE_ROLE_KEY` for admin API access.

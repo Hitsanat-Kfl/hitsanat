@@ -1,20 +1,14 @@
-import type { Session, User } from "@repo/database/schema";
-
 export interface SessionUser {
   id: string;
   email: string;
   name: string;
   role: string;
+  /** Linked member record (BR-007) — null only for MEMBER_REGULAR legacy rows. */
+  memberId: string | null;
   image?: string | null;
   globalRoles: string[];
   subDeptRoles: Array<{
     subDepartmentCode: string;
     role: string;
   }>;
-}
-
-export interface AuthContext {
-  user: User;
-  session: Session;
-  sessionUser: SessionUser;
 }

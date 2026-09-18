@@ -3,6 +3,7 @@
 import { usePathname, useRouter } from "next/navigation";
 import type * as React from "react";
 import { useEffect, useState } from "react";
+import { createClient } from "../../lib/supabase/client";
 
 interface SessionUser {
   id: string;
@@ -22,6 +23,9 @@ interface RouteGuardProps {
 
 const LEADERSHIP_ROLES = ["SUPER_ADMIN", "CHAIRPERSON", "SUB_CHAIRPERSON", "SECRETARY"];
 
+/** Sub-dept officer posts that grant admin-portal access (ADR-0007). */
+const SUB_DEPT_ACCESS_ROLES = ["Leader", "Sub-Leader", "Secretary"];
+
 export function RouteGuard({ children }: RouteGuardProps) {
   const router = useRouter();
   const pathname = usePathname();
@@ -30,71 +34,93 @@ export function RouteGuard({ children }: RouteGuardProps) {
   const [authorized, setAuthorized] = useState(false);
 
   useEffect(() => {
+    let isMounted = true;
+
     const checkAuth = async () => {
       try {
-        const response = await fetch("/api/v1/auth/session", {
-          credentials: "include",
-        });
+        const supabase = createClient();
+        const {
+          data: { session },
+        } = await supabase.auth.getSession();
 
-        if (!response.ok) {
-          router.push(`/login?redirect=${encodeURIComponent(pathname)}`);
+        if (!session) {
+          if (isMounted) {
+            router.push(`/login?redirect=${encodeURIComponent(pathname)}`);
+          }
           return;
         }
 
-        const data = await response.json();
+        // Extract role from session metadata as initial baseline
+        const metadataRole = (session.user.user_metadata?.role as string) || "MEMBER_REGULAR";
+        const metadataName =
+          (session.user.user_metadata?.name as string) ||
+          session.user.email?.split("@")[0] ||
+          "User";
 
-        if (!data.success || !data.user) {
-          router.push(`/login?redirect=${encodeURIComponent(pathname)}`);
-          return;
+        let sessionUser: SessionUser = {
+          id: session.user.id,
+          email: session.user.email || "",
+          name: metadataName,
+          role: metadataRole,
+          globalRoles: LEADERSHIP_ROLES.includes(metadataRole) ? [metadataRole] : [],
+          subDeptRoles: [],
+        };
+
+        // Try to fetch full session user from API (with sub-dept scopes)
+        try {
+          const response = await fetch("/api/v1/auth/session", {
+            credentials: "include",
+            headers: {
+              Authorization: `Bearer ${session.access_token}`,
+            },
+          });
+
+          if (response.ok) {
+            const data = await response.json();
+            if (data.user) {
+              sessionUser = data.user as SessionUser;
+            }
+          }
+        } catch (apiErr) {
+          // If API is unreachable or starting up, proceed with session metadata
+          console.warn("API session fetch fallback:", apiErr);
         }
 
-        const sessionUser = data.user as SessionUser;
-        setUser(sessionUser);
+        if (isMounted) {
+          setUser(sessionUser);
 
-        // ADR-0007: Non-leader lockout
-        // Check if user has any leadership role (global or sub-department)
-        const hasGlobalLeadership = sessionUser.globalRoles.some((role) =>
-          LEADERSHIP_ROLES.includes(role)
-        );
+          // ADR-0007: Non-leader lockout check
+          const hasGlobalLeadership = sessionUser.globalRoles.some((role) =>
+            LEADERSHIP_ROLES.includes(role)
+          );
 
-        const hasSubDeptLeadership = sessionUser.subDeptRoles.some((membership) =>
-          ["LEAD", "ADMIN"].includes(membership.role)
-        );
+          const hasSubDeptLeadership = sessionUser.subDeptRoles.some((membership) =>
+            SUB_DEPT_ACCESS_ROLES.includes(membership.role)
+          );
 
-        if (!hasGlobalLeadership && !hasSubDeptLeadership) {
-          // Regular members without leadership roles are denied access
-          setAuthorized(false);
-          return;
+          if (!hasGlobalLeadership && !hasSubDeptLeadership) {
+            setAuthorized(false);
+          } else {
+            setAuthorized(true);
+          }
         }
-
-        setAuthorized(true);
       } catch {
-        // Session check failed, redirect to login
-        router.push(`/login?redirect=${encodeURIComponent(pathname)}`);
+        if (isMounted) {
+          router.push(`/login?redirect=${encodeURIComponent(pathname)}`);
+        }
       } finally {
-        setLoading(false);
+        if (isMounted) {
+          setLoading(false);
+        }
       }
     };
 
     checkAuth();
+
+    return () => {
+      isMounted = false;
+    };
   }, [router, pathname]);
-
-  // Refresh session on navigation
-  useEffect(() => {
-    if (user) {
-      const refreshSession = async () => {
-        try {
-          await fetch("/api/v1/auth/session", {
-            credentials: "include",
-          });
-        } catch {
-          // Silent fail for session refresh
-        }
-      };
-
-      refreshSession();
-    }
-  }, [user]);
 
   if (loading) {
     return (

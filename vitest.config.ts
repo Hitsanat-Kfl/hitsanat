@@ -47,5 +47,12 @@ export default defineConfig({
     globals: true,
     environment: "jsdom",
     exclude: ["**/node_modules/**", "**/dist/**", "**/.next/**", "tests/e2e/**"],
+    // Hermetic env for tests: SUPABASE_URL/ANON_KEY are required by the API's
+    // env schema at import time; CI has no .env file, so provide safe
+    // placeholders here. Real values still override via process.env.
+    env: {
+      SUPABASE_URL: "http://localhost:54321",
+      SUPABASE_ANON_KEY: "test-anon-key",
+    },
   },
 });

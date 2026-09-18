@@ -6,7 +6,6 @@ import {
   programSessions,
 } from "@repo/database/schema";
 import type { ProgramSession, ProgramSessionAttendance } from "@repo/domain";
-import { AttendanceStatus, PersonType } from "@repo/domain";
 import type { AttendanceRepository } from "../../domain/repositories/attendance.repository.js";
 
 function toSession(row: typeof programSessions.$inferSelect): ProgramSession {

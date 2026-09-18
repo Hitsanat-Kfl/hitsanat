@@ -1,27 +1,53 @@
+import { createServerClient } from "@supabase/ssr";
 import { type NextRequest, NextResponse } from "next/server";
 
-const PUBLIC_PATHS = ["/login", "/api", "/_next", "/favicon.ico"];
+export async function middleware(request: NextRequest) {
+  let supabaseResponse = NextResponse.next({ request });
 
-function isPublicPath(pathname: string): boolean {
-  return PUBLIC_PATHS.some((p) => pathname.startsWith(p));
-}
+  const supabase = createServerClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL || "",
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || "",
+    {
+      cookies: {
+        getAll() {
+          return request.cookies.getAll();
+        },
+        setAll(cookiesToSet) {
+          for (const { name, value } of cookiesToSet) {
+            request.cookies.set(name, value);
+          }
+          supabaseResponse = NextResponse.next({ request });
+          for (const { name, value, options } of cookiesToSet) {
+            supabaseResponse.cookies.set(name, value, options);
+          }
+        },
+      },
+    }
+  );
 
-export function middleware(request: NextRequest) {
+  // Refresh the auth session — updates cookie expiry
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
+  // Redirect unauthenticated users to login (skip public paths)
   const { pathname } = request.nextUrl;
+  const PUBLIC_PATHS = ["/login", "/api", "/_next", "/favicon.ico"];
+  const isPublic = PUBLIC_PATHS.some((p) => pathname.startsWith(p));
 
-  if (isPublicPath(pathname)) {
-    return NextResponse.next();
-  }
-
-  const session = request.cookies.get("session_token");
-
-  if (!session) {
+  if (!isPublic && !user) {
     const loginUrl = new URL("/login", request.url);
     loginUrl.searchParams.set("redirect", pathname);
     return NextResponse.redirect(loginUrl);
   }
 
-  return NextResponse.next();
+  // Redirect already authenticated users away from login page to dashboard
+  if (pathname === "/login" && user) {
+    const redirectUrl = request.nextUrl.searchParams.get("redirect") || "/";
+    return NextResponse.redirect(new URL(redirectUrl, request.url));
+  }
+
+  return supabaseResponse;
 }
 
 export const config = {

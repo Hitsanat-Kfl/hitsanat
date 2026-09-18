@@ -1,5 +1,16 @@
 import type { ProgramSessionAttendance } from "@repo/domain";
-import { AttendanceStatus, PersonType } from "@repo/domain";
+
+const AttendanceStatus = {
+  EXPECTED: "Expected",
+  PRESENT: "Present",
+  ABSENT: "Absent",
+  EXCUSED: "Excused",
+} as const;
+
+const PersonType = {
+  MEMBER: "Member",
+  CHILD: "Child",
+} as const;
 import type { AttendanceRepository } from "../../domain/repositories/attendance.repository.js";
 
 const COLLECTION_LOCATIONS = ["Apartama", "Gende Boy", "Gende Je", "Cobalt", "Bate"] as const;

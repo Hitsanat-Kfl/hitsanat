@@ -186,7 +186,7 @@ describe("Organization Integration Tests", () => {
           memberId: "member-001",
           memberName: "Daniel Kebede",
           christianName: "Daniel",
-          role: "MEMBER",
+          role: "Member",
           isPrimary: false,
           assignedAt: new Date(),
         },
@@ -194,7 +194,7 @@ describe("Organization Integration Tests", () => {
           memberId: "member-002",
           memberName: "Hana Tesfaye",
           christianName: "Hana",
-          role: "LEAD",
+          role: "Leader",
           isPrimary: true,
           assignedAt: new Date(),
         },
@@ -202,8 +202,8 @@ describe("Organization Integration Tests", () => {
 
       const roster = await getRoster.execute("TIMIHRT");
       expect(roster).toHaveLength(2);
-      expect(roster[0].role).toBe("MEMBER");
-      expect(roster[1].role).toBe("LEAD");
+      expect(roster[0].role).toBe("Member");
+      expect(roster[1].role).toBe("Leader");
     });
   });
 
@@ -337,7 +337,7 @@ describe("Organization Integration Tests", () => {
           memberId: "member-001",
           memberName: "Daniel Kebede",
           christianName: "Daniel",
-          role: "LEAD",
+          role: "Leader",
           isPrimary: true,
           assignedAt: new Date(),
         },
@@ -345,7 +345,7 @@ describe("Organization Integration Tests", () => {
 
       const roster = await getRoster.execute("TIMIHRT");
       expect(roster).toHaveLength(1);
-      expect(roster[0].role).toBe("LEAD");
+      expect(roster[0].role).toBe("Leader");
     });
 
     it("should throw for non-existent sub-department", async () => {

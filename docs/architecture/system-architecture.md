@@ -31,7 +31,8 @@ C4Context
     Rel(public, portfolioApp, "Views public information and countdowns", "HTTPS")
     Rel(leader, tgApp, "Receives alerts in", "Telegram")
 
-    Rel(adminApp, apiApp, "Calls secure endpoints using Better Auth session", "JSON / HTTPS")
+    Rel(adminApp, apiApp, "Calls secure endpoints using Supabase JWT", "JSON / HTTPS")
+    Rel(adminApp, supabaseDb, "Direct Supabase Auth for login/session", "HTTPS")
     Rel(portfolioApp, apiApp, "Queries public announcements & stats", "JSON / HTTPS")
     Rel(apiApp, supabaseDb, "Executes queries and transactions via Drizzle", "PostgreSQL / TLS")
     Rel(tgApp, apiApp, "Polls or receives published announcement events", "Internal / API")
@@ -53,7 +54,7 @@ Hitsanat/
 │   └── telegram/            # Standalone Telegram Bot Notification Service
 │
 ├── packages/
-│   ├── auth/                # Better Auth configuration and session guards
+│   ├── auth/                # Supabase Auth configuration and session guards
 │   ├── calendar/            # Ethiopian Calendar conversion (ethiopian-calendar-new)
 │   ├── config/              # Shared TypeScript & Biome configuration
 │   ├── database/            # Drizzle ORM schema declarations & migrations
@@ -102,7 +103,7 @@ graph TD
         DrizzleRepos[Drizzle Repository Implementations]
         Postgres[Supabase PostgreSQL Database]
         CalendarAdapter[Ethiopian Calendar Adapter]
-        AuthAdapter[Better Auth Adapter]
+        AuthAdapter[Supabase Auth Adapter]
     end
 
     Controllers --> UseCases

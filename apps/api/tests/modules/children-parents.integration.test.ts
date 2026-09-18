@@ -177,7 +177,10 @@ describe("Children & Parents Integration Tests", () => {
 
     for (const route of validRoutes) {
       it(`should accept ${route} as valid collection location`, async () => {
-        const child = { ...mockChild, collectionLocation: route as any };
+        const child = {
+          ...mockChild,
+          collectionLocation: route as (typeof mockChild)["collectionLocation"],
+        };
         vi.mocked(childRepo.create).mockResolvedValue(child);
 
         const result = await createChild.execute({

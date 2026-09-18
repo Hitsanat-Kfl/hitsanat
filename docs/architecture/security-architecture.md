@@ -1,8 +1,8 @@
 # Security Architecture & Access Control
 
 ## Hitsanat Kifl Children's Ministry Management System
-**Document Version:** 2.1  
-**Auth Provider:** Better Auth  
+**Document Version:** 3.0  
+**Auth Provider:** Supabase Auth  
 **Access Model:** Scoped Role-Based Access Control (RBAC)  
 
 ---
@@ -20,8 +20,9 @@ graph TD
     end
 
     subgraph Authentication Barrier
-        BetterAuth[Better Auth Middleware]
+        SupabaseAuth[Supabase Auth / GoTrue]
         SessionCookie[HttpOnly, Secure, SameSite=Strict Cookie]
+        JWT[Supabase JWT Verification]
     end
 
     subgraph Scoped Authorization Barrier
@@ -32,48 +33,49 @@ graph TD
     subgraph Data Layer Security
         ParamQuery[Drizzle Parameterized SQL Queries]
         PIIMask[Sanitized PII Data Serialization]
+        RLS[Supabase Row Level Security]
     end
 
-    Client --> TLS --> CORS --> RateLimit --> BetterAuth
-    BetterAuth --> SessionCookie
-    BetterAuth --> ScopeGuard --> DeptContext
+    Client --> TLS --> CORS --> RateLimit --> SupabaseAuth
+    SupabaseAuth --> SessionCookie
+    SupabaseAuth --> JWT
+    JWT --> ScopeGuard --> DeptContext
     DeptContext --> ParamQuery --> PIIMask
+    ParamQuery --> RLS
 ```
 
 ---
 
 ## 2. Authentication & Session Management
 
-- **Authentication Framework:** **Better Auth** (`packages/auth`), providing robust session storage, secure password hashing (`argon2id` / `bcrypt`), and CSRF token verification.
-- **Session Tokens:** Transmitted via `httpOnly`, `Secure`, `SameSite=Strict` browser cookies. No raw authentication tokens are stored in browser `localStorage` or `sessionStorage` to mitigate Cross-Site Scripting (XSS) token theft.
-- **Session Duration:** 7 days rolling expiration, with automatic invalidation upon password reset or administrative role revocation.
+- **Authentication Provider:** **Supabase Auth** (GoTrue) — manages user accounts, password hashing (bcrypt), JWT tokens, and session lifecycle.
+- **Session Tokens:** Supabase sets an `HttpOnly`, `Secure`, `SameSite=Strict` cookie (`sb-<project-ref>-auth-token`). No raw authentication tokens are stored in browser `localStorage` or `sessionStorage`.
+- **JWT Verification:** The Express API verifies Supabase JWTs using `supabase.auth.getUser()` (server-side verification against Supabase auth server).
+- **Session Duration:** Managed by Supabase (default 1 week, refresh token rotation).
 
 ---
 
 ## 3. Scoped Authorization & Least Privilege
 
 ### 3.1 Non-Leadership Zero-Access Boundary (ADR-0007)
-Regular members (`MEMBER_REGULAR`) without active leadership appointments have **no login accounts** or credentials in the system. Any attempt to authenticate without a leadership role is rejected with `HTTP 403 Forbidden` and `AUTH_NOT_AUTHORIZED_LEADERSHIP`.
+Regular members (`MEMBER_REGULAR`) without active leadership appointments have **no login credentials** in Supabase Auth. The RouteGuard component rejects non-leadership users at the frontend level.
 
 ### 3.2 Department Scope Isolation (ADR-0005)
 Permissions are enforced at the API route handler level using scoped guards:
 
 ```typescript
-// Example: Scoped Authorization in Express Router
 router.post(
   '/curriculum',
   requireAuth(),
-  requireScopePermission('TIMIHRT', 'CURRICULUM_CREATE'),
+  requireScopePermission({ requiredSubDeptCode: 'TIMIHRT', allowedSubDeptRoles: ['Leader', 'Sub-Leader'] }),
   timihrtController.createCurriculumItem
 );
 ```
-
-If a user holding `SUB_LEAD_MEZMUR` attempts to access `/api/v1/timihrt/curriculum`, the guard detects the mismatch between the user's active sub-department scope (`MEZMUR`) and the required scope (`TIMIHRT`), immediately terminating the request.
 
 ---
 
 ## 4. Beneficiary Data Privacy & Child Protection
 
-1. **Child & Parent Data Isolation:** Public endpoints (consumed by `apps/portfolio`) expose zero PII. Only aggregated numerical metrics (e.g., total count of children, total events completed) are accessible without authentication.
-2. **Contact Detail Redaction:** Phone numbers and residential addresses of children and parents are restricted to the Secretary, Chairperson, and Kutitr transportation coordinators.
-3. **Audit Trail Logging:** All write, update, and delete actions on child and member records are recorded in the `audit_log` table, logging the operator's user ID, IP address, timestamp, and JSON diff of changes.
+1. **Child & Parent Data Isolation:** Public endpoints expose zero PII. Only aggregated numerical metrics are accessible without authentication.
+2. **Contact Detail Redaction:** Phone numbers and residential addresses are restricted to the Secretary, Chairperson, and Kutitr transportation coordinators.
+3. **Audit Trail Logging:** All write, update, and delete actions are recorded in the `audit_log` table.
