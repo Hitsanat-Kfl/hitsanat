@@ -1,9 +1,23 @@
 "use client";
 
 import { useCallback, useEffect, useState } from "react";
-import type { KPIData, ListItemData, QuickAction, StatusSummaryItem } from "@repo/ui";
+import type {
+  ActivityItem,
+  EventItem,
+  KPIData,
+  ListItemData,
+  QuickAction,
+  StatusSummaryItem,
+} from "@repo/ui";
 import { type ApiResponse, type PaginatedResponse, api } from "@/lib/api-client";
-import type { AnnualMasterPlan, PeriodicReport, SubDepartment } from "@/lib/types";
+import type {
+  AnnualMasterPlan,
+  DistributionStatusItem,
+  PeriodicReport,
+  PublicEvent,
+  SubDepartment,
+} from "@/lib/types";
+import { useAuditLogs } from "./use-audit-logs";
 
 export interface DepartmentStatus {
   id: string;
@@ -31,6 +45,12 @@ export interface UseSubChairpersonDashboardResult {
   kpis: KPIData[];
   reviewItems: ListItemData[];
   reportSummary: StatusSummaryItem[];
+  distributionSummary: StatusSummaryItem[];
+  assignmentItems: ListItemData[];
+  upcomingEvents: EventItem[];
+  activity: ActivityItem[];
+  activityRestricted: boolean;
+  hasActivePlan: boolean;
   departmentBoard: ListItemData[];
   quickActions: QuickAction[];
   loading: boolean;
@@ -52,17 +72,26 @@ function formatDate(value: string | null): string {
 }
 
 /**
- * Vice-Chairperson (Sub-Chairperson) dashboard data — spec §1.2.
+ * Sub-Chairperson (Vice-Chairperson) dashboard data — spec §1.2 + Phase 06.
  *
  * Sources (all real endpoints; no fabricated metrics):
- *  - GET /sub-departments — the five programs
- *  - GET /reports         — per-department report pipeline (oversight)
- *  - GET /annual-plans    — plan pipeline (drafts awaiting executive action)
+ *  - GET /sub-departments              — the five programs
+ *  - GET /reports                      — per-department report pipeline
+ *  - GET /annual-plans                 — plan pipeline + active plan for distributions
+ *  - GET /annual-plans/:id/distributions — real assignments (BES-012)
+ *  - GET /events?upcoming=true         — upcoming activities
+ *  - GET /audit-logs                   — recent activity (role-restricted)
+ *
+ * All grouping/counting happens here — no business logic in components.
  */
 export function useSubChairpersonDashboard(): UseSubChairpersonDashboardResult {
   const [kpis, setKpis] = useState<KPIData[]>([]);
   const [reviewItems, setReviewItems] = useState<ListItemData[]>([]);
   const [reportSummary, setReportSummary] = useState<StatusSummaryItem[]>([]);
+  const [distributionSummary, setDistributionSummary] = useState<StatusSummaryItem[]>([]);
+  const [assignmentItems, setAssignmentItems] = useState<ListItemData[]>([]);
+  const [upcomingEvents, setUpcomingEvents] = useState<EventItem[]>([]);
+  const [hasActivePlan, setHasActivePlan] = useState(false);
   const [departmentBoard, setDepartmentBoard] = useState<ListItemData[]>([]);
   const [quickActions] = useState<QuickAction[]>([
     {
@@ -83,18 +112,30 @@ export function useSubChairpersonDashboard(): UseSubChairpersonDashboardResult {
       onClick: () => window.location.assign("/planning"),
       variant: "outline",
     },
+    {
+      id: "qa-events",
+      label: "View Events",
+      onClick: () => window.location.assign("/events"),
+      variant: "outline",
+    },
   ]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+
+  // Recent activity (LEVEL 6): the audit trail is readable by
+  // SUPER_ADMIN/CHAIRPERSON only, so this role gets a truthful
+  // restricted notice instead of an empty or fabricated feed.
+  const { activity: auditActivity, loading: auditLoading, error: auditError } = useAuditLogs(6);
 
   const fetchData = useCallback(async () => {
     setLoading(true);
     setError(null);
 
-    const [departmentsRes, reportsRes, plansRes] = await Promise.allSettled([
+    const [departmentsRes, reportsRes, plansRes, eventsRes] = await Promise.allSettled([
       api.get<ApiResponse<SubDepartment[]>>("/sub-departments"),
       api.get<PaginatedResponse<PeriodicReport>>("/reports?limit=100"),
       api.get<PaginatedResponse<AnnualMasterPlan>>("/annual-plans?limit=50"),
+      api.get<PaginatedResponse<PublicEvent>>("/events?upcoming=true&limit=5"),
     ]);
 
     // The department board is the core of this dashboard — without the
@@ -109,8 +150,25 @@ export function useSubChairpersonDashboard(): UseSubChairpersonDashboardResult {
     const departments = departmentsRes.value.data ?? [];
     const reports = reportsRes.status === "fulfilled" ? (reportsRes.value.data ?? []) : [];
     const plans = plansRes.status === "fulfilled" ? (plansRes.value.data ?? []) : [];
+    const events = eventsRes.status === "fulfilled" ? (eventsRes.value.data ?? []) : [];
+
+    // ---- Active plan → real assignments (distributions) ----
+    const activePlan = plans.find((p) => p.status === "Active") ?? null;
+    setHasActivePlan(activePlan !== null);
+    let distributions: DistributionStatusItem[] = [];
+    if (activePlan) {
+      try {
+        const distRes = await api.get<ApiResponse<DistributionStatusItem[]>>(
+          `/annual-plans/${activePlan.id}/distributions`
+        );
+        distributions = distRes.data ?? [];
+      } catch {
+        // Partial data: the board still renders without assignments.
+      }
+    }
 
     // ---- Department status board (group reports by department) ----
+    const deptCodeById = new Map(departments.map((d) => [d.id, d.code]));
     const byDept = new Map<
       string,
       { total: number; approved: number; inReview: number; draft: number }
@@ -170,6 +228,29 @@ export function useSubChairpersonDashboard(): UseSubChairpersonDashboardResult {
       { status: "draft", label: "Drafts", count: drafts },
     ]);
 
+    // ---- Distribution progress (real BES-012 statuses, counts only) ----
+    const assigned = distributions.filter((d) => d.status === "Assigned").length;
+    const inProgress = distributions.filter((d) => d.status === "In_Progress").length;
+    const completed = distributions.filter((d) => d.status === "Completed").length;
+    setDistributionSummary([
+      { status: "assigned", label: "Assigned", count: assigned },
+      { status: "in-progress", label: "In progress", count: inProgress },
+      { status: "completed", label: "Completed", count: completed },
+    ]);
+
+    // ---- Responsibilities / assignments (real distributed activities) ----
+    setAssignmentItems(
+      distributions.map((d) => ({
+        id: d.distributionId,
+        primary: d.activityMainActivity,
+        secondary: `${deptCodeById.get(d.subDepartmentId) ?? "Sub-department"} · ${d.status.replaceAll("_", " ")}`,
+        trailing: formatDate(d.assignedAt),
+        onClick: activePlan
+          ? () => window.location.assign(`/planning/${activePlan.id}`)
+          : undefined,
+      }))
+    );
+
     // ---- Items awaiting executive review (reports + plan drafts) ----
     const items: ReviewItem[] = [
       ...reports
@@ -201,28 +282,40 @@ export function useSubChairpersonDashboard(): UseSubChairpersonDashboardResult {
       }))
     );
 
-    // ---- KPIs ----
-    const activePlans = plans.filter((p) => p.status === "Active").length;
+    // ---- Upcoming activities (real events only) ----
+    setUpcomingEvents(
+      events.map((evt) => ({
+        id: evt.id,
+        title: evt.title,
+        date: evt.eventDate,
+        time: new Date(evt.eventDate).toLocaleTimeString("en-ET", {
+          hour: "numeric",
+          minute: "2-digit",
+        }),
+      }))
+    );
+
+    // ---- Coordination KPIs (all real counts) ----
     setKpis([
       {
         label: "Sub-Departments",
         value: departments.length,
-        description: "Programs under oversight",
+        description: "Programs under coordination",
       },
       {
         label: "Reports In Review",
         value: inReview,
-        description: "Submitted or reviewed, awaiting action",
+        description: "Awaiting executive action",
       },
       {
-        label: "Plan Drafts",
-        value: plans.filter((p) => p.status === "Draft").length,
-        description: "Awaiting executive review",
+        label: "Activities In Progress",
+        value: inProgress,
+        description: activePlan ? `From ${activePlan.title}` : "Distributed plan activities",
       },
       {
-        label: "Active Plans",
-        value: activePlans,
-        description: "Currently in execution",
+        label: "Upcoming Activities",
+        value: events.length,
+        description: "Scheduled events",
       },
     ]);
 
@@ -237,6 +330,12 @@ export function useSubChairpersonDashboard(): UseSubChairpersonDashboardResult {
     kpis,
     reviewItems,
     reportSummary,
+    distributionSummary,
+    assignmentItems,
+    upcomingEvents,
+    activity: auditActivity,
+    activityRestricted: !auditLoading && auditError !== null,
+    hasActivePlan,
     departmentBoard,
     quickActions,
     loading,
