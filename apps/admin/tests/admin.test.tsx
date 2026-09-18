@@ -243,7 +243,7 @@ describe("DashboardRouter", () => {
     });
   });
 
-  it("renders the Executive dashboard for SUB_CHAIRPERSON", async () => {
+  it("renders the Vice-Chairperson dashboard for SUB_CHAIRPERSON", async () => {
     render(
       <TestWrapper
         user={{
@@ -257,7 +257,7 @@ describe("DashboardRouter", () => {
     );
 
     await waitFor(() => {
-      expect(screen.getByText("Executive Dashboard")).toBeDefined();
+      expect(screen.getByText("Vice-Chairperson Dashboard")).toBeDefined();
     });
   });
 });
