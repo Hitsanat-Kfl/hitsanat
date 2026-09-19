@@ -73,7 +73,7 @@ The Hitsanat Kifl Digital System is a two-application platform designed to suppo
 | Regular Members        | No admin access — view the public portfolio site only            |
 | Children               | Tracked for attendance and academic scores (data only, no login) |
 | Parents                | Registered and linked to their children (data only, no login)    |
-| Super Admin            | Full control of the system, including permissions                |
+| Super Admin            | Full control of the system, including permissions, user management, audit logs |
 | Project Manager        | System oversight and development management                      |
 | Developers             | Build and maintain the system                                    |
 
@@ -346,6 +346,99 @@ No dashboard. Regular members are not part of the admin/management system in any
 
 - Full control over the entire system, including all leadership dashboards
 - Manages the permission system itself
+
+#### 7.10.1 Super Admin Dashboard
+
+The Super Admin dashboard provides system-wide administration, access, and operational oversight:
+
+**System Overview (KPIs):**
+- User Accounts — total provisioned accounts
+- Active Accounts — email-verified accounts
+- Sub-Departments — configured programs
+- API Service — health status, version, environment
+
+**Requires Administrative Attention:**
+- Deactivated Accounts — accounts currently signed out
+- Account Status — active vs deactivated summary
+
+**Users & Access:**
+- Recently Provisioned — most recently created accounts
+- Roles in Use — accounts grouped by assigned role
+
+**System Health:**
+- API Service status, environment, and version
+
+**System Activity:**
+- Real audit trail of administrative actions (user CRUD events)
+
+**Quick Actions:**
+- Manage Users → `/users`
+- Audit Logs → `/audit-logs`
+- Permissions → `/permissions`
+- Manage Members → `/members`
+- Sub-Departments → `/sub-departments`
+- View Reports → `/reports`
+
+#### 7.10.2 User Management (`/users`)
+
+Full CRUD interface for user account management (BR-008):
+
+- **List users** — paginated, searchable, role-filtered
+- **Create account** — name, email, password, role, sub-department assignment
+- **Reset password** — via Supabase Admin API
+- **Deactivate account** — bans Supabase Auth account
+
+Roles that can be assigned: SUPER_ADMIN, CHAIRPERSON, SUB_CHAIRPERSON, SECRETARY, MEMBER_REGULAR
+
+Leadership roles (SUPER_ADMIN, CHAIRPERSON, SUB_CHAIRPERSON, SECRETARY) require a linked member (BR-007).
+
+#### 7.10.3 Audit Logs (`/audit-logs`)
+
+Table view of system audit trail:
+
+- **Action** — type of administrative action (Created, Updated, Deactivated, Password Reset)
+- **Resource** — type of entity affected (user)
+- **Details** — payload diff (email, role, changed fields)
+- **IP Address** — source IP of the action
+- **Timestamp** — when the action occurred
+
+Currently logged actions:
+- USER_CREATED
+- USER_UPDATED
+- USER_DEACTIVATED
+- PASSWORD_RESET
+
+#### 7.10.4 Permission Matrix (`/permissions`)
+
+Static reference view of role-based access control:
+
+| Role | Members | Families | Children | Parents | Sub-Depts | Attendance | Academic | Planning | Events | Reports | Announcements |
+|------|---------|----------|----------|---------|-----------|------------|----------|----------|--------|---------|---------------|
+| SUPER_ADMIN | CRUD | CRUD | CRUD | CRUD | CRUD | CRUD | CRUD | CRUD | CRUD | CRUD | CRUD |
+| CHAIRPERSON | CRUD | CRUD | CRUD | CRUD | — | — | — | CRUD+A | CRUD+A | CRUD+A | CRUD+A |
+| SUB_CHAIRPERSON | CRUD | CRUD | CRUD | CRUD | — | — | — | CRUD+A | CRUD+A | CRUD+A | CRUD+A |
+| SECRETARY | CRUD | CRUD | CRUD | CRUD | — | R | R | R | R | R | CRUD |
+
+CRUD = Create, Read, Update, Delete; A = Approve; R = Read-only; — = No access
+
+#### 7.10.5 Sidebar Navigation (Super Admin)
+
+The Super Admin sees all navigation items:
+
+**Main:**
+- Dashboard
+
+**Ministry:**
+- Members, Children, Sub-Departments
+
+**Programs:**
+- Attendance, Academic, Events, Transport
+
+**Administration:**
+- User Accounts, Audit Logs, Permissions
+
+**Operations:**
+- Planning, Reports
 
 ---
 
@@ -1104,5 +1197,32 @@ pnpm add ethiopian-calendar-new
 
 ---
 
+## 16. Changelog
+
+### v2.1.1 (September 2026)
+
+**Super Admin Dashboard Enhancements:**
+- Added detailed Super Admin dashboard features to Section 7.10
+- Documented User Management page (`/users`) with full CRUD operations
+- Documented Audit Logs page (`/audit-logs`) with system action tracking
+- Documented Permission Matrix page (`/permissions`) with role-based access reference
+- Added sidebar navigation items for Audit Logs and Permissions (super-admin only)
+- Updated Key Stakeholders table with detailed Super Admin responsibilities
+
+**Implemented Features:**
+- User Management: list, create, reset password, deactivate accounts
+- Audit Logs: table view of administrative actions with filtering
+- Permission Matrix: static reference view of RBAC configuration
+- Role-aware sidebar: navigation items filtered by user role
+- Dashboard routing: role-based routing to appropriate dashboard
+
+**Technical Changes:**
+- Added `mapSessionRolesToNavRoles()` to convert session roles to nav roles
+- Added `MEZMUR_LEADER` case to DashboardRouter
+- Updated authenticated layout to pass user roles to AppShell
+- Created new branches: `feat/role-aware-sidebar-and-dashboard-router`, `feat/super-admin-management`
+
+---
+
 _End of Document_
-_Hitsanat Kifl — Haramaya University Gibi Gubae — Version 2.1 — August 2026_
+_Hitsanat Kifl — Haramaya University Gibi Gubae — Version 2.1.1 — September 2026_
