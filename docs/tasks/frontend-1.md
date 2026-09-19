@@ -57,7 +57,7 @@ The navigation shell provides consistent navigation across all admin pages and e
 - Reference: `packages/ui/src/` — UI component patterns
 
 ### 10. Expected Implementation
-Create a responsive layout shell with: sidebar navigation (role-aware), header with user info, main content area, mobile hamburger menu. Navigation items filtered by user role (Chairperson sees all, leaders see own sub-dept).
+Create a responsive layout shell with: sidebar navigation (role-aware), header with user info, main content area, mobile hamburger menu. Navigation items filtered by user role (Chairperson sees all, leaders see own sub-dept). The sidebar includes 5 sections: Main, Ministry, Programs, Administration (Super Admin only), Operations.
 
 ### 11. Expected File Changes
 
@@ -82,6 +82,7 @@ N/A
 - [ ] Header shows user name and role
 - [ ] Mobile responsive (hamburger menu)
 - [ ] Accessible (WCAG 2.1 AA)
+- [ ] Administration section (User Accounts, Audit Logs, Permissions) visible only to Super Admin
 
 ### 15. Definition of Done
 - [ ] Implementation complete
@@ -444,7 +445,7 @@ Build the Chairperson executive dashboard with cross-departmental visibility.
 - Reference: `packages/ui/src/` — Card, Chart components
 
 ### 8. Expected Implementation
-Create an executive dashboard with: overall progress summary, sub-department status cards, planning completion percentage, attendance summary, key KPI widgets, charts for trends.
+Create an executive dashboard with: overall progress summary, sub-department status cards, planning completion percentage, attendance summary, key KPI widgets, charts for trends. Note: The `DashboardRouter` component routes users to role-specific dashboards (Super Admin, Chairperson, Vice-Chairperson, Secretary, Mezmur).
 
 ### 9. Expected File Changes
 
@@ -463,6 +464,7 @@ Create an executive dashboard with: overall progress summary, sub-department sta
 - [ ] Key KPI widgets
 - [ ] Cross-departmental visibility (RBAC: Chairperson)
 - [ ] Responsive layout
+- [ ] Dashboard routes to correct role-specific page
 
 ### 11. Git Branch
 `feature/fe1-009-executive-dashboard`

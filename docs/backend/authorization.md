@@ -65,3 +65,45 @@ export function requireScopePermission(options: {
   };
 }
 ```
+
+---
+
+## 3. Implementation Details
+
+### 3.1 packages/permissions
+
+The RBAC system is implemented as a dedicated package:
+
+| File | Purpose |
+| :--- | :--- |
+| `packages/permissions/src/types.ts` | `GlobalRole` enum (SUPER_ADMIN, CHAIRPERSON, SUB_CHAIRPERSON, SECRETARY, MEMBER_REGULAR), `ResourceType` enum, `ActionType` enum, `SubDepartmentCode` enum |
+| `packages/permissions/src/matrix.ts` | `PERMISSION_MATRIX` record mapping `GlobalRole` to `Permission[]` arrays |
+| `packages/permissions/src/checker.ts` | `hasGlobalPermission()`, `hasSubDeptPermission()`, `checkPermission()` functions |
+| `packages/permissions/src/leadership.ts` | BR-009 One Leadership Post Rule validation |
+| `packages/permissions/src/sub-dept-permissions.ts` | Sub-department scoped permission evaluation |
+
+### 3.2 packages/auth
+
+The auth middleware wraps permission checks:
+
+| File | Purpose |
+| :--- | :--- |
+| `packages/auth/src/index.ts` | `requireAuth` (JWT verification), `requireScopePermission` (RBAC evaluation) |
+
+### 3.3 BR-008 Enforcement
+
+User management endpoints are restricted to `SUPER_ADMIN` and `CHAIRPERSON`:
+
+```typescript
+// apps/api/src/modules/users/presentation/users.router.ts
+router.use(requireScopePermission({ allowedGlobalRoles: ['SUPER_ADMIN', 'CHAIRPERSON'] }));
+
+// apps/api/src/modules/audit/presentation/audit.router.ts
+router.use(requireScopePermission({ allowedGlobalRoles: ['SUPER_ADMIN', 'CHAIRPERSON'] }));
+```
+
+### 3.4 Super Admin Bypass
+
+The `SUPER_ADMIN` role bypasses all permission checks. This is a design decision: Super Admin has unrestricted access to all resources and actions. Implementation:
+- `packages/permissions/src/checker.ts`: `if (role === GlobalRole.SUPER_ADMIN) return true;`
+- `packages/auth/src/index.ts`: `if (user.globalRoles.includes('SUPER_ADMIN')) return next();`

@@ -22,6 +22,8 @@
 | **Reports** | `/api/v1/reports` | Periodic reports (Weekly, Monthly, Quarterly, Half-Year, Annual) |
 | **Announcements** | `/api/v1/announcements` | Announcement publishing, public feed, Telegram triggers |
 | **Public Portfolio**| `/api/v1/public` | Public stats, event countdowns, published news (No login required) |
+| **Users** | `/api/v1/users` | Account CRUD, password reset, deactivation (BR-008) |
+| **Audit Logs** | `/api/v1/audit-logs` | Administrative action trail (SUPER_ADMIN/CHAIRPERSON only) |
 
 ---
 
@@ -72,3 +74,26 @@
 - `GET /api/v1/public/stats`: Public sanitized statistics (Active members count, Children count, Events count).
 - `GET /api/v1/public/events/upcoming`: Public upcoming events with countdown timestamps.
 - `GET /api/v1/public/announcements`: Public announcements for the portfolio website.
+
+### 2.7 User Management (`/api/v1/users`)
+> **Authorization:** BR-008 — Restricted to `SUPER_ADMIN` and `CHAIRPERSON` global roles.
+
+- `POST /api/v1/users`: Create a new user account with name, email, password, and role.
+- `GET /api/v1/users`: List all user accounts with pagination, search, and role filter.
+- `GET /api/v1/users/:id`: Get a specific user's details.
+- `PATCH /api/v1/users/:id`: Update user details (name, email, role).
+- `POST /api/v1/users/:id/reset-password`: Reset a user's password to a temporary value.
+- `POST /api/v1/users/:id/deactivate`: Deactivate a user account (bans Supabase Auth account).
+
+### 2.8 Audit Logs (`/api/v1/audit-logs`)
+> **Authorization:** Restricted to `SUPER_ADMIN` and `CHAIRPERSON` global roles.
+
+- `GET /api/v1/audit-logs`: List recent audit log entries with `?limit=N` query parameter. Returns entries with: id, action, resourceType, resourceId, payloadDiff, ipAddress, timestamp.
+
+**Logged Actions:**
+| Action | Description |
+| :--- | :--- |
+| `USER_CREATED` | New user account provisioned |
+| `USER_UPDATED` | User details modified |
+| `USER_DEACTIVATED` | User account deactivated |
+| `PASSWORD_RESET` | User password reset |
