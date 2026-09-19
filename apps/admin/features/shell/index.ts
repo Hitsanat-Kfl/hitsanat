@@ -13,6 +13,7 @@ export {
   getNavigationForRoles,
   getPrimaryNavItems,
   findActiveNavItem,
+  mapSessionRolesToNavRoles,
   type UserRole,
   type NavItem,
   type NavSection,
