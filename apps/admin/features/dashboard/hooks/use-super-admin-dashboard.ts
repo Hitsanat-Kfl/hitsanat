@@ -92,6 +92,18 @@ export function useSuperAdminDashboard(): UseSuperAdminDashboardResult {
       variant: "outline",
     },
     {
+      id: "qa-audit-logs",
+      label: "Audit Logs",
+      onClick: () => window.location.assign("/audit-logs"),
+      variant: "outline",
+    },
+    {
+      id: "qa-permissions",
+      label: "Permissions",
+      onClick: () => window.location.assign("/permissions"),
+      variant: "outline",
+    },
+    {
       id: "qa-members",
       label: "Manage Members",
       onClick: () => window.location.assign("/members"),
