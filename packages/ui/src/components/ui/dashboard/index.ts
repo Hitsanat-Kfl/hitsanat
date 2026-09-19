@@ -2,6 +2,12 @@
 export { DashboardContainer, type DashboardContainerProps } from "./dashboard-container";
 export { DashboardHeader, type DashboardHeaderProps } from "./dashboard-header";
 export {
+  DashboardLocaleProvider,
+  useDashboardLocale,
+  useLocalizedText,
+  type DashboardLocale,
+} from "./i18n-context";
+export {
   DashboardGrid,
   DashboardGridItem,
   type DashboardGridProps,

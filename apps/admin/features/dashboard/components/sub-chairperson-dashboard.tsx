@@ -51,11 +51,29 @@ export function SubChairpersonDashboardPage() {
   } = useSubChairpersonDashboard();
 
   if (loading) {
+    // Phase 06 §24: skeleton placeholders matching the loaded layout
+    // (KPI row + two-column widget rows) instead of a bare spinner.
     return (
       <PageShell breadcrumbs={[{ label: "Home", href: "/" }, { label: "Sub-Chairperson" }]}>
-        <div className="flex items-center justify-center py-12" aria-busy="true">
-          <span className="h-8 w-8 animate-spin rounded-full border-4 border-primary border-t-transparent" />
-        </div>
+        <DashboardContainer>
+          <DashboardHeader
+            title="Sub-Chairperson Dashboard"
+            description="Coordinate ministry activities, follow up on responsibilities, and monitor progress."
+          />
+          <div className="space-y-8" aria-busy="true" aria-live="polite">
+            <DashboardSection title="Coordination Overview" titleAm="የመሪ ሁኔታ">
+              <KPIRow items={[]} state="loading" />
+            </DashboardSection>
+            <DashboardGrid>
+              <DashboardGridItem size="md">
+                <ListWidget title="Awaiting Executive Review" items={[]} state="loading" />
+              </DashboardGridItem>
+              <DashboardGridItem size="md">
+                <StatusSummaryWidget title="Report Pipeline" items={[]} state="loading" />
+              </DashboardGridItem>
+            </DashboardGrid>
+          </div>
+        </DashboardContainer>
       </PageShell>
     );
   }
@@ -78,7 +96,9 @@ export function SubChairpersonDashboardPage() {
       <DashboardContainer>
         <DashboardHeader
           title="Sub-Chairperson Dashboard"
+          titleAm="የምክትል ሰብሳቢ ዳሽቦርድ"
           description="Coordinate ministry activities, follow up on responsibilities, and monitor progress."
+          descriptionAm="የሚኒስትሪ ተግባራትን ያስተባብሩ፣ ኃላፊነቶችን ይከታተሉ እና እድገትን ይቆጣጠሩ።"
         />
 
         <div className="space-y-8">
@@ -129,12 +149,14 @@ export function SubChairpersonDashboardPage() {
                 {hasActivePlan ? (
                   <StatusSummaryWidget
                     title="Distributed Activities"
+                    titleAm="የተሰራጩ ተግባራት"
                     items={distributionSummary as StatusSummaryItem[]}
                     aria-label="Distribution progress summary"
                   />
                 ) : (
                   <ListWidget
                     title="Distributed Activities"
+                    titleAm="የተሰራጩ ተግባራት"
                     items={[]}
                     emptyTitle="No active plan"
                     emptyDescription="Distribution progress appears once a plan is activated."
@@ -159,6 +181,7 @@ export function SubChairpersonDashboardPage() {
           <DashboardSection title="Responsibilities" titleAm="ኃላፊነቶች">
             <ListWidget
               title="Distributed Plan Activities"
+              titleAm="የተሰራጩ የዕቅድ ተግባራት"
               description="Activities assigned to sub-departments from the active plan."
               items={assignmentItems}
               emptyTitle={hasActivePlan ? "No activities distributed yet" : "No active plan"}

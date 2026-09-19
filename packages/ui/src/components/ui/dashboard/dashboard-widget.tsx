@@ -13,6 +13,7 @@ import {
   CardTitle,
 } from "../card";
 import { Skeleton } from "../skeleton";
+import { useLocalizedText } from "./i18n-context";
 
 // ============================================================
 // WidgetHeader
@@ -26,13 +27,28 @@ interface WidgetHeaderProps extends React.HTMLAttributes<HTMLDivElement> {
   action?: React.ReactNode;
 }
 
-function WidgetHeader({ title, description, action, className, ...props }: WidgetHeaderProps) {
+function WidgetHeader({
+  title,
+  titleAm,
+  description,
+  descriptionAm,
+  action,
+  className,
+  ...props
+}: WidgetHeaderProps) {
+  // Phase 06 §22: render the Amharic variant when the shell locale is am.
+  const t = useLocalizedText();
+  const heading = t(title, titleAm) ?? title;
+  const headingDescription = t(description, descriptionAm);
+
   return (
     <CardHeader className={cn("pb-2", className)} {...props}>
       <div className="flex items-start justify-between gap-2">
         <div className="min-w-0 flex-1">
-          <CardTitle className="text-sm font-semibold">{title}</CardTitle>
-          {description && <CardDescription className="mt-0.5">{description}</CardDescription>}
+          <CardTitle className="text-sm font-semibold">{heading}</CardTitle>
+          {headingDescription && (
+            <CardDescription className="mt-0.5">{headingDescription}</CardDescription>
+          )}
         </div>
         {action && <CardAction>{action}</CardAction>}
       </div>

@@ -6,6 +6,7 @@ import { DashboardWidget, WidgetContent } from "./dashboard-widget";
 
 interface StatusSummaryWidgetProps extends React.HTMLAttributes<HTMLDivElement> {
   title?: string;
+  titleAm?: string;
   items: StatusSummaryItem[];
   state?: WidgetState;
   onRetry?: () => void;
@@ -17,6 +18,7 @@ const StatusSummaryWidget = React.forwardRef<HTMLDivElement, StatusSummaryWidget
     {
       className,
       title = "Status Summary",
+      titleAm,
       items,
       state = "default",
       onRetry,
@@ -31,6 +33,7 @@ const StatusSummaryWidget = React.forwardRef<HTMLDivElement, StatusSummaryWidget
       <DashboardWidget
         ref={ref}
         title={title}
+        titleAm={titleAm}
         headerAction={headerAction}
         state={state}
         onRetry={onRetry}

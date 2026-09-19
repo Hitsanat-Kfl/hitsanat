@@ -471,6 +471,156 @@ const kinetibebLeaderConfig: DashboardConfig = {
   ],
 };
 
+/**
+ * Sub-Chairperson dashboard — mirrors the implemented sections in
+ * sub-chairperson-dashboard.tsx (Phase 06): coordination overview,
+ * attention, activity/plan progress, responsibilities, upcoming,
+ * recent activity, quick actions.
+ */
+const subChairpersonConfig: DashboardConfig = {
+  role: "sub-chairperson",
+  sections: [
+    {
+      id: "coordination-overview",
+      title: "Coordination Overview",
+      titleAm: "የመሪ ሁኔታ",
+      widgets: [
+        {
+          id: "kpi-subdepartments",
+          type: "kpi",
+          title: "Sub-Departments",
+          size: "sm",
+          priority: 1,
+          visible: true,
+        },
+        {
+          id: "kpi-reports-in-review",
+          type: "kpi",
+          title: "Reports In Review",
+          size: "sm",
+          priority: 2,
+          visible: true,
+        },
+        {
+          id: "kpi-activities-in-progress",
+          type: "kpi",
+          title: "Activities In Progress",
+          size: "sm",
+          priority: 3,
+          visible: true,
+        },
+        {
+          id: "kpi-upcoming-activities",
+          type: "kpi",
+          title: "Upcoming Activities",
+          size: "sm",
+          priority: 4,
+          visible: true,
+        },
+      ],
+    },
+    {
+      id: "attention",
+      title: "Requires Attention",
+      titleAm: "የሚጠይቅ ትኩረት",
+      widgets: [
+        {
+          id: "review-queue",
+          type: "list",
+          title: "Awaiting Executive Review",
+          size: "md",
+          priority: 5,
+          visible: true,
+        },
+        {
+          id: "report-pipeline",
+          type: "status-summary",
+          title: "Report Pipeline",
+          size: "md",
+          priority: 6,
+          visible: true,
+        },
+      ],
+    },
+    {
+      id: "progress",
+      title: "Activity & Plan Progress",
+      titleAm: "የዕቅድ እድገት",
+      widgets: [
+        {
+          id: "distribution-progress",
+          type: "status-summary",
+          title: "Distributed Activities",
+          size: "md",
+          priority: 7,
+          visible: true,
+        },
+        {
+          id: "department-board",
+          type: "list",
+          title: "Department Status Board",
+          size: "md",
+          priority: 8,
+          visible: true,
+        },
+      ],
+    },
+    {
+      id: "responsibilities",
+      title: "Responsibilities",
+      titleAm: "ኃላፊነቶች",
+      widgets: [
+        {
+          id: "assignments",
+          type: "list",
+          title: "Distributed Plan Activities",
+          size: "full",
+          priority: 9,
+          visible: true,
+        },
+      ],
+    },
+    {
+      id: "upcoming",
+      title: "Upcoming Activities",
+      titleAm: "የሚመጡ ዝግጅቶች",
+      widgets: [
+        {
+          id: "upcoming-events",
+          type: "upcoming-events",
+          title: "Upcoming Activities",
+          size: "md",
+          priority: 10,
+          visible: true,
+        },
+      ],
+    },
+    {
+      id: "recent-activity",
+      title: "Recent Activity",
+      titleAm: "የቅርብ ጊዜ ተግባር",
+      widgets: [
+        {
+          id: "activity",
+          type: "activity",
+          title: "Recent Activity",
+          size: "md",
+          priority: 11,
+          visible: true,
+        },
+      ],
+    },
+    {
+      id: "actions",
+      title: "Quick Actions",
+      titleAm: "ፈጣን ድርጊቶች",
+      widgets: [
+        { id: "quick-actions", type: "quick-actions", size: "full", priority: 12, visible: true },
+      ],
+    },
+  ],
+};
+
 const superAdminConfig: DashboardConfig = {
   role: "super-admin",
   sections: [
@@ -612,7 +762,7 @@ const defaultConfig: DashboardConfig = {
 
 const configMap: Record<DashboardRole, DashboardConfig> = {
   chairperson: chairpersonConfig,
-  "sub-chairperson": defaultConfig,
+  "sub-chairperson": subChairpersonConfig,
   secretary: secretaryConfig,
   "timihrt-leader": timihrtLeaderConfig,
   "mezmur-leader": mezmurLeaderConfig,
@@ -632,6 +782,7 @@ export function getSectionsForRole(role: DashboardRole) {
 
 export {
   chairpersonConfig,
+  subChairpersonConfig,
   secretaryConfig,
   timihrtLeaderConfig,
   mezmurLeaderConfig,
