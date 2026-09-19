@@ -1,8 +1,24 @@
 "use client";
 
 import type * as React from "react";
-import { RouteGuard } from "@/features/auth";
-import { AppShell } from "@/features/shell";
+import { RouteGuard, useAuthUser } from "@/features/auth";
+import { AppShell, mapSessionRolesToNavRoles } from "@/features/shell";
+
+function AuthenticatedShell({ children }: { children: React.ReactNode }) {
+  const user = useAuthUser();
+  const roles = mapSessionRolesToNavRoles(user?.globalRoles ?? []);
+
+  return (
+    <AppShell
+      roles={roles.length > 0 ? roles : ["chairperson"]}
+      userName={user?.name}
+      userEmail={user?.email}
+      userRole={user?.role}
+    >
+      {children}
+    </AppShell>
+  );
+}
 
 interface DashboardLayoutProps {
   children: React.ReactNode;
@@ -11,7 +27,7 @@ interface DashboardLayoutProps {
 export default function DashboardLayout({ children }: DashboardLayoutProps) {
   return (
     <RouteGuard>
-      <AppShell>{children}</AppShell>
+      <AuthenticatedShell>{children}</AuthenticatedShell>
     </RouteGuard>
   );
 }

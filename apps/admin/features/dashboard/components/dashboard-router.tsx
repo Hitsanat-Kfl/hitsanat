@@ -5,6 +5,7 @@ import { useEffect } from "react";
 import { useAuthUser } from "@/features/auth";
 import { ChairpersonDashboardPage } from "./chairperson-dashboard-page";
 import { ExecutiveDashboardPage } from "./executive-dashboard-page";
+import { MezmurDashboardPage } from "./mezmur-dashboard";
 import { SecretaryDashboardPage } from "./secretary-dashboard";
 import { SubChairpersonDashboardPage } from "./sub-chairperson-dashboard";
 import { SuperAdminDashboardPage } from "./super-admin-dashboard";
@@ -28,6 +29,7 @@ function LoadingPane() {
  * - CHAIRPERSON        → Chairperson dashboard (ministry operations)
  * - SUB_CHAIRPERSON    → Vice-Chairperson dashboard (delegated oversight)
  * - SECRETARY          → Secretary dashboard (administrative operations)
+ * - MEZMUR_LEADER      → Mezmur dashboard (choir & music ministry)
  * - Sub-dept officer   → redirected to /sub-departments/<code>/dashboard
  *
  * This is presentation-level routing only — the RouteGuard still owns
@@ -42,7 +44,8 @@ export function DashboardRouter() {
     globalRoles.includes("SUPER_ADMIN") ||
     globalRoles.includes("CHAIRPERSON") ||
     globalRoles.includes("SUB_CHAIRPERSON") ||
-    globalRoles.includes("SECRETARY");
+    globalRoles.includes("SECRETARY") ||
+    globalRoles.includes("MEZMUR_LEADER");
 
   // Sub-department officers have no executive dashboard — send them to
   // their department's own dashboard.
@@ -70,6 +73,9 @@ export function DashboardRouter() {
   }
   if (globalRoles.includes("SECRETARY")) {
     return <SecretaryDashboardPage />;
+  }
+  if (globalRoles.includes("MEZMUR_LEADER")) {
+    return <MezmurDashboardPage />;
   }
 
   // Sub-dept officers redirect via the effect above.

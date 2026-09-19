@@ -19,6 +19,28 @@ import {
 // Roles come from the single source of truth in @/config/roles.
 export type UserRole = AdminRole;
 
+/**
+ * Maps session user globalRoles (UPPERCASE like "SUPER_ADMIN") to
+ * nav-config UserRole (lowercase with hyphens like "super-admin").
+ */
+const SESSION_ROLE_MAP: Record<string, UserRole> = {
+  SUPER_ADMIN: "super-admin",
+  CHAIRPERSON: "chairperson",
+  SUB_CHAIRPERSON: "sub-chairperson",
+  SECRETARY: "secretary",
+  TIMIHRT_LEADER: "timihrt-leader",
+  MEZMUR_LEADER: "mezmur-leader",
+  KUTITR_LEADER: "kutitr-leader",
+  EKD_LEADER: "ekd-leader",
+  KINETIBEB_LEADER: "kinetibeb-leader",
+};
+
+export function mapSessionRolesToNavRoles(globalRoles: string[]): UserRole[] {
+  return globalRoles
+    .map((role) => SESSION_ROLE_MAP[role])
+    .filter((role): role is UserRole => role !== undefined);
+}
+
 export interface NavItem {
   id: string;
   label: string;
