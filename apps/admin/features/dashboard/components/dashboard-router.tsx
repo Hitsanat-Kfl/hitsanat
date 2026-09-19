@@ -5,6 +5,7 @@ import { useEffect } from "react";
 import { useAuthUser } from "@/features/auth";
 import { ChairpersonDashboardPage } from "./chairperson-dashboard-page";
 import { ExecutiveDashboardPage } from "./executive-dashboard-page";
+import { SecretaryDashboardPage } from "./secretary-dashboard";
 import { SubChairpersonDashboardPage } from "./sub-chairperson-dashboard";
 import { SuperAdminDashboardPage } from "./super-admin-dashboard";
 
@@ -26,7 +27,7 @@ function LoadingPane() {
  * - SUPER_ADMIN        → Super Admin dashboard (system administration)
  * - CHAIRPERSON        → Chairperson dashboard (ministry operations)
  * - SUB_CHAIRPERSON    → Vice-Chairperson dashboard (delegated oversight)
- * - SECRETARY          → Executive dashboard (org-wide stats view)
+ * - SECRETARY          → Secretary dashboard (administrative operations)
  * - Sub-dept officer   → redirected to /sub-departments/<code>/dashboard
  *
  * This is presentation-level routing only — the RouteGuard still owns
@@ -68,7 +69,7 @@ export function DashboardRouter() {
     return <SubChairpersonDashboardPage />;
   }
   if (globalRoles.includes("SECRETARY")) {
-    return <ExecutiveDashboardPage />;
+    return <SecretaryDashboardPage />;
   }
 
   // Sub-dept officers redirect via the effect above.
