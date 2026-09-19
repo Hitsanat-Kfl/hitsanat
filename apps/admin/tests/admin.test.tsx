@@ -225,7 +225,7 @@ describe("DashboardRouter", () => {
     });
   });
 
-  it("renders the Executive dashboard for SECRETARY", async () => {
+  it("renders the Secretary dashboard for SECRETARY", async () => {
     render(
       <TestWrapper
         user={{
@@ -239,7 +239,7 @@ describe("DashboardRouter", () => {
     );
 
     await waitFor(() => {
-      expect(screen.getByText("Executive Dashboard")).toBeDefined();
+      expect(screen.getByText("Secretary Dashboard")).toBeDefined();
     });
   });
 

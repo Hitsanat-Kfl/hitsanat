@@ -107,18 +107,23 @@ const chairpersonConfig: DashboardConfig = {
   ],
 };
 
+/**
+ * Secretary dashboard — Phase 06: operational administrative workspace.
+ * Information hierarchy: Registration Overview → Pending Records / Attention →
+ * Children, Members & Families Overview → Recent Activity → Upcoming Activities → Quick Actions.
+ */
 const secretaryConfig: DashboardConfig = {
   role: "secretary",
   sections: [
     {
-      id: "overview",
-      title: "Overview",
-      titleAm: "አጠቃላይ ዕይታ",
+      id: "registration-overview",
+      title: "Registration Overview",
+      titleAm: "አጠቃላይ የምዝገባ ዕይታ",
       widgets: [
         {
-          id: "kpi-registrations",
+          id: "kpi-children",
           type: "kpi",
-          title: "Pending Registrations",
+          title: "Total Children",
           size: "sm",
           priority: 1,
           visible: true,
@@ -126,7 +131,7 @@ const secretaryConfig: DashboardConfig = {
         {
           id: "kpi-members",
           type: "kpi",
-          title: "Total Members",
+          title: "Active Members",
           size: "sm",
           priority: 2,
           visible: true,
@@ -134,15 +139,15 @@ const secretaryConfig: DashboardConfig = {
         {
           id: "kpi-families",
           type: "kpi",
-          title: "Families",
+          title: "Registered Families",
           size: "sm",
           priority: 3,
           visible: true,
         },
         {
-          id: "kpi-announcements",
+          id: "kpi-pending-records",
           type: "kpi",
-          title: "Announcements",
+          title: "Pending Records",
           size: "sm",
           priority: 4,
           visible: true,
@@ -150,49 +155,79 @@ const secretaryConfig: DashboardConfig = {
       ],
     },
     {
-      id: "registrations",
-      title: "Registrations & Records",
-      titleAm: "ምዝገባዎች",
+      id: "attention",
+      title: "Requires Attention",
+      titleAm: "የሚጠይቅ ትኩረት",
       widgets: [
         {
-          id: "approvals",
-          type: "approval-queue",
-          title: "Pending Approvals",
-          size: "md",
-          priority: 5,
-          visible: true,
-        },
-        {
-          id: "members-list",
+          id: "pending-records",
           type: "list",
-          title: "Recent Members",
-          size: "md",
-          priority: 6,
+          title: "Pending & Incomplete Records",
+          size: "full",
+          priority: 5,
           visible: true,
         },
       ],
     },
     {
-      id: "communications",
-      title: "Communications",
-      titleAm: "ማስተላለፍ",
+      id: "records-overview",
+      title: "Records Overview",
+      titleAm: "የመዝገቦች አጠቃላይ ዕይታ",
       widgets: [
         {
-          id: "announcements",
-          type: "announcement",
-          title: "Announcements",
+          id: "member-records-summary",
+          type: "status-summary",
+          title: "Member Records",
+          size: "md",
+          priority: 6,
+          visible: true,
+        },
+        {
+          id: "children-records-summary",
+          type: "status-summary",
+          title: "Children Records",
           size: "md",
           priority: 7,
           visible: true,
         },
+      ],
+    },
+    {
+      id: "recent-activity",
+      title: "Recent Activity",
+      titleAm: "የቅርብ ጊዜ ተግባር",
+      widgets: [
         {
           id: "activity",
           type: "activity",
-          title: "Recent Activity",
+          title: "Recent Administrative Activity",
           size: "md",
           priority: 8,
           visible: true,
         },
+      ],
+    },
+    {
+      id: "upcoming",
+      title: "Upcoming Activities",
+      titleAm: "የሚመጡ ዝግጅቶች",
+      widgets: [
+        {
+          id: "upcoming-events",
+          type: "upcoming-events",
+          title: "Upcoming Activities",
+          size: "md",
+          priority: 9,
+          visible: true,
+        },
+      ],
+    },
+    {
+      id: "actions",
+      title: "Quick Actions",
+      titleAm: "ፈጣን ድርጊቶች",
+      widgets: [
+        { id: "quick-actions", type: "quick-actions", size: "full", priority: 10, visible: true },
       ],
     },
   ],
