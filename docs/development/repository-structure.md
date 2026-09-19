@@ -23,6 +23,13 @@ Hitsanat/
 │   │   └── tsconfig.json
 │   ├── admin/                   # Administrative Next.js management console
 │   │   ├── app/                 # Admin shell, dashboard placeholders
+│   │   ├── features/            # Feature-based modules
+│   │   │   ├── auth/            # Auth route guard, auth user hook
+│   │   │   ├── dashboard/       # Role-aware dashboard system (components, hooks, config)
+│   │   │   ├── shell/           # App shell (sidebar, header, nav-config, search)
+│   │   │   ├── users/           # User account management (CRUD, password reset)
+│   │   │   ├── audit-logs/      # Audit log viewer
+│   │   │   └── permissions/     # Permission matrix reference view
 │   │   ├── public/
 │   │   ├── components.json      # shadcn configuration
 │   │   ├── next.config.ts
@@ -33,7 +40,19 @@ Hitsanat/
 │       ├── src/
 │       │   ├── config/          # Environment configuration
 │       │   ├── infrastructure/  # OpenAPI/Swagger & technical integrations
-│       │   ├── modules/         # Modular DDD domain modules (upcoming)
+│       │   ├── modules/         # Modular DDD domain modules
+│       │   │   ├── audit/       # Audit log domain (application, domain, infrastructure, presentation)
+│       │   │   ├── users/       # User management (controller, router, repository)
+│       │   │   ├── members/     # Member management
+│       │   │   ├── families/    # Family management
+│       │   │   ├── children/    # Children management
+│       │   │   ├── attendance/  # Attendance tracking
+│       │   │   ├── academic/    # Academic tracking
+│       │   │   ├── planning/    # Planning hierarchy
+│       │   │   ├── events/      # Event management
+│       │   │   ├── reports/     # Reporting & analytics
+│       │   │   ├── announcements/ # Announcements & portfolio
+│       │   │   └── sub-departments/ # Sub-department management
 │       │   ├── presentation/    # Express routers & controllers
 │       │   ├── shared/          # Cross-module shared utilities
 │       │   ├── app.ts           # Express app setup
@@ -55,6 +74,25 @@ Hitsanat/
 │   │   │   ├── health.ts
 │   │   │   └── index.ts
 │   │   └── package.json         # @repo/schemas
+│   ├── auth/                    # JWT verification, RBAC middleware
+│   │   ├── src/
+│   │   │   ├── index.ts         # requireAuth, requireScopePermission
+│   │   │   └── types.ts         # Auth types
+│   │   └── package.json         # @repo/auth
+│   ├── permissions/             # RBAC types, permission matrix, checker
+│   │   ├── src/
+│   │   │   ├── types.ts         # GlobalRole, ResourceType, ActionType enums
+│   │   │   ├── matrix.ts        # PERMISSION_MATRIX record
+│   │   │   ├── checker.ts       # hasGlobalPermission, hasSubDeptPermission
+│   │   │   ├── leadership.ts    # BR-009 One Leadership Post Rule
+│   │   │   ├── sub-dept-permissions.ts
+│   │   │   └── index.ts
+│   │   └── package.json         # @repo/permissions
+│   ├── validation/              # Zod validation schemas for API contracts
+│   │   ├── src/
+│   │   │   ├── index.ts
+│   │   │   └── schemas/
+│   │   └── package.json         # @repo/validation
 │   ├── ui/                      # Shared shadcn/ui React components
 │   │   ├── src/
 │   │   │   ├── components/      # Button, Card, Badge, etc.
@@ -108,9 +146,11 @@ To ensure clean architecture and prevent coupling:
 
 ```text
 apps/portfolio  ───►  @repo/ui, @repo/schemas, @repo/calendar, @repo/config
-apps/admin      ───►  @repo/ui, @repo/schemas, @repo/calendar, @repo/config
-apps/api        ───►  @repo/database, @repo/schemas, @repo/config
+apps/admin      ───►  @repo/ui, @repo/schemas, @repo/calendar, @repo/config, @repo/auth, @repo/permissions
+apps/api        ───►  @repo/database, @repo/schemas, @repo/config, @repo/auth, @repo/permissions
 @repo/database  ───►  PostgreSQL (Local / Supabase)
+@repo/auth      ───►  @repo/permissions
+@repo/permissions ──►  (no internal dependencies)
 ```
 
 ### Strict Architectural Boundaries:
@@ -137,6 +177,9 @@ apps/api        ───►  @repo/database, @repo/schemas, @repo/config
 | :--- | :--- | :--- |
 | `@repo/database` | `packages/database` | Drizzle ORM schema, migrations, connection pool client |
 | `@repo/schemas` | `packages/schemas` | Zod contracts, request/response validation schemas |
+| `@repo/auth` | `packages/auth` | JWT verification, requireAuth, requireScopePermission middleware, RBAC evaluation |
+| `@repo/permissions` | `packages/permissions` | RBAC role taxonomy, permission matrix, scope checker, leadership validation |
+| `@repo/validation` | `packages/validation` | Zod validation schemas for API request/response contracts |
 | `@repo/ui` | `packages/ui` | Shared shadcn/ui components (Button, Card, Badge, cn) |
 | `@repo/calendar` | `packages/calendar` | Ethiopian ↔ Gregorian calendar conversions (`ethiopian-calendar-new`) |
 | `@repo/config` | `packages/config` | Global configuration constants |

@@ -109,3 +109,22 @@ A member holds **at most one leadership post** across the whole organization:
 - Plain sub-department `Member` and sub-department `Secretary` roles may be held in any number of departments regardless of leadership status.
 
 Enforced in the users module use-cases and by a database trigger (`0004_one_leadership_post.sql`).
+
+### 4.2 BR-008: User Management Restriction
+
+User account management (create, update, reset password, deactivate) is restricted to `SUPER_ADMIN` and `CHAIRPERSON` global roles. This is enforced in:
+- `apps/api/src/modules/users/presentation/users.router.ts`
+- `apps/api/src/modules/audit/presentation/audit.router.ts`
+
+### 4.3 Super Admin Bypass
+
+The `SUPER_ADMIN` role bypasses all permission checks. This is a design decision: Super Admin has unrestricted access to all resources and actions.
+
+### 4.4 Super Admin UI Pages
+
+| Page | Route | Description |
+| :--- | :--- | :--- |
+| Super Admin Dashboard | `/super-admin` | System overview KPIs, user accounts, system health, activity feed |
+| User Management | `/users` | CRUD for user accounts, password reset, deactivation |
+| Audit Logs | `/audit-logs` | Chronological audit trail of administrative actions |
+| Permission Matrix | `/permissions` | Static reference view of role-based access control |

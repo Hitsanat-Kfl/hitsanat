@@ -56,7 +56,7 @@ Route guards protect admin pages from unauthorized access and enforce ADR-0007 (
 - Reference: `packages/permissions/` — Role constants
 
 ### 10. Expected Implementation
-Create a RouteGuard component that: checks session on navigation, redirects to login if unauthenticated, denies access to non-leadership members (ADR-0007), refreshes session on navigation.
+Create a RouteGuard component that: checks session on navigation, redirects to login if unauthenticated, denies access to non-leadership members (ADR-0007), refreshes session on navigation. The route guard uses `LEADERSHIP_ROLES = ["SUPER_ADMIN", "CHAIRPERSON", "SUB_CHAIRPERSON", "SECRETARY"]` to determine access.
 
 ### 11. Expected File Changes
 
@@ -420,12 +420,19 @@ Build sub-department scoped dashboards showing only department-specific data.
 ### 6. Repository References
 - `apps/admin/src/app/(authenticated)/dashboard/sub-department/` — CREATE
 
-### 7. Acceptance Criteria
+### 7. Related Code
+- Existing: `apps/admin/src/components/dashboard/` — Dashboard components
+
+### 8. Expected Implementation
+Create sub-department scoped dashboards. The `DashboardRouter` component routes users to role-specific dashboards based on their role: Super Admin, Chairperson, Vice-Chairperson, Secretary, Mezmur, and sub-department officers.
+
+### 9. Acceptance Criteria
 - [ ] Scoped to user's sub-department (RBAC)
 - [ ] Department-specific KPIs
 - [ ] Progress tracking for distributed activities
 - [ ] Attendance summary for department
 - [ ] Academic scores for Timihrt leaders
+- [ ] Dashboard routes to correct role-specific page
 
-### 8. Git Branch
+### 10. Git Branch
 `feature/fe2-010-subdepartment-dashboard`

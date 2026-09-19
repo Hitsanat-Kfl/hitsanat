@@ -8,7 +8,7 @@
 
 ## 1. System Module Inventory
 
-The system comprises 12 functional modules spanning administrative governance, operational execution, planning hierarchy, reporting, and external integrations.
+The system comprises 13 functional modules spanning administrative governance, operational execution, planning hierarchy, reporting, and external integrations.
 
 ```mermaid
 graph LR
@@ -34,6 +34,10 @@ graph LR
     subgraph Outreach & Channels
         M11[M-11: Announcements & Portfolio]
         M12[M-12: Telegram Service]
+    end
+    
+    subgraph System Administration
+        M13[M-13: System Administration]
     end
 ```
 
@@ -130,3 +134,10 @@ graph LR
 ### 2.12 Module M-12: Telegram Integration Service
 - **FR-12.1 (Decoupled Notification Service):** Standalone bot service polls or listens for published announcement events.
 - **FR-12.2 (Channel / Group Broadcasts):** Automatically posts formatted announcements, training schedules, and feast greetings to the Hitsanat Kifl Telegram group.
+
+### 2.13 Module M-13: System Administration
+- **FR-13.1 (User Account Management):** SUPER_ADMIN and CHAIRPERSON can create, list, update, reset passwords for, and deactivate user accounts. Enforced via BR-008.
+- **FR-13.2 (Audit Log Viewing):** SUPER_ADMIN and CHAIRPERSON can view a chronological audit trail of administrative actions (USER_CREATED, USER_DEACTIVATED, PASSWORD_RESET) with resource type, details payload, IP address, and timestamp.
+- **FR-13.3 (Permission Matrix Reference):** A static reference view showing role-based access control across all 11 resources and 5 action types (CRUD + Approve).
+- **FR-13.4 (Super Admin Dashboard):** Dedicated dashboard showing system overview KPIs (user accounts, active accounts, sub-departments, API health), deactivated accounts requiring attention, recently provisioned accounts, role distribution, system health status, and system activity feed.
+- **FR-13.5 (Dashboard Routing):** Role-to-dashboard routing: SUPER_ADMIN → Super Admin Dashboard, CHAIRPERSON → Chairperson Dashboard, SUB_CHAIRPERSON → Vice-Chairperson Dashboard, SECRETARY → Secretary Dashboard, MEZMUR_LEADER → Mezmur Dashboard, Sub-dept officers → redirected to their department's dashboard.

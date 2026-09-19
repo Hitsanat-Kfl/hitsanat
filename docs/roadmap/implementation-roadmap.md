@@ -67,3 +67,15 @@ gantt
 - **API:** Periodic report consolidation, public stats feed, announcement webhooks.
 - **Frontend / Worker:** Public portfolio website with live feast countdowns, Telegram broadcast worker.
 - **Acceptance Criteria:** Ekd generates consolidated quarterly reports; announcements publish to public website and Telegram group simultaneously.
+
+### Phase 6: System Administration & Super Admin Features
+- **Modules:** `apps/admin/features/dashboard`, `apps/admin/features/users`, `apps/admin/features/audit-logs`, `apps/admin/features/permissions`, `apps/admin/features/shell`.
+- **Packages:** `packages/auth`, `packages/permissions`.
+- **API:** User management (`/api/v1/users`), audit logs (`/api/v1/audit-logs`).
+- **Frontend:** Super Admin dashboard, User Management page, Audit Logs page, Permission Matrix page, Role-aware sidebar navigation.
+- **Acceptance Criteria:**
+  - Super Admin sees dedicated dashboard with system KPIs (user accounts, active accounts, sub-departments, API health)
+  - User management restricted to SUPER_ADMIN and CHAIRPERSON (BR-008)
+  - Audit trail records administrative actions (USER_CREATED, USER_DEACTIVATED, PASSWORD_RESET)
+  - Sidebar navigation filters items by role
+  - Dashboard routes to correct role-specific page
