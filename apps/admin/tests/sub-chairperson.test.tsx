@@ -1,5 +1,6 @@
 import { render, screen, waitFor } from "@testing-library/react";
-import { describe, expect, it, vi } from "vitest";
+import { beforeEach, describe, expect, it, vi } from "vitest";
+import { api } from "../lib/api-client";
 import { SubChairpersonDashboardPage } from "../features/dashboard/components/sub-chairperson-dashboard";
 import { I18nProvider, ShellProvider } from "../features/shell";
 
@@ -185,6 +186,14 @@ function renderDashboard() {
 }
 
 describe("Sub-Chairperson Dashboard (Phase 06)", () => {
+  beforeEach(() => {
+    // Tests below (skeleton, error) override api.get; restore the
+    // endpoint-keyed fixture resolution for every test.
+    vi.mocked(api.get).mockImplementation((endpoint: string) =>
+      Promise.resolve(fixtures.getFixture(endpoint))
+    );
+  });
+
   it("renders the dashboard header", async () => {
     renderDashboard();
 
@@ -292,5 +301,55 @@ describe("Sub-Chairperson Dashboard (Phase 06)", () => {
       expect(screen.getByText(/unauthorized/)).toBeDefined();
       expect(screen.getByText("Retry")).toBeDefined();
     });
+  });
+
+  it("renders the skeleton loading state before data arrives", async () => {
+    const { api } = await import("../lib/api-client");
+    vi.mocked(api.get).mockImplementation(() => new Promise(() => {}));
+
+    renderDashboard();
+
+    // aria-busy container marks the loading layout; header stays visible.
+    await waitFor(() => {
+      expect(screen.getByText("Sub-Chairperson Dashboard")).toBeDefined();
+    });
+    expect(document.querySelector("[aria-busy='true']")).not.toBeNull();
+  });
+
+  it("renders Amharic section titles when locale is am", async () => {
+    // AppShell bridges the shell locale into DashboardLocaleProvider in the
+    // real app; the test replicates that bridge with locale="am".
+    const { DashboardLocaleProvider } = await import("@repo/ui");
+    function AmharicWrapper({ children }: { children: React.ReactNode }) {
+      return (
+        <I18nProvider initialLocale="am">
+          <DashboardLocaleProvider locale="am">
+            <ShellProvider>{children}</ShellProvider>
+          </DashboardLocaleProvider>
+        </I18nProvider>
+      );
+    }
+
+    render(
+      <AmharicWrapper>
+        <SubChairpersonDashboardPage />
+      </AmharicWrapper>
+    );
+
+    await waitFor(() => {
+      expect(screen.getByText("የምክትል ሰብሳቢ ዳሽቦርድ")).toBeDefined();
+      expect(screen.getByText("የመሪ ሁኔታ")).toBeDefined();
+      expect(screen.getByText("ኃላፊነቶች")).toBeDefined();
+    });
+  });
+
+  it("renders English titles when locale is en", async () => {
+    renderDashboard();
+
+    await waitFor(() => {
+      expect(screen.getByText("Sub-Chairperson Dashboard")).toBeDefined();
+      expect(screen.getByText("Coordination Overview")).toBeDefined();
+    });
+    expect(screen.queryByText("የምክትል ሰብሳቢ ዳሽቦርድ")).toBeNull();
   });
 });
