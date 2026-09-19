@@ -8,12 +8,14 @@ export { ChairpersonDashboardPage } from "./components/chairperson-dashboard-pag
 export { ExecutiveDashboardPage } from "./components/executive-dashboard-page";
 export { SubChairpersonDashboardPage } from "./components/sub-chairperson-dashboard";
 export { SecretaryDashboardPage } from "./components/secretary-dashboard";
+export { MezmurDashboardPage } from "./components/mezmur-dashboard";
 export { DashboardRouter } from "./components/dashboard-router";
 export {
   useSubChairpersonDashboard,
   departmentDrillDownHref,
 } from "./hooks/use-sub-chairperson-dashboard";
 export { useSecretaryDashboard } from "./hooks/use-secretary-dashboard";
+export { useMezmurDashboard } from "./hooks/use-mezmur-dashboard";
 export type {
   DepartmentStatus,
   ReviewItem,
@@ -23,6 +25,7 @@ export type {
   IncompleteRecordItem,
   UseSecretaryDashboardResult,
 } from "./hooks/use-secretary-dashboard";
+export type { UseMezmurDashboardResult } from "./hooks/use-mezmur-dashboard";
 export type { AuditEntry } from "./hooks/use-audit-logs";
 export type {
   AdminUserRow,

@@ -324,13 +324,19 @@ const timihrtLeaderConfig: DashboardConfig = {
   ],
 };
 
+/**
+ * Mezmur Leader Dashboard — Phase 08: operational ministry workspace.
+ * Information hierarchy: Mezmur Overview → Attention / Preparation Required →
+ * Song & Assignment Overview → Mezmur Responsibilities → Upcoming Programs / Awdemerit →
+ * Recent Activity → Quick Actions.
+ */
 const mezmurLeaderConfig: DashboardConfig = {
   role: "mezmur-leader",
   sections: [
     {
       id: "overview",
-      title: "Overview",
-      titleAm: "አጠቃላይ ዕይታ",
+      title: "Mezmur Overview",
+      titleAm: "የመዝሙር አጠቃላይ ዕይታ",
       widgets: [
         {
           id: "kpi-members",
@@ -341,25 +347,25 @@ const mezmurLeaderConfig: DashboardConfig = {
           visible: true,
         },
         {
-          id: "kpi-songs",
+          id: "kpi-assignments",
           type: "kpi",
-          title: "Songs in Repertoire",
+          title: "Active Assignments",
           size: "sm",
           priority: 2,
           visible: true,
         },
         {
-          id: "kpi-practices",
+          id: "kpi-programs",
           type: "kpi",
-          title: "Weekly Practices",
+          title: "Upcoming Programs",
           size: "sm",
           priority: 3,
           visible: true,
         },
         {
-          id: "kpi-events",
+          id: "kpi-pending",
           type: "kpi",
-          title: "Upcoming Performances",
+          title: "Pending Preparation",
           size: "sm",
           priority: 4,
           visible: true,
@@ -367,49 +373,94 @@ const mezmurLeaderConfig: DashboardConfig = {
       ],
     },
     {
-      id: "schedules",
-      title: "Schedules & Assignments",
-      titleAm: "መርሐግብር",
+      id: "attention",
+      title: "Requires Attention",
+      titleAm: "የሚጠይቅ ትኩረት",
       widgets: [
         {
-          id: "events",
-          type: "upcoming-events",
-          title: "Upcoming Events",
-          size: "md",
+          id: "preparation-queue",
+          type: "list",
+          title: "Preparation Required",
+          size: "full",
           priority: 5,
-          visible: true,
-        },
-        {
-          id: "assignments",
-          type: "assignment",
-          title: "Practice Assignments",
-          size: "md",
-          priority: 6,
           visible: true,
         },
       ],
     },
     {
-      id: "progress",
-      title: "Progress",
-      titleAm: "ግንባታ",
+      id: "assignments-overview",
+      title: "Assignments & Progress",
+      titleAm: "ምደባዎች እና እድገት",
       widgets: [
         {
-          id: "planning",
-          type: "planning",
-          title: "Repertoire Progress",
+          id: "distribution-summary",
+          type: "status-summary",
+          title: "Plan Activities",
+          size: "md",
+          priority: 6,
+          visible: true,
+        },
+        {
+          id: "session-summary",
+          type: "status-summary",
+          title: "Practice & Sessions",
           size: "md",
           priority: 7,
           visible: true,
         },
+      ],
+    },
+    {
+      id: "responsibilities",
+      title: "Mezmur Responsibilities",
+      titleAm: "የመዝሙር ኃላፊነቶች",
+      widgets: [
+        {
+          id: "mezmur-assignments",
+          type: "list",
+          title: "Distributed Responsibilities",
+          size: "full",
+          priority: 8,
+          visible: true,
+        },
+      ],
+    },
+    {
+      id: "upcoming",
+      title: "Upcoming Programs",
+      titleAm: "የሚመጡ መርሐግብራት",
+      widgets: [
+        {
+          id: "upcoming-events",
+          type: "upcoming-events",
+          title: "Upcoming Programs & Awdemerit",
+          size: "md",
+          priority: 9,
+          visible: true,
+        },
+      ],
+    },
+    {
+      id: "recent-activity",
+      title: "Recent Activity",
+      titleAm: "የቅርብ ጊዜ ተግባር",
+      widgets: [
         {
           id: "activity",
           type: "activity",
           title: "Recent Activity",
           size: "md",
-          priority: 8,
+          priority: 10,
           visible: true,
         },
+      ],
+    },
+    {
+      id: "actions",
+      title: "Quick Actions",
+      titleAm: "ፈጣን ድርጊቶች",
+      widgets: [
+        { id: "quick-actions", type: "quick-actions", size: "full", priority: 11, visible: true },
       ],
     },
   ],
