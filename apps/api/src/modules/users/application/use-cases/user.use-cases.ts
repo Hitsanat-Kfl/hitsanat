@@ -1,6 +1,9 @@
 import { checkLeadershipExclusivity, type MembershipRow } from "@repo/permissions";
 import type { CreateUserInput, UpdateUserInput } from "@repo/validation";
 import {
+  AccountNotDeactivatedError,
+  AccountSelfDeactivationError,
+  LastAdminAccountError,
   LeaderMustBeMemberError,
   LeadershipConflictError,
   type MemberNotFoundError,
@@ -27,6 +30,10 @@ export interface SupabaseAdminService {
   updatePassword(authUserId: string, newPassword: string): Promise<void>;
   updateEmail(authUserId: string, newEmail: string): Promise<void>;
   deactivate(authUserId: string): Promise<void>;
+  /** PE-01 / FR-13.6: lift the auth-system ban so sign-in works again. */
+  reactivate(authUserId: string): Promise<void>;
+  /** PE-08 / FR-13.13: revoke all live sessions for the user. */
+  revokeSessions(authUserId: string): Promise<void>;
 }
 
 export type CreateUserWithMemberInput = Omit<CreateUserInput, "memberId"> & {
@@ -80,6 +87,13 @@ function assertLeadershipAllowed(params: {
       result.reason
     );
   }
+}
+
+/**
+ * PE-06 / FR-13.11: roles protected by the last-admin guard rail.
+ */
+function isExecutiveRole(role: string): boolean {
+  return role === "SUPER_ADMIN" || role === "CHAIRPERSON";
 }
 
 export class CreateUserAccountUseCase {
@@ -141,6 +155,22 @@ export class UpdateUserAccountUseCase {
     const user = await this.userRepository.findById(id);
     if (!user) throw new UserNotFoundError(id);
 
+    // PE-06 / FR-13.11 hardening: demoting the last active executive would
+    // leave the system without an administrator — same guard rail as
+    // deactivation applies to role changes.
+    if (
+      input.role &&
+      input.role !== user.role &&
+      user.status === "ACTIVE" &&
+      isExecutiveRole(user.role) &&
+      !isExecutiveRole(input.role)
+    ) {
+      const activeExecutives = await this.userRepository.countActiveExecutives();
+      if (activeExecutives <= 1) {
+        throw new LastAdminAccountError();
+      }
+    }
+
     // BR-009 direction 1: role change → check against existing memberships
     if (input.role && input.role !== user.role) {
       const existingMemberships = user.memberId
@@ -183,11 +213,27 @@ export class UpdateUserAccountUseCase {
     const updated = await this.userRepository.update(id, input);
 
     if (this.audit?.actor && this.audit.auditSink) {
+      // PE-02 / FR-13.7: record a field-level old → new diff (never secrets).
+      const diffs: string[] = [];
+      if (input.name !== undefined && input.name !== user.name) {
+        diffs.push(`name: ${user.name} → ${input.name}`);
+      }
+      if (input.email !== undefined && input.email !== user.email) {
+        diffs.push(`email: ${user.email} → ${input.email}`);
+      }
+      if (input.role !== undefined && input.role !== user.role) {
+        diffs.push(`role: ${user.role} → ${input.role}`);
+      }
+      if (input.memberId !== undefined && input.memberId !== user.memberId) {
+        diffs.push(`memberId: ${user.memberId ?? "null"} → ${input.memberId ?? "null"}`);
+      }
+      if (diffs.length === 0) diffs.push("no field changes");
+
       await this.audit.auditSink.record(this.audit.actor, {
         action: "USER_UPDATED",
         resourceType: "user",
         resourceId: updated.id,
-        payloadDiff: `fields=${Object.keys(input).join(",")}`,
+        payloadDiff: diffs.join("; "),
       });
     }
 
@@ -225,13 +271,34 @@ export class DeactivateUserUseCase {
     private readonly audit?: UserAuditContext
   ) {}
 
-  async execute(id: string): Promise<void> {
+  /**
+   * @param actorId id of the acting admin — required for the PE-06
+   *   self-deactivation guard rail. Passed explicitly so direct use-case
+   *   invocations (tests, scripts) cannot skip the check.
+   */
+  async execute(id: string, actorId?: string): Promise<void> {
     const user = await this.userRepository.findById(id);
     if (!user) throw new UserNotFoundError(id);
+
+    // PE-06 / FR-13.11: block deactivating your own account.
+    if (actorId && actorId === id) {
+      throw new AccountSelfDeactivationError();
+    }
+
+    // PE-06 / FR-13.11: block deactivating the last active executive.
+    if (isExecutiveRole(user.role)) {
+      const activeExecutives = await this.userRepository.countActiveExecutives();
+      if (activeExecutives <= 1) {
+        throw new LastAdminAccountError();
+      }
+    }
+
     // Ban the Supabase Auth account (blocks new logins immediately), then
-    // mark the local mirror as unverified.
+    // mark the local mirror as deactivated. emailVerified keeps its
+    // independent meaning (whether the email was confirmed) — the
+    // lifecycle lives in `status` (migration 0006).
     await this.supabaseAdmin.deactivate(user.id);
-    await this.userRepository.setEmailVerified(id, false);
+    await this.userRepository.setStatus(id, "DEACTIVATED", new Date());
 
     if (this.audit?.actor && this.audit.auditSink) {
       await this.audit.auditSink.record(this.audit.actor, {
@@ -244,4 +311,71 @@ export class DeactivateUserUseCase {
   }
 }
 
-export type { MemberNotFoundError, UserAccountExistsError, UserNotFoundError };
+/**
+ * PE-01 / FR-13.6: restore a deactivated account (unban in Supabase Auth
+ * and flip the local status back to ACTIVE).
+ */
+export class ReactivateUserUseCase {
+  constructor(
+    private readonly userRepository: UserRepository,
+    private readonly supabaseAdmin: SupabaseAdminService,
+    private readonly audit?: UserAuditContext
+  ) {}
+
+  async execute(id: string): Promise<void> {
+    const user = await this.userRepository.findById(id);
+    if (!user) throw new UserNotFoundError(id);
+    if (user.status !== "DEACTIVATED") {
+      throw new AccountNotDeactivatedError(id);
+    }
+
+    await this.supabaseAdmin.reactivate(user.id);
+    await this.userRepository.setStatus(id, "ACTIVE", null);
+
+    if (this.audit?.actor && this.audit.auditSink) {
+      await this.audit.auditSink.record(this.audit.actor, {
+        action: "USER_REACTIVATED",
+        resourceType: "user",
+        resourceId: user.id,
+        payloadDiff: `email=${user.email}`,
+      });
+    }
+  }
+}
+
+/**
+ * PE-08 / FR-13.13: force sign-out of a user's live sessions
+ * (e.g. stolen credentials) independent of account deactivation.
+ */
+export class RevokeUserSessionsUseCase {
+  constructor(
+    private readonly userRepository: UserRepository,
+    private readonly supabaseAdmin: SupabaseAdminService,
+    private readonly audit?: UserAuditContext
+  ) {}
+
+  async execute(id: string): Promise<void> {
+    const user = await this.userRepository.findById(id);
+    if (!user) throw new UserNotFoundError(id);
+
+    await this.supabaseAdmin.revokeSessions(user.id);
+
+    if (this.audit?.actor && this.audit.auditSink) {
+      await this.audit.auditSink.record(this.audit.actor, {
+        action: "SESSIONS_REVOKED",
+        resourceType: "user",
+        resourceId: user.id,
+        payloadDiff: `email=${user.email}`,
+      });
+    }
+  }
+}
+
+export type {
+  AccountNotDeactivatedError,
+  AccountSelfDeactivationError,
+  LastAdminAccountError,
+  MemberNotFoundError,
+  UserAccountExistsError,
+  UserNotFoundError,
+};

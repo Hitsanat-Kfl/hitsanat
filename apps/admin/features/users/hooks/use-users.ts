@@ -13,6 +13,9 @@ export interface ManagedUser {
   role: string;
   memberId: string | null;
   emailVerified: boolean;
+  /** Lifecycle status: ACTIVE or DEACTIVATED (FR-13.6, migration 0006). */
+  status: "ACTIVE" | "DEACTIVATED";
+  deactivatedAt: string | null;
   image: string | null;
   subDepartments: Array<{
     subDepartmentId: string;
@@ -55,10 +58,14 @@ export interface CreateUserPayload {
   memberId?: string;
 }
 
-/**
- * Maps API failures to operator-friendly messages. The users endpoints
- * return { success: false, error: { code, message } }.
- */
+export interface UpdateUserPayload {
+  name?: string;
+  email?: string;
+  role?: string;
+  memberId?: string | null;
+}
+
+/** PE-02 error codes from the users API. */
 export function userActionErrorMessage(err: unknown): string {
   const code = (err as { error?: { code?: string } })?.error?.code;
   switch (code) {
@@ -72,6 +79,12 @@ export function userActionErrorMessage(err: unknown): string {
       return "Account provisioning is not configured on the server (missing service-role key).";
     case "FORBIDDEN":
       return "You do not have permission to manage user accounts.";
+    case "SELF_DEACTIVATION":
+      return "You cannot deactivate your own account (guard rail).";
+    case "LAST_ADMIN":
+      return "Cannot deactivate the last remaining SUPER_ADMIN/CHAIRPERSON account (guard rail).";
+    case "NOT_DEACTIVATED":
+      return "This account is not deactivated — nothing to reactivate.";
     case "VALIDATION_ERROR":
       return "Please check the form values — some fields are invalid.";
     case "NOT_FOUND":
@@ -96,6 +109,12 @@ interface UseUsersResult {
   createUser: (payload: CreateUserPayload) => Promise<void>;
   resetPassword: (userId: string, newPassword: string) => Promise<void>;
   deactivate: (userId: string) => Promise<void>;
+  /** PE-02 / FR-13.7: edit name, email, role, member link. */
+  updateUser: (userId: string, payload: UpdateUserPayload) => Promise<void>;
+  /** PE-01 / FR-13.6: restore a deactivated account. */
+  reactivate: (userId: string) => Promise<void>;
+  /** PE-08 / FR-13.13: force sign-out of live sessions. */
+  revokeSessions: (userId: string) => Promise<void>;
 }
 
 export function useUsers(initialFilters: UserFilters = {}): UseUsersResult {
@@ -164,6 +183,38 @@ export function useUsers(initialFilters: UserFilters = {}): UseUsersResult {
     [fetchUsers]
   );
 
+  const updateUser = useCallback(
+    async (userId: string, payload: UpdateUserPayload) => {
+      try {
+        await api.patch(`/users/${userId}`, payload);
+        await fetchUsers();
+      } catch (err) {
+        throw new Error(userActionErrorMessage(err));
+      }
+    },
+    [fetchUsers]
+  );
+
+  const reactivate = useCallback(
+    async (userId: string) => {
+      try {
+        await api.post(`/users/${userId}/reactivate`, {});
+        await fetchUsers();
+      } catch (err) {
+        throw new Error(userActionErrorMessage(err));
+      }
+    },
+    [fetchUsers]
+  );
+
+  const revokeSessions = useCallback(async (userId: string) => {
+    try {
+      await api.post(`/users/${userId}/revoke-sessions`, {});
+    } catch (err) {
+      throw new Error(userActionErrorMessage(err));
+    }
+  }, []);
+
   return {
     users,
     pagination,
@@ -175,5 +226,8 @@ export function useUsers(initialFilters: UserFilters = {}): UseUsersResult {
     createUser,
     resetPassword,
     deactivate,
+    updateUser,
+    reactivate,
+    revokeSessions,
   };
 }

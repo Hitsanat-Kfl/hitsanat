@@ -122,6 +122,37 @@ export class SupabaseAdminAuthService implements SupabaseAdminService {
       throw new Error(`Supabase Auth deactivation failed: ${supabaseErrorMessage(error)}`);
     }
   }
+
+  /**
+   * PE-01 / FR-13.6: lift the ban placed by deactivate() and clear the
+   * deactivation metadata so the user can sign in again.
+   */
+  async reactivate(authUserId: string): Promise<void> {
+    const supabase = sharedAdminClient();
+
+    const { error } = await supabase.auth.admin.updateUserById(authUserId, {
+      ban_duration: "none",
+      user_metadata: { deactivated: false },
+    });
+
+    if (error) {
+      throw new Error(`Supabase Auth reactivation failed: ${supabaseErrorMessage(error)}`);
+    }
+  }
+
+  /**
+   * PE-08 / FR-13.13: revoke every live session for the user (force
+   * sign-out), independent of account deactivation.
+   */
+  async revokeSessions(authUserId: string): Promise<void> {
+    const supabase = sharedAdminClient();
+
+    const { error } = await supabase.auth.admin.signOut(authUserId);
+
+    if (error) {
+      throw new Error(`Supabase Auth session revocation failed: ${supabaseErrorMessage(error)}`);
+    }
+  }
 }
 
 export { SupabaseAdminServiceUnavailableError };

@@ -31,13 +31,13 @@ export function AppSidebar({ roles = ["chairperson"], className }: AppSidebarPro
   return (
     <aside
       className={cn(
-        "hidden md:flex flex-col border-r border-border bg-card transition-all duration-200",
+        "hidden md:flex flex-col border-r admin-sidebar transition-all duration-200",
         sidebarCollapsed ? "w-16" : "w-64",
         className
       )}
       aria-label="Sidebar navigation"
     >
-      <div className="flex h-16 items-center justify-between border-b border-border px-4">
+      <div className="flex h-16 items-center justify-between border-b admin-sidebar-border-b px-4">
         {!sidebarCollapsed && (
           <Link href="/" className="flex items-center gap-2">
             <div className="flex h-8 w-8 items-center justify-center rounded-md bg-primary text-primary-foreground text-sm font-bold">
@@ -72,7 +72,7 @@ export function AppSidebar({ roles = ["chairperson"], className }: AppSidebarPro
         </nav>
       </ScrollArea>
 
-      <div className="border-t border-border p-2">
+      <div className="border-t admin-sidebar-border-b p-2">
         <Button
           variant="ghost"
           size="icon"

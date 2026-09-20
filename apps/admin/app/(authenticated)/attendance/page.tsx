@@ -1,9 +1,9 @@
 "use client";
 
-import { Badge, Button, Card, CardContent, EmptyState, Spinner } from "@repo/ui";
+import { Badge, Button, Card, CardContent } from "@repo/ui";
 import Link from "next/link";
 import { useAttendanceSessions } from "@/features/attendance";
-import { PageShell } from "@/features/shell";
+import { AlertBanner, PageEmpty, PageLoading, PageShell } from "@/features/shell";
 import type { SessionStatus } from "../../../lib/types";
 
 const statusVariant: Record<SessionStatus, "default" | "secondary" | "destructive" | "outline"> = {
@@ -27,14 +27,12 @@ export default function AttendancePage() {
         </Button>
       }
     >
-      {error && <div className="mb-4 rounded-md bg-red-50 p-4 text-red-700">{error}</div>}
+      {error && <AlertBanner message={error} className="mb-4" />}
 
       {loading ? (
-        <div className="flex justify-center py-12">
-          <Spinner size="lg" />
-        </div>
+        <PageLoading />
       ) : sessions.length === 0 ? (
-        <EmptyState
+        <PageEmpty
           title="No sessions found"
           description="No attendance sessions have been created yet."
         />
@@ -45,7 +43,7 @@ export default function AttendancePage() {
               <Card className="transition-shadow hover:shadow-md">
                 <CardContent className="p-4">
                   <div className="mb-2 flex items-center justify-between">
-                    <span className="text-sm font-medium text-gray-500">
+                    <span className="text-sm font-medium text-muted-foreground">
                       {new Date(session.sessionDate).toLocaleDateString("en-ET", {
                         weekday: "short",
                         year: "numeric",
@@ -58,7 +56,7 @@ export default function AttendancePage() {
                     </Badge>
                   </div>
                   <h3 className="font-semibold">{session.topic || session.sessionType}</h3>
-                  <p className="mt-1 text-sm text-gray-500">{session.sessionType}</p>
+                  <p className="mt-1 text-sm text-muted-foreground">{session.sessionType}</p>
                 </CardContent>
               </Card>
             </Link>

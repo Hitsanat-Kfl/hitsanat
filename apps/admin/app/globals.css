@@ -1,1 +1,107 @@
 @import "@repo/ui/globals.css";
+
+/* === Admin-specific warm surfaces === */
+:root {
+  --admin-sidebar: 340 25% 93%;
+  --admin-sidebar-border: 340 20% 85%;
+  --admin-login-panel: 340 45% 35%;
+  --admin-login-panel-text: 0 0% 100%;
+  --admin-header-warm: 43 35% 95%;
+}
+
+.dark {
+  --admin-sidebar: 340 15% 12%;
+  --admin-sidebar-border: 340 12% 18%;
+  --admin-login-panel: 340 45% 20%;
+  --admin-login-panel-text: 0 0% 100%;
+  --admin-header-warm: 43 20% 10%;
+}
+
+/* === Login panel cross pattern === */
+.login-cross-pattern {
+  background-color: hsl(var(--admin-login-panel));
+  position: relative;
+  overflow: hidden;
+}
+
+.login-cross-pattern::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  opacity: 0.08;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='60' height='60'%3E%3Cpath d='M30 10 L30 50 M10 30 L50 30 M20 20 L40 40 M40 20 L20 40' stroke='white' stroke-width='1.5' fill='none'/%3E%3Cpath d='M30 5 L33 10 L30 15 L27 10 Z' fill='white' opacity='0.5'/%3E%3Cpath d='M30 45 L33 50 L30 55 L27 50 Z' fill='white' opacity='0.5'/%3E%3Cpath d='M5 30 L10 33 L15 30 L10 27 Z' fill='white' opacity='0.5'/%3E%3Cpath d='M45 30 L50 33 L55 30 L50 27 Z' fill='white' opacity='0.5'/%3E%3C/svg%3E");
+  background-size: 60px 60px;
+  pointer-events: none;
+}
+
+/* === Sidebar warm tint === */
+.admin-sidebar {
+  background-color: hsl(var(--admin-sidebar));
+  border-color: hsl(var(--admin-sidebar-border));
+  position: relative;
+}
+
+.admin-sidebar::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  opacity: 0.04;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='60' height='60'%3E%3Cpath d='M30 10 L30 50 M10 30 L50 30 M20 20 L40 40 M40 20 L20 40' stroke='currentColor' stroke-width='1.5' fill='none'/%3E%3Cpath d='M30 5 L33 10 L30 15 L27 10 Z' fill='currentColor' opacity='0.5'/%3E%3Cpath d='M30 45 L33 50 L30 55 L27 50 Z' fill='currentColor' opacity='0.5'/%3E%3Cpath d='M5 30 L10 33 L15 30 L10 27 Z' fill='currentColor' opacity='0.5'/%3E%3Cpath d='M45 30 L50 33 L55 30 L50 27 Z' fill='currentColor' opacity='0.5'/%3E%3C/svg%3E");
+  background-size: 60px 60px;
+  pointer-events: none;
+}
+
+.admin-sidebar-border-b {
+  border-color: hsl(var(--admin-sidebar-border));
+}
+
+/* === Dashboard header warm === */
+.admin-header {
+  background-color: hsl(var(--admin-header-warm));
+  border-color: hsl(var(--admin-sidebar-border));
+}
+
+/* === Mobile nav warm === */
+.admin-mobile-nav {
+  background-color: hsl(var(--admin-sidebar));
+  border-color: hsl(var(--admin-sidebar-border));
+}
+
+/* === Browser surfaces === */
+
+/* Focus ring theming — match admin primary */
+:focus-visible {
+  outline: 2px solid hsl(var(--primary));
+  outline-offset: 2px;
+}
+
+/* Text selection */
+::selection {
+  background-color: hsl(var(--primary) / 0.2);
+  color: hsl(var(--foreground));
+}
+
+/* Scrollbar theming */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: hsl(var(--muted));
+}
+
+::-webkit-scrollbar-thumb {
+  background: hsl(var(--border-strong));
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: hsl(var(--muted-foreground));
+}
+
+/* Firefox scrollbar */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: hsl(var(--border-strong)) hsl(var(--muted));
+}

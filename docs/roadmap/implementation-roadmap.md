@@ -79,3 +79,28 @@ gantt
   - Audit trail records administrative actions (USER_CREATED, USER_DEACTIVATED, PASSWORD_RESET)
   - Sidebar navigation filters items by role
   - Dashboard routes to correct role-specific page
+
+### Phase 6.1: Super Admin Planned Enhancements (v2.2 — Proposed)
+
+> From the September 2026 Super Admin review session. Requirement text: FR-13.6 – FR-13.13; full descriptions: system documentation § 7.10.6.
+
+- **Modules:** `apps/admin/features/users`, `apps/admin/features/audit-logs`, `apps/admin/features/dashboard`.
+- **API:** `POST /users/:id/reactivate`, `POST /users/:id/revoke-sessions`; wire audit filters/export into `/api/v1/audit-logs`; guard rails in the users use-cases.
+- **Priority order:**
+  1. **Account reactivation** (FR-13.6) — closes the deactivate/reactivate loop flagged by the dashboard; new audit action `USER_REACTIVATED`.
+  2. **Edit user / role reassignment** (FR-13.7) — expose the existing unused `PATCH /users/:id` in an edit dialog; validate BR-007/BR-009 on role changes.
+  3. **Account self-protection guard rails** (FR-13.11) — no self-deactivation; no deactivation of the last active SUPER_ADMIN/CHAIRPERSON.
+  4. **Audit log filters & CSV export** (FR-13.10).
+  5. **Searchable member picker** (FR-13.8) — replace raw UUID member linking.
+  6. **Session revocation** (FR-13.13) — force sign-out, audit action `SESSIONS_REVOKED`.
+  7. **Break-glass action logging** (FR-13.12) — audit all writes performed under the SUPER_ADMIN bypass.
+  8. **Leadership handover workflow** (FR-13.9) — guided annual role-transfer sequence.
+- **Deferred:** dependency health checks (DB/Supabase/Telegram), data export for leadership transitions, email invitation links (see system documentation § 7.10.6 "Lower-priority candidates").
+- **Open decision:** permission overrides scope — see `docs/open-decisions.md` OD-05.
+- **Acceptance Criteria:**
+  - A deactivated account can be reactivated from `/users` and from the dashboard's deactivated-accounts widget
+  - A user's role can be changed after creation without recreating the account
+  - Deactivating the acting admin or the last remaining admin is rejected with a clear error
+  - Audit trail can be filtered by action, date range, and actor, and exported to CSV
+  - Live sessions of a user can be revoked without deactivating the account
+  - All SUPER_ADMIN bypass write actions appear in the audit trail

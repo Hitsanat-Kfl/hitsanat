@@ -3,7 +3,8 @@
 import {
   Badge,
   Button,
-  Spinner,
+  Input,
+  Select,
   Table,
   TableBody,
   TableCell,
@@ -11,9 +12,14 @@ import {
   TableHeader,
   TableRow,
 } from "@repo/ui";
-import { RefreshCw } from "lucide-react";
-import { PageShell } from "@/features/shell";
-import { formatAuditAction, useAuditLogEntries } from "../hooks/use-audit-log-entries";
+import { Download, RefreshCw } from "lucide-react";
+import { AlertBanner, PageLoading, PagePagination, PageShell } from "@/features/shell";
+import { ActorPicker } from "./actor-picker";
+import {
+  AUDIT_ACTION_FILTERS,
+  formatAuditAction,
+  useAuditLogEntries,
+} from "../hooks/use-audit-log-entries";
 
 function formatDate(value: string): string {
   const parsed = new Date(value);
@@ -30,13 +36,22 @@ function formatDate(value: string): string {
 
 function actionBadgeVariant(action: string): "default" | "secondary" | "destructive" | "outline" {
   if (action === "USER_DEACTIVATED") return "destructive";
-  if (action === "USER_CREATED") return "default";
-  if (action === "PASSWORD_RESET") return "secondary";
+  if (action === "USER_CREATED" || action === "USER_REACTIVATED") return "default";
+  if (action === "PASSWORD_RESET" || action === "SESSIONS_REVOKED") return "secondary";
+  if (action === "BYPASS_ACTION") return "destructive";
   return "outline";
 }
 
+/**
+ * PE-05 / FR-13.10: audit trail with filters (action, actor, date range),
+ * server-side pagination, and CSV export for incident review.
+ */
 export default function AuditLogsPage() {
-  const { entries, loading, error, refresh } = useAuditLogEntries(100);
+  const { entries, pagination, filters, setFilters, loading, error, refresh, exportCsv } =
+    useAuditLogEntries();
+
+  const totalPages = pagination?.totalPages ?? 1;
+  const currentPage = pagination?.page ?? 1;
 
   return (
     <PageShell
@@ -44,26 +59,59 @@ export default function AuditLogsPage() {
       title="Audit Logs"
       description="Track administrative actions across the system."
       actions={
-        <Button variant="outline" size="sm" onClick={refresh} disabled={loading}>
-          <RefreshCw className={`h-4 w-4 ${loading ? "animate-spin" : ""}`} aria-hidden="true" />
-          Refresh
-        </Button>
+        <div className="flex gap-2">
+          <Button variant="outline" size="sm" onClick={exportCsv}>
+            <Download className="h-4 w-4" aria-hidden="true" />
+            Export CSV
+          </Button>
+          <Button variant="outline" size="sm" onClick={refresh} disabled={loading}>
+            <RefreshCw className={`h-4 w-4 ${loading ? "animate-spin" : ""}`} aria-hidden="true" />
+            Refresh
+          </Button>
+        </div>
       }
     >
       <div className="space-y-4">
-        {error && (
-          <div role="alert" className="rounded-md bg-destructive/10 p-4 text-destructive">
-            {error}
-            <button type="button" onClick={refresh} className="ml-3 underline underline-offset-2">
-              Retry
-            </button>
-          </div>
-        )}
+        {/* PE-05 filters */}
+        <div className="flex flex-col gap-3 sm:flex-row">
+          <Select
+            value={filters.action ?? ""}
+            onChange={(e) =>
+              setFilters({ ...filters, action: e.target.value || undefined, page: 1 })
+            }
+            aria-label="Filter by action"
+            className="sm:max-w-56"
+          >
+            {AUDIT_ACTION_FILTERS.map((action) => (
+              <option key={action || "all"} value={action}>
+                {action ? formatAuditAction(action) : "All actions"}
+              </option>
+            ))}
+          </Select>
+          <ActorPicker
+            value={filters.operatorId ?? null}
+            onChange={(actor) => setFilters({ ...filters, operatorId: actor?.id, page: 1 })}
+          />
+          <Input
+            type="date"
+            value={filters.from ?? ""}
+            onChange={(e) => setFilters({ ...filters, from: e.target.value || undefined, page: 1 })}
+            aria-label="From date"
+            className="sm:max-w-40"
+          />
+          <Input
+            type="date"
+            value={filters.to ?? ""}
+            onChange={(e) => setFilters({ ...filters, to: e.target.value || undefined, page: 1 })}
+            aria-label="To date"
+            className="sm:max-w-40"
+          />
+        </div>
+
+        {error && <AlertBanner message={error} />}
 
         {loading ? (
-          <div className="flex items-center justify-center py-12" aria-busy="true">
-            <Spinner size="lg" />
-          </div>
+          <PageLoading aria-busy="true" />
         ) : (
           <>
             <div className="rounded-md border">
@@ -118,9 +166,16 @@ export default function AuditLogsPage() {
               </Table>
             </div>
 
-            <p className="text-sm text-muted-foreground">
-              Showing {entries.length} most recent entries.
-            </p>
+            <div className="flex items-center justify-between text-sm text-muted-foreground">
+              <span>
+                {pagination ? `${pagination.total} entr(ies)` : `${entries.length} entries`}
+              </span>
+              <PagePagination
+                page={currentPage}
+                totalPages={totalPages}
+                onPageChange={(page) => setFilters({ ...filters, page })}
+              />
+            </div>
           </>
         )}
       </div>

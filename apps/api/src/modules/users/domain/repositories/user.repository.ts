@@ -11,6 +11,10 @@ export interface UserWithSubDepartments {
   role: string;
   memberId: string | null;
   emailVerified: boolean;
+  /** Lifecycle status: ACTIVE or DEACTIVATED (FR-13.6). */
+  status: "ACTIVE" | "DEACTIVATED";
+  /** When the account was deactivated (null while active). */
+  deactivatedAt: Date | null;
   image: string | null;
   subDepartments: Array<{
     subDepartmentId: string;
@@ -57,4 +61,18 @@ export interface UserRepository {
    */
   getSubDepartmentCodes(ids: string[]): Promise<Map<string, string>>;
   setEmailVerified(id: string, verified: boolean): Promise<void>;
+  /**
+   * PE-06 / FR-13.11: count active executive accounts (SUPER_ADMIN or
+   * CHAIRPERSON) for the last-admin guard rail.
+   */
+  countActiveExecutives(): Promise<number>;
+  /**
+   * PE-01 / FR-13.6: mark the account ACTIVE (Supabase unban happens in
+   * the auth adapter). Returns the updated row.
+   */
+  setStatus(
+    id: string,
+    status: "ACTIVE" | "DEACTIVATED",
+    deactivatedAt: Date | null
+  ): Promise<void>;
 }

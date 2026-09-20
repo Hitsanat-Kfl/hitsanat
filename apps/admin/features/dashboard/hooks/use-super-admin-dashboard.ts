@@ -16,6 +16,9 @@ export interface AdminUserRow {
   role: string;
   memberId: string | null;
   emailVerified: boolean;
+  /** Lifecycle status: ACTIVE or DEACTIVATED (FR-13.6, migration 0006). */
+  status: "ACTIVE" | "DEACTIVATED";
+  deactivatedAt: string | null;
   subDepartments: Array<{
     subDepartmentId: string;
     code: string;
@@ -40,12 +43,67 @@ export interface RoleCount {
   count: number;
 }
 
+/**
+ * Leadership Roster Matrix entry (dashboards.md § 1.3): every leadership
+ * post in the system — executive roles plus sub-department Leader /
+ * Sub-Leader posts — with BR-009 conflict detection.
+ */
+export interface RosterEntry {
+  userId: string;
+  name: string;
+  email: string;
+  posts: string[];
+  /** BR-009: the member holds more than one leadership post. */
+  conflict: boolean;
+  status: "ACTIVE" | "DEACTIVATED";
+}
+
+const EXECUTIVE_ROLES = new Set(["SUPER_ADMIN", "CHAIRPERSON", "SUB_CHAIRPERSON", "SECRETARY"]);
+const SUB_DEPT_LEADERSHIP_ROLES = new Set(["Leader", "Sub-Leader"]);
+
+function isLeadershipSubDeptRole(role: string): boolean {
+  return SUB_DEPT_LEADERSHIP_ROLES.has(role);
+}
+
+/**
+ * Builds the leadership roster from user rows. Executive global roles and
+ * sub-department Leader/Sub-Leader memberships count as posts; anything
+ * more than one post per member is a BR-009 conflict.
+ */
+function buildRoster(users: AdminUserRow[]): RosterEntry[] {
+  const entries: RosterEntry[] = [];
+  for (const user of users) {
+    const posts: string[] = [];
+    if (EXECUTIVE_ROLES.has(user.role)) {
+      posts.push(`${user.role} (global)`);
+    }
+    for (const sd of user.subDepartments) {
+      if (isLeadershipSubDeptRole(sd.role)) {
+        posts.push(`${sd.role} — ${sd.code}`);
+      }
+    }
+    if (posts.length === 0) continue;
+    entries.push({
+      userId: user.id,
+      name: user.name,
+      email: user.email,
+      posts,
+      conflict: posts.length > 1,
+      status: user.status,
+    });
+  }
+  return entries.sort(
+    (a, b) => Number(b.conflict) - Number(a.conflict) || a.name.localeCompare(b.name)
+  );
+}
+
 export interface UseSuperAdminDashboardResult {
   kpis: KPIData[];
   deactivatedAccounts: AdminUserRow[];
   verificationSummary: StatusSummaryItem[];
   recentAccounts: AdminUserRow[];
   roleCounts: RoleCount[];
+  leadershipRoster: RosterEntry[];
   health: ApiHealth | null;
   healthError: string | null;
   quickActions: QuickAction[];
@@ -82,6 +140,7 @@ export function useSuperAdminDashboard(): UseSuperAdminDashboardResult {
   const [verificationSummary, setVerificationSummary] = useState<StatusSummaryItem[]>([]);
   const [recentAccounts, setRecentAccounts] = useState<AdminUserRow[]>([]);
   const [roleCounts, setRoleCounts] = useState<RoleCount[]>([]);
+  const [leadershipRoster, setLeadershipRoster] = useState<RosterEntry[]>([]);
   const [health, setHealth] = useState<ApiHealth | null>(null);
   const [healthError, setHealthError] = useState<string | null>(null);
   const [quickActions] = useState<QuickAction[]>([
@@ -148,8 +207,10 @@ export function useSuperAdminDashboard(): UseSuperAdminDashboardResult {
     const total = usersRes.value.pagination?.total ?? users.length;
     const departments =
       departmentsRes.status === "fulfilled" ? (departmentsRes.value.data ?? []) : [];
-    const verified = users.filter((u) => u.emailVerified);
-    const deactivated = users.filter((u) => !u.emailVerified);
+    // Lifecycle is driven by `status` (FR-13.6, migration 0006) — NOT by
+    // emailVerified, which only tracks whether the email was confirmed.
+    const active = users.filter((u) => u.status === "ACTIVE");
+    const deactivated = users.filter((u) => u.status === "DEACTIVATED");
     const apiHealth = healthRes.status === "fulfilled" ? healthRes.value : null;
 
     setKpis([
@@ -160,9 +221,9 @@ export function useSuperAdminDashboard(): UseSuperAdminDashboardResult {
       },
       {
         label: "Active Accounts",
-        value: verified.length,
+        value: active.length,
         description:
-          users.length < total ? `Verified email (of ${users.length} loaded)` : "Email verified",
+          users.length < total ? `Status ACTIVE (of ${users.length} loaded)` : "Status ACTIVE",
       },
       {
         label: "Sub-Departments",
@@ -182,9 +243,11 @@ export function useSuperAdminDashboard(): UseSuperAdminDashboardResult {
     setDeactivatedAccounts(deactivated);
 
     setVerificationSummary([
-      { status: "active", label: "Active accounts", count: verified.length },
+      { status: "active", label: "Active accounts", count: active.length },
       { status: "inactive", label: "Deactivated accounts", count: deactivated.length },
     ]);
+
+    setLeadershipRoster(buildRoster(users));
 
     // API already returns users ordered by createdAt desc.
     setRecentAccounts(users.slice(0, 5));
@@ -217,6 +280,7 @@ export function useSuperAdminDashboard(): UseSuperAdminDashboardResult {
     verificationSummary,
     recentAccounts,
     roleCounts,
+    leadershipRoster,
     health,
     healthError,
     quickActions,

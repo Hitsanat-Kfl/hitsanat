@@ -14,6 +14,14 @@ export const LEADERSHIP_ROLES = [
 export type LeadershipRole = (typeof LEADERSHIP_ROLES)[number];
 
 /**
+ * Account lifecycle status (FR-13.6): deactivation must be distinguishable
+ * from unverified email so accounts can be reactivated cleanly.
+ */
+export const ACCOUNT_STATUS = ["ACTIVE", "DEACTIVATED"] as const;
+
+export type AccountStatus = (typeof ACCOUNT_STATUS)[number];
+
+/**
  * Users table
  * Stores leadership accounts only (ADR-0007: regular members have no accounts).
  *
@@ -30,6 +38,10 @@ export const users = pgTable(
     emailVerified: boolean("email_verified").default(false).notNull(),
     image: text("image"),
     role: varchar("role", { length: 64 }).default("MEMBER_REGULAR").notNull(),
+    /** Lifecycle status: ACTIVE or DEACTIVATED (banned in Supabase Auth). */
+    status: varchar("status", { length: 16 }).default("ACTIVE").notNull(),
+    /** When the account was deactivated (null while active). */
+    deactivatedAt: timestamp("deactivated_at", { withTimezone: true }),
     memberId: uuid("member_id").references(() => members.id),
     createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
     updatedAt: timestamp("updated_at", { withTimezone: true }).defaultNow().notNull(),

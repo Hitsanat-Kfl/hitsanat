@@ -64,3 +64,17 @@ In accordance with the Source-of-Truth governance rules, all unresolved technica
   2. **Option B (Always-On Hosting on Railway):** Railway runs continuous 24/7 instances without sleeping.
 - **Resolved Decision:** **Option B (Railway Always-On)** completely eliminates the cold-start problem. All requests respond immediately in $<50\text{ ms}$.
 - **Decision Status:** `RESOLVED (Adopted Option B via Railway)`
+
+---
+
+### OD-05: Scope of Super Admin "Permission Overrides"
+
+- **Problem:** The business requirements persona table describes the Super Admin as responsible for "permission overrides", but the Permission Matrix page (`/permissions`, FR-13.3) is a static read-only reference. No mechanism for dynamic per-user or per-role permission overrides exists in the data model or API.
+- **Source of Ambiguity:** Gap identified in the September 2026 Super Admin review session while reconciling `business-requirements.md` against the implemented permission matrix.
+- **Affected Modules:** `packages/permissions`, `apps/admin/features/permissions`, `apps/api/src/modules/permissions` (if created).
+- **Possible Options:**
+  1. **Option A (Keep Static Matrix):** Treat "permission overrides" as the documented SUPER_ADMIN bypass (roles-and-permissions.md § 4.3) and remove the word "overrides" from the persona description. No dynamic grants.
+  2. **Option B (Per-User Override Table):** Add a `user_permission_overrides` table (grant/deny per resource/action) consulted by the permission checker before role evaluation. More flexible, but significantly complicates the RBAC model, caching, and audit story for a system with five fixed sub-departments.
+  3. **Option C (Per-Role Matrix Editor):** Keep roles as the only unit of delegation but allow SUPER_ADMIN to edit the role→resource/action matrix itself. Middle ground; still requires storing a mutable matrix and versioning it.
+- **Recommended Option:** **Option A** for now — the bypass plus annual leadership rotation does not create a demonstrated need for dynamic grants; revisit Option C if a real request appears.
+- **Decision Status:** `PROPOSED (Option A)` — raised 2026-09-19

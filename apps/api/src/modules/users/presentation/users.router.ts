@@ -5,7 +5,9 @@ import {
   deactivateUser,
   getUser,
   listUsers,
+  reactivateUser,
   resetPassword,
+  revokeUserSessions,
   updateUser,
 } from "./users.controller.js";
 
@@ -28,3 +30,7 @@ usersRouter.get("/:id", getUser);
 usersRouter.patch("/:id", updateUser);
 usersRouter.post("/:id/reset-password", resetPassword);
 usersRouter.post("/:id/deactivate", deactivateUser);
+// PE-01 / FR-13.6: restore a deactivated account (unban).
+usersRouter.post("/:id/reactivate", reactivateUser);
+// PE-08 / FR-13.13: force sign-out of live sessions.
+usersRouter.post("/:id/revoke-sessions", revokeUserSessions);

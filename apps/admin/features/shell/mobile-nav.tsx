@@ -42,7 +42,7 @@ export function MobileNav({ roles = ["chairperson"] }: MobileNavProps) {
     <>
       {/* Bottom navigation bar — primary items only */}
       <nav
-        className="fixed bottom-0 inset-x-0 z-40 border-t border-border bg-card md:hidden"
+        className="fixed bottom-0 inset-x-0 z-40 border-t admin-mobile-nav md:hidden"
         aria-label="Mobile navigation"
       >
         <ul className="flex items-stretch">
@@ -86,7 +86,7 @@ export function MobileNav({ roles = ["chairperson"] }: MobileNavProps) {
               </DrawerTrigger>
 
               <DrawerContent>
-                <DrawerHeader className="border-b border-border">
+                <DrawerHeader className="border-b admin-sidebar-border-b">
                   <div className="flex items-center justify-between">
                     <DrawerTitle>{t("shell.menu")}</DrawerTitle>
                     <DrawerClose

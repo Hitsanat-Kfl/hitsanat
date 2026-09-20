@@ -1,4 +1,3 @@
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3001";
 const API_PREFIX = "/api/v1";
 
 export interface ApiError {
@@ -25,7 +24,7 @@ export interface PaginatedResponse<T> {
 }
 
 async function request<T>(endpoint: string, options?: RequestInit): Promise<T> {
-  const url = `${API_BASE_URL}${API_PREFIX}${endpoint}`;
+  const url = `${API_PREFIX}${endpoint}`;
 
   const response = await fetch(url, {
     ...options,

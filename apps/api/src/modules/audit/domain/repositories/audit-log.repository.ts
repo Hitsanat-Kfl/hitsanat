@@ -2,8 +2,25 @@ import type { AuditActor, AuditLog, RecordAuditInput } from "../entities/audit-l
 
 export type { AuditActor, AuditLog, RecordAuditInput };
 
+/**
+ * PE-05 / FR-13.10: audit trail query filters.
+ */
 export interface AuditLogQuery {
   limit?: number;
+  offset?: number;
+  /** Exact action code (e.g. USER_DEACTIVATED). */
+  action?: string;
+  /** Actor (operator) user id. */
+  operatorId?: string;
+  /** Inclusive lower bound on timestamp. */
+  from?: Date;
+  /** Inclusive upper bound on timestamp. */
+  to?: Date;
+}
+
+export interface AuditLogPage {
+  entries: AuditLog[];
+  total: number;
 }
 
 export interface AuditLogRepository {
@@ -12,4 +29,7 @@ export interface AuditLogRepository {
 
   /** Most recent entries, newest first (dashboard + audit overview). */
   findRecent(query?: AuditLogQuery): Promise<AuditLog[]>;
+
+  /** PE-05: filtered, paginated listing with total count. */
+  findMany(query?: AuditLogQuery): Promise<AuditLogPage>;
 }

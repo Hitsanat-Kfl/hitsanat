@@ -2,6 +2,7 @@
 
 import {
   ActivityWidget,
+  Button,
   DashboardContainer,
   DashboardGrid,
   DashboardGridItem,
@@ -16,8 +17,14 @@ import {
   StatusSummaryWidget,
 } from "@repo/ui";
 import { PageShell } from "@/features/shell";
+import { useState } from "react";
+import { api } from "@/lib/api-client";
 import { useAuditLogs } from "../hooks/use-audit-logs";
-import { useSuperAdminDashboard, type AdminUserRow } from "../hooks/use-super-admin-dashboard";
+import {
+  useSuperAdminDashboard,
+  type AdminUserRow,
+  type RosterEntry,
+} from "../hooks/use-super-admin-dashboard";
 
 // ============================================================
 // Presentational helpers — formatting only, no business rules.
@@ -48,6 +55,21 @@ function roleItems(roleCounts: Array<{ role: string; count: number }>): ListItem
   }));
 }
 
+/**
+ * Leadership Roster Matrix (dashboards.md § 1.3): all leadership posts
+ * with BR-009 conflict highlighting.
+ */
+function rosterItems(entries: RosterEntry[]): ListItemData[] {
+  return entries.map((entry) => ({
+    id: entry.userId,
+    primary: entry.conflict ? `⚠ ${entry.name}` : entry.name,
+    secondary: `${entry.email} · ${entry.posts.join(", ")}${
+      entry.status === "DEACTIVATED" ? " · deactivated" : ""
+    }`,
+    trailing: entry.conflict ? "BR-009 conflict" : `${entry.posts.length} post(s)`,
+  }));
+}
+
 // ============================================================
 // Super Admin Dashboard — Phase 11
 // ============================================================
@@ -59,6 +81,7 @@ export function SuperAdminDashboardPage() {
     verificationSummary,
     recentAccounts,
     roleCounts,
+    leadershipRoster,
     health,
     healthError,
     quickActions,
@@ -66,6 +89,28 @@ export function SuperAdminDashboardPage() {
     error,
     refresh,
   } = useSuperAdminDashboard();
+
+  // PE-01 / FR-13.6: one-click reactivation from the "Deactivated Accounts"
+  // widget. Errors surface inline; success refreshes the dashboard data.
+  const [reactivatingId, setReactivatingId] = useState<string | null>(null);
+  const [reactivateNotice, setReactivateNotice] = useState<string | null>(null);
+
+  const handleReactivate = async (user: AdminUserRow) => {
+    setReactivatingId(user.id);
+    setReactivateNotice(null);
+    try {
+      await api.post(`/users/${user.id}/reactivate`, {});
+      setReactivateNotice(`Reactivated ${user.email}.`);
+      refresh();
+    } catch (err) {
+      const message =
+        (err as { error?: { message?: string } })?.error?.message ??
+        (err instanceof Error ? err.message : "Reactivation failed.");
+      setReactivateNotice(message);
+    } finally {
+      setReactivatingId(null);
+    }
+  };
 
   // LEVEL 4 — real audit trail (no fabricated events; omitted content when unavailable)
   const {
@@ -78,6 +123,8 @@ export function SuperAdminDashboardPage() {
   const attentionItems: ListItemData[] = deactivatedAccounts.map(accountItem);
   const recentItems: ListItemData[] = recentAccounts.map(accountItem);
   const rolesItems: ListItemData[] = roleItems(roleCounts);
+  const roster = rosterItems(leadershipRoster);
+  const rosterConflicts = leadershipRoster.filter((entry) => entry.conflict).length;
 
   if (loading) {
     return (
@@ -120,6 +167,11 @@ export function SuperAdminDashboardPage() {
           <DashboardSection title="Requires Administrative Attention" titleAm="የሚጠይቅ ትኩረት">
             <DashboardGrid>
               <DashboardGridItem size="md">
+                {reactivateNotice && (
+                  <output className="mb-2 block rounded-md bg-muted p-2 text-sm">
+                    {reactivateNotice}
+                  </output>
+                )}
                 <ListWidget
                   title="Deactivated Accounts"
                   titleAm="የቦዝኑ መገለጫዎች"
@@ -129,6 +181,22 @@ export function SuperAdminDashboardPage() {
                   emptyDescription="All accounts are currently active."
                   aria-label="Deactivated accounts"
                 />
+                {deactivatedAccounts.length > 0 && (
+                  <div className="mt-2 flex flex-wrap gap-2">
+                    {deactivatedAccounts.map((user) => (
+                      <Button
+                        key={user.id}
+                        variant="outline"
+                        size="sm"
+                        disabled={reactivatingId === user.id}
+                        onClick={() => handleReactivate(user)}
+                        aria-label={`Reactivate ${user.name}`}
+                      >
+                        Reactivate {user.name}
+                      </Button>
+                    ))}
+                  </div>
+                )}
               </DashboardGridItem>
 
               <DashboardGridItem size="md">
@@ -163,6 +231,28 @@ export function SuperAdminDashboardPage() {
                   items={rolesItems}
                   emptyTitle="No roles assigned"
                   emptyDescription="Role distribution will appear once accounts exist."
+                />
+              </DashboardGridItem>
+            </DashboardGrid>
+          </DashboardSection>
+
+          {/* Leadership Roster Matrix — all posts + BR-009 conflicts */}
+          <DashboardSection title="Leadership Roster" titleAm="የአመራር ዝርዝር">
+            {rosterConflicts > 0 && (
+              <output className="mb-2 block rounded-md bg-warning/10 p-3 text-sm text-warning-foreground">
+                {rosterConflicts} member(s) hold more than one leadership post (BR-009).
+              </output>
+            )}
+            <DashboardGrid>
+              <DashboardGridItem size="lg">
+                <ListWidget
+                  title="Leadership Posts"
+                  titleAm="የአመራር ቦታዎች"
+                  description="Executive roles and sub-department leadership, with conflict highlighting."
+                  items={roster}
+                  emptyTitle="No leadership posts"
+                  emptyDescription="Leadership posts will appear once accounts are linked to roles."
+                  aria-label="Leadership roster matrix"
                 />
               </DashboardGridItem>
             </DashboardGrid>

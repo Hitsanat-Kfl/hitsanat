@@ -1,4 +1,5 @@
 import * as React from "react";
+import { createPortal } from "react-dom";
 import { cn } from "../../lib/utils";
 
 interface TooltipProps {
@@ -86,35 +87,34 @@ function Tooltip({ content, children, side = "top", delay = 300 }: TooltipProps)
   const tooltipId = React.useId();
 
   return (
-    <>
-      <div
-        ref={triggerRef}
-        onMouseEnter={show}
-        onMouseLeave={hide}
-        onFocus={show}
-        onBlur={hide}
-        aria-describedby={open ? tooltipId : undefined}
-        className="inline-flex"
-      >
-        {children}
-      </div>
-
-      {open && (
-        <div
-          ref={tooltipRef}
-          id={tooltipId}
-          role="tooltip"
-          className={cn(
-            "fixed z-50 overflow-hidden rounded-md bg-primary px-3 py-1.5 text-xs text-primary-foreground animate-in fade-in-0 zoom-in-95",
-            "data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=closed]:zoom-out-95"
-          )}
-          style={{ left: position.x, top: position.y }}
-          data-side={side}
-        >
-          {content}
-        </div>
-      )}
-    </>
+    <div
+      ref={triggerRef}
+      onMouseEnter={show}
+      onMouseLeave={hide}
+      onFocus={show}
+      onBlur={hide}
+      aria-describedby={open ? tooltipId : undefined}
+      className="inline-flex"
+    >
+      {children}
+      {open &&
+        createPortal(
+          <div
+            ref={tooltipRef}
+            id={tooltipId}
+            role="tooltip"
+            className={cn(
+              "fixed z-50 overflow-hidden rounded-md bg-primary px-3 py-1.5 text-xs text-primary-foreground animate-in fade-in-0 zoom-in-95",
+              "data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=closed]:zoom-out-95"
+            )}
+            style={{ left: position.x, top: position.y }}
+            data-side={side}
+          >
+            {content}
+          </div>,
+          document.body
+        )}
+    </div>
   );
 }
 

@@ -43,6 +43,13 @@
       "when": 1788959200000,
       "tag": "0005_audit_logs",
       "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "7",
+      "when": 1789045600000,
+      "tag": "0006_account_status_audit_indexes",
+      "breakpoints": true
     }
   ]
 }

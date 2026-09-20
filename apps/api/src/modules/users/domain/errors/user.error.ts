@@ -49,3 +49,32 @@ export class MemberNotFoundError extends Error {
     this.name = "MemberNotFoundError";
   }
 }
+
+/**
+ * PE-06 / FR-13.11: account self-protection guard rails.
+ * Rejects deactivating the acting admin's own account or the last
+ * remaining active SUPER_ADMIN/CHAIRPERSON account, preventing lockout.
+ */
+export class AccountSelfDeactivationError extends Error {
+  constructor() {
+    super("BR-008 guard rail: you cannot deactivate your own account");
+    this.name = "AccountSelfDeactivationError";
+  }
+}
+
+export class LastAdminAccountError extends Error {
+  constructor() {
+    super(
+      "BR-008 guard rail: cannot deactivate the last remaining active SUPER_ADMIN/CHAIRPERSON account"
+    );
+    this.name = "LastAdminAccountError";
+  }
+}
+
+/** PE-01 / FR-13.6: only deactivated accounts can be reactivated. */
+export class AccountNotDeactivatedError extends Error {
+  constructor(id: string) {
+    super(`Account ${id} is not deactivated — nothing to reactivate`);
+    this.name = "AccountNotDeactivatedError";
+  }
+}

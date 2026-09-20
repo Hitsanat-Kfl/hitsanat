@@ -128,3 +128,16 @@ The `SUPER_ADMIN` role bypasses all permission checks. This is a design decision
 | User Management | `/users` | CRUD for user accounts, password reset, deactivation |
 | Audit Logs | `/audit-logs` | Chronological audit trail of administrative actions |
 | Permission Matrix | `/permissions` | Static reference view of role-based access control |
+
+### 4.5 Planned Enhancements (v2.2 — Proposed, Not Yet Implemented)
+
+Agreed in the September 2026 Super Admin review session. Full descriptions: system documentation § 7.10.6; requirement text: functional-requirements.md FR-13.6 – FR-13.13.
+
+- **Account reactivation** — restore deactivated accounts (`USER_REACTIVATED`)
+- **Edit user / role reassignment** — expose the existing `PATCH /users/:id` in the UI to reassign leadership roles per BR-008
+- **Searchable member picker** — replace raw member UUID entry for BR-007 member links
+- **Leadership handover workflow** — guided annual role-transfer sequence
+- **Audit log filters & CSV export** — action, date, and actor filtering with export
+- **Account self-protection** — no self-deactivation, no last-admin lockout
+- **Break-glass logging** — audit all actions performed under the § 4.3 permission bypass
+- **Session revocation** — force sign-out of live sessions (`SESSIONS_REVOKED`)

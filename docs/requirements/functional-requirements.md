@@ -141,3 +141,16 @@ graph LR
 - **FR-13.3 (Permission Matrix Reference):** A static reference view showing role-based access control across all 11 resources and 5 action types (CRUD + Approve).
 - **FR-13.4 (Super Admin Dashboard):** Dedicated dashboard showing system overview KPIs (user accounts, active accounts, sub-departments, API health), deactivated accounts requiring attention, recently provisioned accounts, role distribution, system health status, and system activity feed.
 - **FR-13.5 (Dashboard Routing):** Role-to-dashboard routing: SUPER_ADMIN → Super Admin Dashboard, CHAIRPERSON → Chairperson Dashboard, SUB_CHAIRPERSON → Vice-Chairperson Dashboard, SECRETARY → Secretary Dashboard, MEZMUR_LEADER → Mezmur Dashboard, Sub-dept officers → redirected to their department's dashboard.
+
+### 2.14 Module M-13 Proposed Extensions (v2.2 — Proposed, Not Yet Implemented)
+
+> Agreed requirements from the September 2026 Super Admin review session. Full context in `Hitsanat_Kifl_System_Documentation_v2.1 (2).md` § 7.10.6.
+
+- **FR-13.6 (Account Reactivation):** SUPER_ADMIN and CHAIRPERSON can restore deactivated accounts (unban via Supabase Admin API). New endpoint `POST /api/v1/users/:id/reactivate`; audit action `USER_REACTIVATED`; reactivation surfaced from the dashboard's "Deactivated Accounts" widget.
+- **FR-13.7 (User Editing & Role Reassignment):** The existing `PATCH /api/v1/users/:id` endpoint must be exposed in the users UI, allowing full name, email, role, and linked member to be edited. Role changes re-validate BR-007 (leadership requires linked member) and BR-009 (one leadership post per member) and record a `USER_UPDATED` audit entry with a field-level diff.
+- **FR-13.8 (Searchable Member Picker):** User creation and editing must link members via a searchable picker (name/phone) instead of pasting raw member UUIDs. A combined "register leader" flow (member record + account provisioning in one pass) is a stretch goal.
+- **FR-13.9 (Leadership Handover Workflow):** A guided sequence for the annual leadership rotation: create successor account → reassign leadership role (BR-008) → deactivate the outgoing leader's account, with BR-009 conflict validation at each step.
+- **FR-13.10 (Audit Log Filtering & Export):** The audit trail must support filtering by action type, date range, and actor, server-side pagination, and CSV export for incident review.
+- **FR-13.11 (Account Self-Protection Guard Rails):** The system must reject deactivation of the acting Super Admin's own account and of the last remaining active `SUPER_ADMIN` or `CHAIRPERSON` account, preventing lockout.
+- **FR-13.12 (Break-Glass Action Logging):** All write actions performed by `SUPER_ADMIN` — including those executed under the documented permission bypass (roles-and-permissions.md § 4.3) — must be recorded in the audit trail.
+- **FR-13.13 (Session Revocation):** SUPER_ADMIN can force sign-out of a user's live sessions (e.g., stolen credentials) independent of account deactivation. Audit action `SESSIONS_REVOKED`.

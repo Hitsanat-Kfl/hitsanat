@@ -189,7 +189,8 @@ export const navigationConfig: NavSection[] = [
         icon: UserCog,
         href: "/users",
         section: "administration",
-        allowedRoles: ["super-admin"],
+        // FR-13.1: SUPER_ADMIN and CHAIRPERSON manage user accounts (BR-008).
+        allowedRoles: ["super-admin", "chairperson"],
         priority: 11,
       },
       {
@@ -199,7 +200,8 @@ export const navigationConfig: NavSection[] = [
         icon: FileText,
         href: "/audit-logs",
         section: "administration",
-        allowedRoles: ["super-admin"],
+        // FR-13.2: SUPER_ADMIN and CHAIRPERSON view the audit trail.
+        allowedRoles: ["super-admin", "chairperson"],
         priority: 12,
       },
       {
@@ -209,6 +211,7 @@ export const navigationConfig: NavSection[] = [
         icon: Key,
         href: "/permissions",
         section: "administration",
+        // FR-13.3 remains a Super Admin reference page.
         allowedRoles: ["super-admin"],
         priority: 13,
       },

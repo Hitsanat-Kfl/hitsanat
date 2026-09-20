@@ -15,6 +15,7 @@ import {
 } from "@repo/ui";
 import { useState } from "react";
 import { type CreateUserPayload, LEADERSHIP_ROLE_SET } from "../hooks/use-users";
+import { MemberPicker, type PickedMember } from "./member-picker";
 
 interface CreateUserDialogProps {
   open: boolean;
@@ -39,7 +40,7 @@ export function CreateUserDialog({ open, onOpenChange, onCreate }: CreateUserDia
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [role, setRole] = useState("");
-  const [memberId, setMemberId] = useState("");
+  const [member, setMember] = useState<PickedMember | null>(null);
   const [submitting, setSubmitting] = useState(false);
   const [formError, setFormError] = useState<string | null>(null);
 
@@ -50,7 +51,7 @@ export function CreateUserDialog({ open, onOpenChange, onCreate }: CreateUserDia
     setEmail("");
     setPassword("");
     setRole("");
-    setMemberId("");
+    setMember(null);
     setFormError(null);
   };
 
@@ -62,7 +63,7 @@ export function CreateUserDialog({ open, onOpenChange, onCreate }: CreateUserDia
       setFormError("Name, email, password, and role are required.");
       return;
     }
-    if (requiresMember && !memberId.trim()) {
+    if (requiresMember && !member) {
       setFormError("Leadership roles require a member link (BR-007).");
       return;
     }
@@ -74,7 +75,7 @@ export function CreateUserDialog({ open, onOpenChange, onCreate }: CreateUserDia
         email,
         password,
         role,
-        ...(memberId.trim() ? { memberId: memberId.trim() } : {}),
+        ...(member ? { memberId: member.id } : {}),
       });
       resetForm();
       onOpenChange(false);
@@ -149,16 +150,15 @@ export function CreateUserDialog({ open, onOpenChange, onCreate }: CreateUserDia
           </FormField>
 
           <FormField
-            label="Member link (member ID)"
+            label="Linked member"
             required={requiresMember}
-            helperText="Required for leadership roles (BR-007). Paste the member's ID from the Members page."
+            helperText={
+              requiresMember
+                ? "Required for leadership roles (BR-007). Search by name or phone."
+                : "Optional — link this account to a registered member."
+            }
           >
-            <Input
-              value={memberId}
-              onChange={(e) => setMemberId(e.target.value)}
-              placeholder="Member UUID"
-              autoComplete="off"
-            />
+            <MemberPicker value={member} onChange={setMember} />
           </FormField>
 
           {formError && !formError.startsWith("Leadership") && (

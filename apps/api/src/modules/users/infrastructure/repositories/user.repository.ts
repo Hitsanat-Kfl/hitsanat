@@ -38,6 +38,8 @@ async function hydrate(row: UserRow): Promise<UserWithSubDepartments> {
     role: row.role,
     memberId: row.memberId,
     emailVerified: row.emailVerified,
+    status: (row.status === "DEACTIVATED" ? "DEACTIVATED" : "ACTIVE") as "ACTIVE" | "DEACTIVATED",
+    deactivatedAt: row.deactivatedAt,
     image: row.image,
     subDepartments: subDepts,
     createdAt: row.createdAt,
@@ -127,6 +129,7 @@ export class DrizzleUserRepository implements UserRepository {
         name: data.name,
         email: data.email,
         role: data.role,
+        status: "ACTIVE",
         memberId: data.memberId,
         image: data.imageUrl ?? null,
         emailVerified: true,
@@ -235,6 +238,27 @@ export class DrizzleUserRepository implements UserRepository {
     await db
       .update(users)
       .set({ emailVerified: verified, updatedAt: new Date() })
+      .where(eq(users.id, id));
+  }
+
+  async countActiveExecutives(): Promise<number> {
+    const db = (await import("@repo/database")).getDb();
+    const result = await db
+      .select({ value: count() })
+      .from(users)
+      .where(and(inArray(users.role, ["SUPER_ADMIN", "CHAIRPERSON"]), eq(users.status, "ACTIVE")));
+    return result[0]?.value ?? 0;
+  }
+
+  async setStatus(
+    id: string,
+    status: "ACTIVE" | "DEACTIVATED",
+    deactivatedAt: Date | null
+  ): Promise<void> {
+    const db = (await import("@repo/database")).getDb();
+    await db
+      .update(users)
+      .set({ status, deactivatedAt, updatedAt: new Date() })
       .where(eq(users.id, id));
   }
 
