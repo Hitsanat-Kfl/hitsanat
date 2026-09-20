@@ -1,9 +1,9 @@
 "use client";
 
-import { Badge, Button, Card, CardContent, CardHeader, Spinner } from "@repo/ui";
+import { Badge, Button, Card, CardContent, CardHeader } from "@repo/ui";
 import Link from "next/link";
 import { usePlans } from "@/features/planning";
-import { PageShell } from "@/features/shell";
+import { AlertBanner, PageEmpty, PageLoading, PageShell } from "@/features/shell";
 
 export default function PlanningListPage() {
   const { plans, loading, error, refresh } = usePlans();
@@ -20,16 +20,15 @@ export default function PlanningListPage() {
       }
     >
       <div className="space-y-6">
-        {error && <div className="p-4 rounded-lg bg-destructive/10 text-destructive">{error}</div>}
+        {error && <AlertBanner message={error} />}
 
         {loading ? (
-          <div className="flex items-center justify-center py-12">
-            <Spinner size="lg" />
-          </div>
+          <PageLoading />
         ) : plans.length === 0 ? (
-          <div className="text-center py-12">
-            <p className="text-muted-foreground">No plans found</p>
-          </div>
+          <PageEmpty
+            title="No plans found"
+            description="No annual master plans have been created yet."
+          />
         ) : (
           <div className="grid gap-4">
             {plans.map((plan) => (

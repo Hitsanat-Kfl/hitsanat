@@ -5,18 +5,14 @@ import {
   Button,
   Card,
   CardContent,
-  CardHeader,
-  EmptyState,
-  Spinner,
   Tabs,
   TabsContent,
   TabsList,
   TabsTrigger,
 } from "@repo/ui";
 import { useState } from "react";
-import { ReportGenerationForm } from "@/features/reports";
-import { useReports } from "@/features/reports";
-import { PageShell } from "@/features/shell";
+import { ReportGenerationForm, useReports } from "@/features/reports";
+import { AlertBanner, PageEmpty, PageLoading, PageShell } from "@/features/shell";
 import type { ReportStatus, SubmissionStatus } from "../../../lib/types";
 
 const reportStatusVariant: Record<
@@ -59,7 +55,7 @@ export default function ReportsPage() {
         </div>
       }
     >
-      {error && <div className="mb-4 rounded-md bg-red-50 p-4 text-red-700">{error}</div>}
+      {error && <AlertBanner message={error} className="mb-4" />}
 
       {showGenerateForm && (
         <div className="mb-6">
@@ -80,11 +76,9 @@ export default function ReportsPage() {
 
         <TabsContent value="reports">
           {loading ? (
-            <div className="flex justify-center py-12">
-              <Spinner size="lg" />
-            </div>
+            <PageLoading />
           ) : reports.length === 0 ? (
-            <EmptyState title="No reports" description="No reports have been generated yet." />
+            <PageEmpty title="No reports" description="No reports have been generated yet." />
           ) : (
             <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
               {reports.map((report) => (
@@ -95,7 +89,7 @@ export default function ReportsPage() {
                       <Badge variant={reportStatusVariant[report.status]}>{report.status}</Badge>
                     </div>
                     <h3 className="font-semibold">{report.periodLabel}</h3>
-                    <p className="mt-1 text-sm text-gray-500">
+                    <p className="mt-1 text-sm text-muted-foreground">
                       {new Date(report.periodStart).toLocaleDateString("en-ET")} —{" "}
                       {new Date(report.periodEnd).toLocaleDateString("en-ET")}
                     </p>
@@ -113,11 +107,9 @@ export default function ReportsPage() {
 
         <TabsContent value="submissions">
           {loading ? (
-            <div className="flex justify-center py-12">
-              <Spinner size="lg" />
-            </div>
+            <PageLoading />
           ) : submissions.length === 0 ? (
-            <EmptyState
+            <PageEmpty
               title="No submissions"
               description="No report submissions have been received yet."
             />
@@ -133,9 +125,13 @@ export default function ReportsPage() {
                       </Badge>
                     </div>
                     <h3 className="font-semibold">{sub.periodLabel}</h3>
-                    <p className="mt-1 text-sm text-gray-500">Sub-dept: {sub.subDepartmentId}</p>
+                    <p className="mt-1 text-sm text-muted-foreground">
+                      Sub-dept: {sub.subDepartmentId}
+                    </p>
                     {sub.reviewedBy && (
-                      <p className="mt-1 text-xs text-gray-400">Reviewed by: {sub.reviewedBy}</p>
+                      <p className="mt-1 text-xs text-muted-foreground">
+                        Reviewed by: {sub.reviewedBy}
+                      </p>
                     )}
                   </CardContent>
                 </Card>

@@ -1,8 +1,95 @@
 "use client";
 
-import { Breadcrumb, type BreadcrumbItem, Button, Separator } from "@repo/ui";
+import { Breadcrumb, type BreadcrumbItem, Button, EmptyState, Spinner } from "@repo/ui";
 import { cn } from "@repo/ui/lib/utils";
 import type * as React from "react";
+
+// === Shared Page Patterns ===
+
+interface AlertBannerProps {
+  message: string;
+  className?: string;
+}
+
+export function AlertBanner({ message, className }: AlertBannerProps) {
+  return (
+    <div
+      className={cn("rounded-md bg-destructive/10 p-3 text-sm text-destructive", className)}
+      role="alert"
+    >
+      {message}
+    </div>
+  );
+}
+
+interface PageLoadingProps {
+  className?: string;
+}
+
+export function PageLoading({ className }: PageLoadingProps) {
+  return (
+    <div className={cn("flex items-center justify-center py-12", className)}>
+      <Spinner size="lg" />
+    </div>
+  );
+}
+
+interface PageEmptyProps {
+  title?: string;
+  description?: string;
+  className?: string;
+}
+
+export function PageEmpty({
+  title = "No items found",
+  description = "There are no items to display.",
+  className,
+}: PageEmptyProps) {
+  return (
+    <EmptyState
+      title={title}
+      description={description}
+      className={className}
+    />
+  );
+}
+
+interface PagePaginationProps {
+  page: number;
+  totalPages: number;
+  onPageChange: (page: number) => void;
+  className?: string;
+}
+
+export function PagePagination({ page, totalPages, onPageChange, className }: PagePaginationProps) {
+  if (totalPages <= 1) return null;
+
+  return (
+    <div className={cn("flex items-center justify-between", className)}>
+      <p className="text-sm text-muted-foreground">
+        Page {page} of {totalPages}
+      </p>
+      <div className="flex gap-2">
+        <Button
+          variant="outline"
+          size="sm"
+          disabled={page <= 1}
+          onClick={() => onPageChange(page - 1)}
+        >
+          Previous
+        </Button>
+        <Button
+          variant="outline"
+          size="sm"
+          disabled={page >= totalPages}
+          onClick={() => onPageChange(page + 1)}
+        >
+          Next
+        </Button>
+      </div>
+    </div>
+  );
+}
 
 interface PageShellProps {
   breadcrumbs?: BreadcrumbItem[];

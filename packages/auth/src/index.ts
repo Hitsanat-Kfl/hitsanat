@@ -47,14 +47,100 @@ export async function verifySupabaseToken(token: string) {
 }
 
 /**
+ * Parse a cookie header into name/value pairs.
+ */
+function parseCookies(cookieHeader: string): Map<string, string> {
+  const cookies = new Map<string, string>();
+  for (const part of cookieHeader.split(";")) {
+    const separator = part.indexOf("=");
+    if (separator === -1) continue;
+    const name = part.slice(0, separator).trim();
+    const value = part.slice(separator + 1).trim();
+    if (name) cookies.set(name, value);
+  }
+  return cookies;
+}
+
+function safeDecode(value: string): string {
+  try {
+    return decodeURIComponent(value);
+  } catch {
+    return value;
+  }
+}
+
+function isJwt(value: string): boolean {
+  return value.split(".").length === 3 && value.length > 40;
+}
+
+/**
+ * Extract the access token from a Supabase SSR auth cookie.
+ *
+ * `@supabase/ssr` stores the session as a URL-encoded JSON document
+ * (`{"access_token":"…","refresh_token":…}`) in
+ * `sb-<project-ref>-auth-token`, chunked into `.0`, `.1`, … siblings when
+ * the value exceeds the per-cookie size limit. Older flows stored the raw
+ * JWT — support both.
+ */
+function extractTokenFromSupabaseCookies(cookieHeader: string): string | undefined {
+  const cookies = parseCookies(cookieHeader);
+
+  // Collect every project ref that has an auth-token cookie.
+  const refs = new Set<string>();
+  for (const name of cookies.keys()) {
+    const match = name.match(/^sb-([a-z0-9]+)-auth-token/);
+    if (match) refs.add(match[1]);
+  }
+
+  for (const ref of refs) {
+    const base = `sb-${ref}-auth-token`;
+    const chunks = [...cookies.entries()]
+      .filter(([name]) => name.startsWith(`${base}.`))
+      .map(([name, value]) => ({
+        index: Number.parseInt(name.slice(base.length + 1), 10),
+        value,
+      }))
+      .filter((chunk) => Number.isInteger(chunk.index))
+      .sort((a, b) => a.index - b.index);
+
+    let raw: string | undefined;
+    if (chunks.length > 0) {
+      raw = chunks.map((chunk) => safeDecode(chunk.value)).join("");
+    } else {
+      const main = cookies.get(base);
+      if (main) raw = safeDecode(main);
+    }
+    if (!raw) continue;
+
+    // Defensive: some storage adapters prefix base64-encoded payloads.
+    if (raw.startsWith("base64-")) {
+      raw = Buffer.from(raw.slice("base64-".length), "base64").toString("utf8");
+    }
+
+    try {
+      const parsed = JSON.parse(raw) as { access_token?: unknown };
+      if (typeof parsed.access_token === "string" && isJwt(parsed.access_token)) {
+        return parsed.access_token;
+      }
+    } catch {
+      // Not JSON — fall through to the legacy raw-JWT format.
+    }
+
+    if (isJwt(raw)) return raw;
+  }
+
+  return undefined;
+}
+
+/**
  * Extract Supabase JWT from cookie or Authorization header.
- * Supabase SSR sets a cookie named `sb-<project-ref>-auth-token`.
+ * Supabase SSR sets a JSON session cookie named `sb-<project-ref>-auth-token`
+ * (chunked into `.0`, `.1`, … when large).
  */
 export function extractToken(req: Request): string | undefined {
-  const cookieHeader = req.headers.cookie;
-  if (cookieHeader) {
-    const match = cookieHeader.match(/sb-[a-z0-9]+-auth-token=([^;]+)/);
-    if (match) return match[1];
+  if (req.headers.cookie) {
+    const token = extractTokenFromSupabaseCookies(req.headers.cookie);
+    if (token) return token;
   }
   const authHeader = req.headers.authorization;
   if (authHeader?.startsWith("Bearer ")) {
@@ -116,6 +202,8 @@ declare global {
   namespace Express {
     interface Request {
       sessionUser?: SessionUser;
+      /** PE-07: set by requireScopePermission when the SUPER_ADMIN bypass allowed the request. */
+      permissionBypassUsed?: boolean;
     }
   }
 }
@@ -190,6 +278,12 @@ export function requireScopePermission(options: RequireScopePermissionOptions) {
     }
 
     if (user.globalRoles.includes("SUPER_ADMIN")) {
+      // PE-07 / FR-13.12: mark that this request was allowed only through
+      // the SUPER_ADMIN permission bypass so the break-glass audit
+      // middleware can record the action.
+      if (!options.allowedGlobalRoles?.includes("SUPER_ADMIN")) {
+        req.permissionBypassUsed = true;
+      }
       return next();
     }
 

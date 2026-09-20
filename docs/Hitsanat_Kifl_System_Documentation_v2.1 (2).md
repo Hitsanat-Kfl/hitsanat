@@ -440,6 +440,67 @@ The Super Admin sees all navigation items:
 **Operations:**
 - Planning, Reports
 
+#### 7.10.6 Planned Enhancements (v2.2 — Proposed, Not Yet Implemented)
+
+The following capabilities are proposed for the Super Admin role. They are documented here as the agreed requirements from the September 2026 review session; none are implemented yet.
+
+**PE-01 Account Reactivation (`/users`):**
+The users page today supports deactivation only, while the Super Admin dashboard explicitly flags "Deactivated Accounts — requiring attention". This creates an incomplete loop: a deactivated account can never be restored.
+
+- Add **Reactivate** action alongside Deactivate (unbans the Supabase Auth account)
+- Requires new API endpoint `POST /users/:id/reactivate`
+- Log new audit action: `USER_REACTIVATED`
+- Surface reactivation as a one-click action from the "Deactivated Accounts" dashboard widget
+
+**PE-02 Edit User / Role Reassignment (`/users`):**
+BR-008 grants the Super Admin authority to "assign or reassign leadership roles", but the backend `PATCH /users/:id` endpoint is currently unused by the frontend. There is no way to change a user's role, name, email, or member link after creation.
+
+- Add **Edit User** dialog wired to `PATCH /users/:id`
+- Editable fields: full name, email, role, linked member
+- Role changes must re-validate BR-007 (leadership requires linked member) and BR-009 (one leadership post per member)
+- Log audit action `USER_UPDATED` with a payload diff of changed fields
+
+**PE-03 Searchable Member Picker (`/users`):**
+The create/edit dialogs currently ask the operator to paste a raw member UUID from the Members page.
+
+- Replace the UUID text input with a searchable member picker (search by name or phone)
+- Stretch goal: a combined "register leader" flow that creates the member record and provisions the account in one pass
+
+**PE-04 Leadership Handover Workflow (`/users`):**
+Leadership rotates annually as members graduate. The most common Super Admin task is a role handover, which today must be performed as unguided manual steps.
+
+- Documented sequence: create successor account → reassign role (BR-008) → deactivate outgoing leader's account
+- Proposed: a guided **Handover** action on the user table that walks this sequence with validation at each step
+
+**PE-05 Audit Log Filters & Export (`/audit-logs`):**
+The audit trail is currently a plain chronological table.
+
+- Filter by action type, date range, and actor
+- Server-side pagination
+- CSV export for incident review
+
+**PE-06 Account Self-Protection Guard Rails:**
+Prevent account lockout scenarios.
+
+- Block the Super Admin from deactivating their own account
+- Block deactivating the last remaining active `SUPER_ADMIN`/`CHAIRPERSON` account
+
+**PE-07 Break-Glass Action Logging:**
+Because `SUPER_ADMIN` bypasses all permission checks (`packages/permissions/src/checker.ts`), actions performed under bypass should be explicitly recorded.
+
+- Log every super-admin write action to the audit trail, including actions on resources outside normal RBAC scope
+
+**PE-08 Session Revocation (`/users`):**
+Deactivation bans future sign-ins but does not terminate live sessions (e.g., stolen credentials).
+
+- Add **Force sign-out** action that revokes a user's active Supabase sessions
+- Log audit action `SESSIONS_REVOKED`
+
+**Lower-priority candidates (deferred):**
+- Dependency health checks (DB, Supabase, Telegram worker) beyond the current API `/health` ping
+- Data export (members, children, attendance) for annual leadership transitions
+- Email invitation links as an alternative to out-of-band temporary passwords
+
 ---
 
 ## 8. Data Models & Registration Forms
@@ -1198,6 +1259,19 @@ pnpm add ethiopian-calendar-new
 ---
 
 ## 16. Changelog
+
+### v2.2 (September 2026) — Proposed
+
+**Super Admin Planned Enhancements (Section 7.10.6):**
+- Added PE-01 Account Reactivation — restore deactivated accounts (new `POST /users/:id/reactivate`, audit action `USER_REACTIVATED`)
+- Added PE-02 Edit User / Role Reassignment — wire unused `PATCH /users/:id` into an edit dialog for role, name, email, member link
+- Added PE-03 Searchable Member Picker — replace raw member UUID entry in create/edit dialogs
+- Added PE-04 Leadership Handover Workflow — guided annual role-transfer sequence
+- Added PE-05 Audit Log Filters & Export — action/date/actor filters, pagination, CSV export
+- Added PE-06 Account Self-Protection Guard Rails — prevent self-deactivation and last-admin lockout
+- Added PE-07 Break-Glass Action Logging — audit all actions performed under Super Admin permission bypass
+- Added PE-08 Session Revocation — force sign-out of live sessions
+- Noted deferred candidates: dependency health checks, data export, email invitations
 
 ### v2.1.1 (September 2026)
 

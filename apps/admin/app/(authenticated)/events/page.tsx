@@ -1,9 +1,8 @@
 "use client";
 
 import { Button, Select } from "@repo/ui";
-import { EventList } from "@/features/events";
-import { useEvents } from "@/features/events";
-import { PageShell } from "@/features/shell";
+import { EventList, useEvents } from "@/features/events";
+import { AlertBanner, PageLoading, PagePagination, PageShell } from "@/features/shell";
 import type { EventType } from "../../../lib/types";
 
 const EVENT_TYPES: { value: string; label: string }[] = [
@@ -26,11 +25,9 @@ export default function EventListPage() {
       title="Events"
       description="Manage ministry events and special occasions."
       actions={
-        <div className="flex items-center gap-2">
-          <Button onClick={refresh} variant="outline" size="sm">
-            Refresh
-          </Button>
-        </div>
+        <Button onClick={refresh} variant="outline" size="sm">
+          Refresh
+        </Button>
       }
     >
       <div className="space-y-6">
@@ -53,34 +50,20 @@ export default function EventListPage() {
           </Select>
         </div>
 
-        {error && <div className="p-4 rounded-lg bg-destructive/10 text-destructive">{error}</div>}
+        {error && <AlertBanner message={error} />}
 
-        <EventList events={events} loading={loading} />
+        {loading ? (
+          <PageLoading />
+        ) : (
+          <EventList events={events} loading={loading} />
+        )}
 
-        {pagination && pagination.totalPages > 1 && (
-          <div className="flex items-center justify-between">
-            <p className="text-sm text-muted-foreground">
-              Page {pagination.page} of {pagination.totalPages}
-            </p>
-            <div className="flex gap-2">
-              <Button
-                variant="outline"
-                size="sm"
-                disabled={pagination.page <= 1}
-                onClick={() => setFilters({ ...filters, page: pagination.page - 1 })}
-              >
-                Previous
-              </Button>
-              <Button
-                variant="outline"
-                size="sm"
-                disabled={pagination.page >= pagination.totalPages}
-                onClick={() => setFilters({ ...filters, page: pagination.page + 1 })}
-              >
-                Next
-              </Button>
-            </div>
-          </div>
+        {pagination && (
+          <PagePagination
+            page={pagination.page}
+            totalPages={pagination.totalPages}
+            onPageChange={(page) => setFilters({ ...filters, page })}
+          />
         )}
       </div>
     </PageShell>

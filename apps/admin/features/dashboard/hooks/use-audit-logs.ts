@@ -29,6 +29,9 @@ const ACTION_LABELS: Record<string, string> = {
   USER_CREATED: "created user account",
   USER_UPDATED: "updated user account",
   USER_DEACTIVATED: "deactivated user account",
+  USER_REACTIVATED: "reactivated user account",
+  SESSIONS_REVOKED: "revoked sessions for",
+  BYPASS_ACTION: "performed bypass action on",
   PASSWORD_RESET: "reset password for",
 };
 

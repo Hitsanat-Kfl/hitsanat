@@ -21,6 +21,7 @@ import { authRouter } from "./presentation/routes/auth.router.js";
 import { healthRouter } from "./presentation/routes/health.router.js";
 import { errorHandler, notFoundHandler } from "./shared/middleware/error-handler.js";
 import { publicRateLimiter } from "./shared/middleware/rate-limiter.js";
+import { breakGlassAuditMiddleware } from "./shared/middleware/break-glass-audit.js";
 
 export function createApp(): Express {
   const app = express();
@@ -35,6 +36,11 @@ export function createApp(): Express {
   );
   app.use(express.json());
   app.use(express.urlencoded({ extended: true }));
+
+  // PE-07 / FR-13.12: audit write actions performed under the SUPER_ADMIN
+  // permission bypass ("break-glass" actions). Runs after body parsing so
+  // req.sessionUser (set by requireAuth inside routers) is available.
+  app.use(breakGlassAuditMiddleware);
 
   // API Documentation (OpenAPI / Swagger)
   app.get("/docs.json", swaggerJsonHandler);

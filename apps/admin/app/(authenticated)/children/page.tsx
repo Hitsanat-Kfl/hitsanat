@@ -1,11 +1,8 @@
 "use client";
 
 import { Button } from "@repo/ui";
-import { ChildFiltersBar } from "@/features/children";
-import { ChildList } from "@/features/children";
-import { ChildPagination } from "@/features/children";
-import { useChildren } from "@/features/children";
-import { PageShell } from "@/features/shell";
+import { ChildFiltersBar, ChildList, ChildPagination, useChildren } from "@/features/children";
+import { AlertBanner, PageShell } from "@/features/shell";
 
 export default function ChildListPage() {
   const { children, pagination, loading, error, filters, setFilters, refresh } = useChildren({
@@ -27,7 +24,7 @@ export default function ChildListPage() {
       <div className="space-y-6">
         <ChildFiltersBar filters={filters} onFilterChange={setFilters} />
 
-        {error && <div className="p-4 rounded-lg bg-destructive/10 text-destructive">{error}</div>}
+        {error && <AlertBanner message={error} />}
 
         <ChildList items={children} loading={loading} />
 

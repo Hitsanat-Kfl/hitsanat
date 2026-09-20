@@ -12,9 +12,11 @@ const fixtures = vi.hoisted(() => {
         id: "u1",
         name: "Super Admin",
         email: "superadmin@hitsanat.org",
-        role: "SUPER_ADMIN",
-        memberId: null,
+        role: "CHAIRPERSON",
+        memberId: "m1",
         emailVerified: true,
+        status: "ACTIVE",
+        deactivatedAt: null,
         image: null,
         subDepartments: [],
         createdAt: "2026-01-01T00:00:00Z",
@@ -27,6 +29,8 @@ const fixtures = vi.hoisted(() => {
         role: "CHAIRPERSON",
         memberId: null,
         emailVerified: false,
+        status: "DEACTIVATED",
+        deactivatedAt: "2026-02-01T00:00:00Z",
         image: null,
         subDepartments: [
           { subDepartmentId: "sd1", code: "TIMIHRT", nameEn: "Timihrt", role: "Member" },
@@ -37,14 +41,34 @@ const fixtures = vi.hoisted(() => {
     ],
     pagination: { page: 1, limit: 50, total: 2, totalPages: 1 },
   };
+
+  const membersList = {
+    success: true,
+    data: [
+      {
+        id: "m1",
+        fullName: "Linked Member One",
+        phone: "+251911000000",
+      },
+    ],
+  };
+
+  const memberDetail = {
+    success: true,
+    data: { id: "m1", fullName: "Linked Member One", phone: "+251911000000" },
+  };
+
   const getFixture = (endpoint: string): unknown => {
     if (endpoint.startsWith("/users")) return usersPage;
+    if (endpoint.startsWith("/members?")) return membersList;
+    if (endpoint.startsWith("/members/")) return memberDetail;
     return { success: true, data: [] };
   };
   return { getFixture };
 });
 
 const postMock = vi.hoisted(() => vi.fn().mockResolvedValue({ success: true, data: {} }));
+const patchMock = vi.hoisted(() => vi.fn().mockResolvedValue({ success: true, data: {} }));
 
 vi.mock("../lib/api-client", () => ({
   api: {
@@ -52,6 +76,7 @@ vi.mock("../lib/api-client", () => ({
       .fn()
       .mockImplementation((endpoint: string) => Promise.resolve(fixtures.getFixture(endpoint))),
     post: postMock,
+    patch: patchMock,
   },
 }));
 
@@ -65,9 +90,19 @@ function renderUsersPage() {
   );
 }
 
+/** Types a search term into a MemberPicker and picks the first result. */
+async function pickMember(searchTerm: string) {
+  fireEvent.change(screen.getByLabelText("Search members"), {
+    target: { value: searchTerm },
+  });
+  const result = await screen.findByRole("button", { name: /Linked Member One/ });
+  fireEvent.click(result);
+}
+
 describe("Users management page", () => {
   beforeEach(() => {
     postMock.mockClear();
+    patchMock.mockClear();
   });
 
   it("renders the page header and action button", async () => {
@@ -85,7 +120,8 @@ describe("Users management page", () => {
     await waitFor(() => {
       expect(screen.getByText("Super Admin")).toBeDefined();
       expect(screen.getByText("Deactivated Leader")).toBeDefined();
-      expect(screen.getByText("SUPER_ADMIN")).toBeDefined();
+      // Both fixture rows are CHAIRPERSON (plus the role-filter option).
+      expect(screen.getAllByText("CHAIRPERSON").length).toBeGreaterThanOrEqual(2);
       expect(screen.getByText("TIMIHRT")).toBeDefined();
     });
   });
@@ -97,6 +133,34 @@ describe("Users management page", () => {
       expect(screen.getByLabelText("Search users")).toBeDefined();
       expect(screen.getByLabelText("Filter by role")).toBeDefined();
     });
+  });
+
+  it("shows Reactivate for deactivated rows and reactivates via the API", async () => {
+    renderUsersPage();
+
+    const reactivate = await screen.findByRole("button", {
+      name: /Reactivate Deactivated Leader/i,
+    });
+    fireEvent.click(reactivate);
+
+    await waitFor(() => {
+      expect(postMock).toHaveBeenCalledWith("/users/u2/reactivate", {});
+    });
+    expect(await screen.findByText(/Account reactivated/)).toBeDefined();
+  });
+
+  it("force-signs-out a user's live sessions", async () => {
+    renderUsersPage();
+
+    const button = await screen.findByRole("button", { name: /Force sign-out for Super Admin/i });
+    fireEvent.click(button);
+
+    await waitFor(() => {
+      expect(postMock).toHaveBeenCalledWith("/users/u1/revoke-sessions", {});
+    });
+    expect(
+      await screen.findByText(/live sessions for superadmin@hitsanat.org were revoked/i)
+    ).toBeDefined();
   });
 
   it("opens the create dialog and shows the BR-007 member-link validation", async () => {
@@ -126,7 +190,7 @@ describe("Users management page", () => {
     expect(postMock).not.toHaveBeenCalled();
   });
 
-  it("submits account creation with the member link", async () => {
+  it("links a member through the searchable picker and creates the account", async () => {
     renderUsersPage();
 
     fireEvent.click(await screen.findByRole("button", { name: /Create account/i }));
@@ -144,9 +208,8 @@ describe("Users management page", () => {
     fireEvent.change(screen.getByDisplayValue("Select role"), {
       target: { value: "SECRETARY" },
     });
-    fireEvent.change(screen.getByPlaceholderText("Member UUID"), {
-      target: { value: "m1" },
-    });
+    await pickMember("Linked");
+
     const submitButton = screen.getAllByRole("button", { name: "Create account" }).pop();
     if (submitButton) fireEvent.click(submitButton);
 
@@ -160,6 +223,67 @@ describe("Users management page", () => {
         memberId: "m1",
       });
     });
+  });
+
+  it("edits an account and submits the PATCH with the resolved member name", async () => {
+    renderUsersPage();
+
+    fireEvent.click(await screen.findByRole("button", { name: /Edit Super Admin/i }));
+    await screen.findByText("Edit user account");
+
+    // The linked member's real name is resolved from GET /members/m1
+    // (the picker chip renders "name · phone").
+    expect(await screen.findByText(/Linked Member One/)).toBeDefined();
+
+    fireEvent.change(screen.getByPlaceholderText("Full name"), {
+      target: { value: "Renamed Admin" },
+    });
+    fireEvent.click(screen.getByRole("button", { name: "Save changes" }));
+
+    await waitFor(() => {
+      expect(patchMock).toHaveBeenCalledWith("/users/u1", {
+        name: "Renamed Admin",
+        email: "superadmin@hitsanat.org",
+        role: "CHAIRPERSON",
+        memberId: "m1",
+      });
+    });
+  });
+
+  it("runs the guided handover: successor first, then deactivation", async () => {
+    renderUsersPage();
+
+    fireEvent.click(await screen.findByRole("button", { name: /Start handover for Super Admin/i }));
+    await screen.findByText(/Leadership handover — CHAIRPERSON/);
+
+    fireEvent.change(screen.getByLabelText("Successor full name"), {
+      target: { value: "Next Chair" },
+    });
+    fireEvent.change(screen.getByLabelText("Successor email"), {
+      target: { value: "next.chair@hitsanat.org" },
+    });
+    fireEvent.change(screen.getByLabelText("Temporary password"), {
+      target: { value: "TempPass123!" },
+    });
+    await pickMember("Linked");
+    fireEvent.click(screen.getByRole("button", { name: "Create successor account" }));
+
+    await waitFor(() => {
+      expect(postMock).toHaveBeenCalledWith("/users", {
+        name: "Next Chair",
+        email: "next.chair@hitsanat.org",
+        password: "TempPass123!",
+        role: "CHAIRPERSON",
+        memberId: "m1",
+      });
+    });
+
+    // Step 2 — deactivate the outgoing leader.
+    fireEvent.click(await screen.findByRole("button", { name: "Deactivate outgoing leader" }));
+    await waitFor(() => {
+      expect(postMock).toHaveBeenCalledWith("/users/u1/deactivate", {});
+    });
+    expect(await screen.findByText(/Handover complete/)).toBeDefined();
   });
 
   it("renders pagination info", async () => {

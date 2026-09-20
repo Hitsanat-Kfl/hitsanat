@@ -10,9 +10,14 @@ import {
   DeactivateUserUseCase,
   GetUserUseCase,
   ListUsersUseCase,
+  ReactivateUserUseCase,
+  RevokeUserSessionsUseCase,
   UpdateUserAccountUseCase,
 } from "../application/use-cases/user.use-cases.js";
 import {
+  AccountNotDeactivatedError,
+  AccountSelfDeactivationError,
+  LastAdminAccountError,
   LeadershipConflictError,
   UserManagementForbiddenError,
 } from "../domain/errors/user.error.js";
@@ -131,8 +136,42 @@ export async function deactivateUser(req: Request, res: Response) {
       supabaseAdminService,
       auditContext(req)
     );
-    await useCase.execute(req.params.id as string);
+    // PE-06: pass the acting admin's id so the self-deactivation guard
+    // rail can reject lockout attempts.
+    await useCase.execute(req.params.id as string, req.sessionUser?.id);
     res.status(200).json({ success: true, message: "User deactivated" });
+  } catch (error) {
+    handleError(res, error);
+  }
+}
+
+/** PE-01 / FR-13.6: restore a deactivated account. */
+export async function reactivateUser(req: Request, res: Response) {
+  try {
+    assertManagementPermission(req);
+    const useCase = new ReactivateUserUseCase(
+      userRepository,
+      supabaseAdminService,
+      auditContext(req)
+    );
+    await useCase.execute(req.params.id as string);
+    res.status(200).json({ success: true, message: "User reactivated" });
+  } catch (error) {
+    handleError(res, error);
+  }
+}
+
+/** PE-08 / FR-13.13: force sign-out of a user's live sessions. */
+export async function revokeUserSessions(req: Request, res: Response) {
+  try {
+    assertManagementPermission(req);
+    const useCase = new RevokeUserSessionsUseCase(
+      userRepository,
+      supabaseAdminService,
+      auditContext(req)
+    );
+    await useCase.execute(req.params.id as string);
+    res.status(200).json({ success: true, message: "Sessions revoked" });
   } catch (error) {
     handleError(res, error);
   }
@@ -176,7 +215,13 @@ export async function getUser(req: Request, res: Response) {
 
 function handleError(res: Response, error: unknown): void {
   const message = error instanceof Error ? error.message : "Unknown error";
-  if (message.includes("BR-007")) {
+  if (error instanceof AccountSelfDeactivationError) {
+    res.status(409).json({ success: false, error: { code: "SELF_DEACTIVATION", message } });
+  } else if (error instanceof LastAdminAccountError) {
+    res.status(409).json({ success: false, error: { code: "LAST_ADMIN", message } });
+  } else if (error instanceof AccountNotDeactivatedError) {
+    res.status(409).json({ success: false, error: { code: "NOT_DEACTIVATED", message } });
+  } else if (message.includes("BR-007")) {
     res.status(422).json({ success: false, error: { code: "BR_007_VIOLATION", message } });
   } else if (message.includes("already exists")) {
     res.status(409).json({ success: false, error: { code: "USER_EXISTS", message } });

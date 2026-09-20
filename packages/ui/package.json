@@ -7,7 +7,8 @@
     "./components/ui/*": "./src/components/ui/*.tsx",
     "./lib/*": "./src/lib/*.ts",
     "./*": "./src/*.tsx",
-    "./globals.css": "./src/globals.css"
+    "./globals.css": "./src/globals.css",
+    "./tailwind.config": "./tailwind.config.ts"
   },
   "scripts": {
     "lint": "eslint . --max-warnings 0",
@@ -28,6 +29,7 @@
     "@types/react-dom": "^19.0.4",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
+    "tailwindcss": "^3.4.0",
     "typescript": "^5.7.3"
   },
   "dependencies": {

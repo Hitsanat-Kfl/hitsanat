@@ -3,11 +3,18 @@
 import { AlertDialog, Button, Input, Select } from "@repo/ui";
 import { Plus } from "lucide-react";
 import { useState } from "react";
-import { PageShell } from "@/features/shell";
+import { AlertBanner, PagePagination, PageShell } from "@/features/shell";
 import { CreateUserDialog } from "./create-user-dialog";
+import { EditUserDialog } from "./edit-user-dialog";
+import { HandoverDialog } from "./handover-dialog";
 import { ResetPasswordDialog } from "./reset-password-dialog";
 import { UserTable } from "./user-table";
-import { ASSIGNABLE_ROLES, type ManagedUser, useUsers } from "../hooks/use-users";
+import {
+  ASSIGNABLE_ROLES,
+  type ManagedUser,
+  type UpdateUserPayload,
+  useUsers,
+} from "../hooks/use-users";
 
 const ROLE_FILTERS = [{ value: "", label: "All roles" }].concat(
   ASSIGNABLE_ROLES.map((role) => ({ value: role, label: role.replaceAll("_", " ") }))
@@ -16,6 +23,8 @@ const ROLE_FILTERS = [{ value: "", label: "All roles" }].concat(
 /**
  * User account management (BR-008). Available to SUPER_ADMIN and
  * CHAIRPERSON — the API enforces this; the UI relies on route guards.
+ * Implements PE-01 (reactivation), PE-02 (edit), PE-04 (handover),
+ * PE-06 (guard rails surfaced as API errors), and PE-08 (force sign-out).
  */
 export default function UsersPage() {
   const {
@@ -29,11 +38,16 @@ export default function UsersPage() {
     createUser,
     resetPassword,
     deactivate,
+    updateUser,
+    reactivate,
+    revokeSessions,
   } = useUsers();
 
   const [createOpen, setCreateOpen] = useState(false);
   const [resetTarget, setResetTarget] = useState<ManagedUser | null>(null);
   const [deactivateTarget, setDeactivateTarget] = useState<ManagedUser | null>(null);
+  const [editTarget, setEditTarget] = useState<ManagedUser | null>(null);
+  const [handoverTarget, setHandoverTarget] = useState<ManagedUser | null>(null);
   const [notice, setNotice] = useState<string | null>(null);
 
   const handleCreate = async (payload: Parameters<typeof createUser>[0]) => {
@@ -54,6 +68,29 @@ export default function UsersPage() {
       setNotice(`Account deactivated — ${user.email} can no longer sign in.`);
     } catch (err) {
       setNotice(err instanceof Error ? err.message : "Deactivation failed.");
+    }
+  };
+
+  const handleUpdate = async (userId: string, payload: UpdateUserPayload) => {
+    await updateUser(userId, payload);
+    setNotice("Account updated.");
+  };
+
+  const handleReactivate = async (user: ManagedUser) => {
+    try {
+      await reactivate(user.id);
+      setNotice(`Account reactivated — ${user.email} can sign in again.`);
+    } catch (err) {
+      setNotice(err instanceof Error ? err.message : "Reactivation failed.");
+    }
+  };
+
+  const handleRevokeSessions = async (user: ManagedUser) => {
+    try {
+      await revokeSessions(user.id);
+      setNotice(`All live sessions for ${user.email} were revoked.`);
+    } catch (err) {
+      setNotice(err instanceof Error ? err.message : "Session revocation failed.");
     }
   };
 
@@ -113,46 +150,29 @@ export default function UsersPage() {
           </output>
         )}
 
-        {error && (
-          <div role="alert" className="rounded-md bg-destructive/10 p-4 text-destructive">
-            {error}
-            <button type="button" onClick={refresh} className="ml-3 underline underline-offset-2">
-              Retry
-            </button>
-          </div>
-        )}
+        {error && <AlertBanner message={error} />}
 
         <UserTable
           users={users}
           loading={loading}
           onResetPassword={(user) => setResetTarget(user)}
           onDeactivate={handleDeactivate}
+          onEdit={(user) => setEditTarget(user)}
+          onReactivate={handleReactivate}
+          onRevokeSessions={handleRevokeSessions}
+          onHandover={(user) => setHandoverTarget(user)}
         />
 
-        <div className="flex items-center justify-between text-sm text-muted-foreground">
-          <span>{pagination ? `${pagination.total} account(s)` : "—"}</span>
-          <div className="flex gap-2">
-            <Button
-              variant="outline"
-              size="sm"
-              disabled={currentPage <= 1 || loading}
-              onClick={() => setFilters({ ...filters, page: currentPage - 1 })}
-            >
-              Previous
-            </Button>
-            <span className="self-center">
-              Page {currentPage} of {totalPages}
-            </span>
-            <Button
-              variant="outline"
-              size="sm"
-              disabled={currentPage >= totalPages || loading}
-              onClick={() => setFilters({ ...filters, page: currentPage + 1 })}
-            >
-              Next
-            </Button>
+        {pagination && (
+          <div className="flex items-center justify-between text-sm text-muted-foreground">
+            <span>{pagination.total} account(s)</span>
+            <PagePagination
+              page={currentPage}
+              totalPages={totalPages}
+              onPageChange={(page) => setFilters({ ...filters, page })}
+            />
           </div>
-        </div>
+        )}
       </div>
 
       <CreateUserDialog open={createOpen} onOpenChange={setCreateOpen} onCreate={handleCreate} />
@@ -174,6 +194,29 @@ export default function UsersPage() {
             if (!open) setDeactivateTarget(null);
           }}
           onConfirm={() => handleDeactivate(deactivateTarget)}
+        />
+      )}
+
+      {editTarget && (
+        <EditUserDialog
+          user={editTarget}
+          onOpenChange={(open) => {
+            if (!open) setEditTarget(null);
+          }}
+          onUpdate={handleUpdate}
+        />
+      )}
+
+      {handoverTarget && (
+        <HandoverDialog
+          user={handoverTarget}
+          onOpenChange={(open) => {
+            if (!open) setHandoverTarget(null);
+          }}
+          onCreateSuccessor={handleCreate}
+          onDeactivateOutgoing={async (userId) => {
+            await deactivate(userId);
+          }}
         />
       )}
     </PageShell>
