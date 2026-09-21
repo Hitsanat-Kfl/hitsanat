@@ -45,13 +45,7 @@ export function PageEmpty({
   description = "There are no items to display.",
   className,
 }: PageEmptyProps) {
-  return (
-    <EmptyState
-      title={title}
-      description={description}
-      className={className}
-    />
-  );
+  return <EmptyState title={title} description={description} className={className} />;
 }
 
 interface PagePaginationProps {
@@ -62,31 +56,33 @@ interface PagePaginationProps {
 }
 
 export function PagePagination({ page, totalPages, onPageChange, className }: PagePaginationProps) {
-  if (totalPages <= 1) return null;
+  if (totalPages <= 0) return null;
 
   return (
-    <div className={cn("flex items-center justify-between", className)}>
+    <div className={cn("flex items-center justify-between gap-2", className)}>
       <p className="text-sm text-muted-foreground">
         Page {page} of {totalPages}
       </p>
-      <div className="flex gap-2">
-        <Button
-          variant="outline"
-          size="sm"
-          disabled={page <= 1}
-          onClick={() => onPageChange(page - 1)}
-        >
-          Previous
-        </Button>
-        <Button
-          variant="outline"
-          size="sm"
-          disabled={page >= totalPages}
-          onClick={() => onPageChange(page + 1)}
-        >
-          Next
-        </Button>
-      </div>
+      {totalPages > 1 && (
+        <div className="flex gap-2">
+          <Button
+            variant="outline"
+            size="sm"
+            disabled={page <= 1}
+            onClick={() => onPageChange(page - 1)}
+          >
+            Previous
+          </Button>
+          <Button
+            variant="outline"
+            size="sm"
+            disabled={page >= totalPages}
+            onClick={() => onPageChange(page + 1)}
+          >
+            Next
+          </Button>
+        </div>
+      )}
     </div>
   );
 }

@@ -52,11 +52,7 @@ export default function EventListPage() {
 
         {error && <AlertBanner message={error} />}
 
-        {loading ? (
-          <PageLoading />
-        ) : (
-          <EventList events={events} loading={loading} />
-        )}
+        {loading ? <PageLoading /> : <EventList events={events} loading={loading} />}
 
         {pagination && (
           <PagePagination
