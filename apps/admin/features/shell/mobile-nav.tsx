@@ -14,6 +14,7 @@ import { Church, Menu, MoreHorizontal, X } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import * as React from "react";
+import { BrandLogo } from "./app-sidebar";
 import { useI18n } from "./i18n";
 import {
   type NavItem,
@@ -109,20 +110,7 @@ export function MobileNav({ roles = ["chairperson"] }: MobileNavProps) {
                 <DrawerHeader className="border-b admin-sidebar-border-b px-4 py-3">
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-2.5">
-                      <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-md bg-[#E5AE60] text-[#32131F] font-bold text-sm shadow-sm overflow-hidden">
-                        <img
-                          src="/logo.jpg"
-                          alt="Hitsanat Kifl Logo"
-                          className="h-full w-full object-cover"
-                          onError={(e) => {
-                            (e.currentTarget as HTMLElement).style.display = "none";
-                          }}
-                        />
-                        <Church
-                          className="h-4 w-4 hidden [img[style*='display: none']~&]:block"
-                          aria-hidden="true"
-                        />
-                      </div>
+                      <BrandLogo className="h-9 w-9 text-xs" iconSize="h-4 w-4" />
                       <div className="text-left">
                         <DrawerTitle className="text-sm font-semibold text-foreground leading-tight">
                           Hitsanat Kifl

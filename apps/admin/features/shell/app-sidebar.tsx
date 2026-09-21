@@ -16,6 +16,36 @@ import {
 } from "./nav-config";
 import { useShell } from "./shell-context";
 
+function BrandLogo({
+  className,
+  iconSize = "h-5 w-5",
+}: {
+  className?: string;
+  iconSize?: string;
+}) {
+  const [hasError, setHasError] = React.useState(false);
+
+  return (
+    <div
+      className={cn(
+        "flex shrink-0 items-center justify-center rounded-md bg-[#E5AE60] text-[#32131F] font-bold shadow-sm overflow-hidden",
+        className
+      )}
+    >
+      {hasError ? (
+        <Church className={iconSize} aria-hidden="true" />
+      ) : (
+        <img
+          src="/logo.jpg"
+          alt="Hitsanat Kifl Logo"
+          className="h-full w-full object-cover"
+          onError={() => setHasError(true)}
+        />
+      )}
+    </div>
+  );
+}
+
 interface AppSidebarProps {
   roles?: UserRole[];
   className?: string;
@@ -45,20 +75,7 @@ export function AppSidebar({ roles = ["chairperson"], className }: AppSidebarPro
             className="flex items-center gap-2.5 min-w-0"
             aria-label="Hitsanat Kifl Home"
           >
-            <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-md bg-[#E5AE60] text-[#32131F] font-bold text-sm shadow-sm overflow-hidden">
-              <img
-                src="/logo.jpg"
-                alt="Hitsanat Kifl Logo"
-                className="h-full w-full object-cover"
-                onError={(e) => {
-                  (e.currentTarget as HTMLElement).style.display = "none";
-                }}
-              />
-              <Church
-                className="h-5 w-5 hidden [img[style*='display: none']~&]:block"
-                aria-hidden="true"
-              />
-            </div>
+            <BrandLogo className="h-9 w-9 text-sm" />
             <div className="flex flex-col min-w-0">
               <span className="text-[15px] font-semibold text-foreground leading-tight truncate">
                 Hitsanat Kifl
@@ -72,21 +89,10 @@ export function AppSidebar({ roles = ["chairperson"], className }: AppSidebarPro
         {sidebarCollapsed && (
           <Link
             href="/"
-            className="mx-auto flex h-9 w-9 items-center justify-center rounded-md bg-[#E5AE60] text-[#32131F] font-bold text-sm shadow-sm overflow-hidden"
+            className="mx-auto flex items-center justify-center"
             aria-label="Hitsanat Kifl Home"
           >
-            <img
-              src="/logo.jpg"
-              alt="Hitsanat Kifl Logo"
-              className="h-full w-full object-cover"
-              onError={(e) => {
-                (e.currentTarget as HTMLElement).style.display = "none";
-              }}
-            />
-            <Church
-              className="h-5 w-5 hidden [img[style*='display: none']~&]:block"
-              aria-hidden="true"
-            />
+            <BrandLogo className="h-9 w-9 text-sm" />
           </Link>
         )}
       </div>
@@ -248,3 +254,4 @@ function NavItemElement({
 
   return <li>{linkContent}</li>;
 }
+export { BrandLogo };
