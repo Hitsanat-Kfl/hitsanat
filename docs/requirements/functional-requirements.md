@@ -142,6 +142,14 @@ graph LR
 - **FR-13.4 (Super Admin Dashboard):** Dedicated dashboard showing system overview KPIs (user accounts, active accounts, sub-departments, API health), deactivated accounts requiring attention, recently provisioned accounts, role distribution, system health status, and system activity feed.
 - **FR-13.5 (Dashboard Routing):** Role-to-dashboard routing: SUPER_ADMIN → Super Admin Dashboard, CHAIRPERSON → Chairperson Dashboard, SUB_CHAIRPERSON → Vice-Chairperson Dashboard, SECRETARY → Secretary Dashboard, MEZMUR_LEADER → Mezmur Dashboard, Sub-dept officers → redirected to their department's dashboard.
 
+### 2.13.1 Module M-13.1: Leadership Meeting Scheduler
+- **FR-13.1.1 (Meeting Creation):** CHAIRPERSON, SUB_CHAIRPERSON, and SECRETARY can create leadership meetings with title, date/time, location, agenda, and invitees (executive leaders and sub-department leaders).
+- **FR-13.1.2 (Automated Reminders):** System sends automated reminders to meeting invitees 24 hours and 1 hour before the scheduled meeting via in-app notification and Telegram.
+- **FR-13.1.3 (Attendance Tracking):** Meeting creator can mark attendance for each meeting (Present, Absent, Excused) and view attendance history per member.
+- **FR-13.1.4 (Meeting Minutes):** Meeting creator can record and store meeting minutes with action items, assignees, and deadlines. Minutes are accessible to all invited participants.
+- **FR-13.1.5 (Recurring Meetings):** Support for scheduling recurring meetings (weekly, bi-weekly, monthly) with automatic instance creation.
+- **FR-13.1.6 (Meeting Calendar View):** Calendar visualization of all scheduled meetings with filtering by department and status (upcoming, completed, cancelled).
+
 ### 2.14 Module M-13 Proposed Extensions (v2.2 — Proposed, Not Yet Implemented)
 
 > Agreed requirements from the September 2026 Super Admin review session. Full context in `Hitsanat_Kifl_System_Documentation_v2.1 (2).md` § 7.10.6.
@@ -154,3 +162,34 @@ graph LR
 - **FR-13.11 (Account Self-Protection Guard Rails):** The system must reject deactivation of the acting Super Admin's own account and of the last remaining active `SUPER_ADMIN` or `CHAIRPERSON` account, preventing lockout.
 - **FR-13.12 (Break-Glass Action Logging):** All write actions performed by `SUPER_ADMIN` — including those executed under the documented permission bypass (roles-and-permissions.md § 4.3) — must be recorded in the audit trail.
 - **FR-13.13 (Session Revocation):** SUPER_ADMIN can force sign-out of a user's live sessions (e.g., stolen credentials) independent of account deactivation. Audit action `SESSIONS_REVOKED`.
+
+### 2.15 Module M-14: Secretary Dashboard Extensions
+
+- **FR-14.1 (Bulk Import/Export):** SECRETARY can import members, children, and parents via CSV/Excel files. System validates data, reports duplicates and errors, and provides import progress. Export functionality generates CSV files for all entity types.
+- **FR-14.2 (Birthday & Anniversary Tracker):** Dashboard displays children's birthdays by month with age calculation. Shows member service anniversaries (date_joined). Month selector for filtering. Supports recognition of milestones (1, 5, 10, 15, 20+ years).
+- **FR-14.3 (Member Transfer System):** SECRETARY can transfer members between sub-departments with documented reason. System maintains transfer audit trail (from/to sub-department, reason, transferred by, timestamp). Updates member's primary sub-department assignment.
+- **FR-14.4 (Registration Analytics):** Dashboard displays registration trends over time (line chart), demographic breakdown by gender/campus/year (pie charts), sub-department distribution (bar chart), and growth metrics (new vs inactive members).
+- **FR-14.5 (Batch Operations):** SECRETARY can perform bulk updates: activate/deactivate multiple members, assign multiple members to sub-dependments, update member status. Operations include confirmation dialog and progress tracking.
+- **FR-14.6 (Data Quality Dashboard):** Dashboard identifies incomplete member records (missing phone, photo, department), duplicate detection (name/phone matching), and provides guided fix workflows. Shows data completeness score per field.
+- **FR-14.7 (Parent Contact Directory):** Searchable directory of all parents with quick-access filters (by child name, phone, address). Supports click-to-call, copy phone number, and view linked children. Export to CSV.
+- **FR-14.8 (Family Tree Visualization):** Interactive visual representation of family connections showing parents, children, and their relationships. Supports expand/collapse, click-to-view details, and print functionality.
+- **FR-14.9 (Audit Trail Viewer):** SECRETARY can view chronological audit trail of all record changes (member, child, parent updates). Filterable by action type, date range, and actor. Shows before/after values for each change.
+
+### 2.16 Module M-15: Timihrt Leader Dashboard Extensions
+
+- **FR-15.1 (Report Card Generator - Single Student):** TIMIHRT_LEADER can generate individual student report cards in PDF format. Report card includes: student name, Christian name, photo, grades (Mid Exam, Final Exam, Assignments), attendance summary (present/absent/excused counts), teacher comments, class rank, and class average. Uses Ethiopian calendar format (e.g., 2016/2017 E.C.). Ministry-branded template.
+- **FR-15.2 (Report Card Generator - Batch Generation):** TIMIHRT_LEADER can generate batch report cards for entire class as Excel spreadsheet. Includes all students with: name, Christian name, all grades, sum, average, and calculated rank. Supports filtering by Kutr group and academic period.
+- **FR-15.3 (Report Card Output):** System supports both PDF download and direct print for single report cards. Batch generation produces downloadable Excel file. Print button available on report card preview.
+- **FR-15.4 (Report Card Template):** Ministry-branded report card template with official logo, header, and footer. Template includes sections for: student info, academic performance, attendance, conduct/behavior, teacher signature, and principal signature lines.
+- **FR-15.5 (Academic Period Selection):** TIMIHRT_LEADER can select academic period (Mid-term, Final, Annual) and Ethiopian academic year for report card generation. System validates that grades exist for selected period before generation.
+
+### 2.17 Module M-16: Kutitr Leader Dashboard Extensions
+
+- **FR-16.1 (Route Performance Dashboard):** KUTITR_LEADER can view statistics per transport route: attendance rate (percentage of children picked up vs expected), average pickup times, issues logged per route, and weekly trends. Dashboard includes visual charts comparing performance across all 5 collection points (Apartama, Gende Boy, Gende Je, Cobalt, Bate).
+- **FR-16.2 (Parent Contact Quick View):** KUTITR_LEADER can access parent phone numbers for children on each route. Quick-access panel shows parent names and phone numbers for emergency situations during transport. Supports click-to-call functionality and search by child or parent name.
+- **FR-16.3 (Emergency Contact Database):** KUTITR_LEADER can view comprehensive emergency contacts for all children including: parent names, primary phone, secondary phone, address, and any medical conditions/allergies. Searchable by child name, route, or collection point. Exportable to CSV for offline access.
+
+### 2.18 Module M-17: Ekd Leader Dashboard Extensions
+
+- **FR-17.1 (Plan Approval Workflow):** EKD_LEADER can submit plan changes (budget, people, time, or activity modifications) for Chairperson approval. System tracks approval status (Pending, Approved, Rejected) with timestamped comments. Chairperson receives notification and can approve/reject with comments. Rejected changes require revision before resubmission.
+- **FR-17.2 (Sub-Department Progress Heatmap):** EKD_LEADER can view a visual heatmap showing progress across all sub-departments. Color-coded matrix displays: rows = sub-departments (Timihrt, Mezmur, Kutitr, Ekd, Kinetibeb), columns = goals/activities. Color intensity indicates completion percentage (Red: 0-25%, Orange: 26-50%, Yellow: 51-75%, Green: 76-100%). Clicking a cell shows detailed progress breakdown.

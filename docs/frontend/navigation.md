@@ -44,6 +44,13 @@ export const navigationConfig: NavItem[] = [
     requiredGlobalRoles: ['SUPER_ADMIN', 'CHAIRPERSON', 'SUB_CHAIRPERSON'],
   },
   {
+    title: 'Meeting Scheduler',
+    titleAm: 'የስብሰባ መር想象力',
+    href: '/chairperson/meetings',
+    icon: 'Calendar',
+    requiredGlobalRoles: ['SUPER_ADMIN', 'CHAIRPERSON', 'SUB_CHAIRPERSON', 'SECRETARY'],
+  },
+  {
     title: 'Registration & Records',
     titleAm: 'ምዝገባ እና መዛግብት',
     href: '/secretary',

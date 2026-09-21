@@ -424,7 +424,7 @@ Build sub-department scoped dashboards showing only department-specific data.
 - Existing: `apps/admin/src/components/dashboard/` — Dashboard components
 
 ### 8. Expected Implementation
-Create sub-department scoped dashboards. The `DashboardRouter` component routes users to role-specific dashboards based on their role: Super Admin, Chairperson, Vice-Chairperson, Secretary, Mezmur, and sub-department officers.
+Create sub-department scoped dashboards. The `DashboardRouter` component routes users to role-specific dashboards based on their role: Super Admin, Chairperson, Vice-Chairperson, Secretary, Mezmur, and sub-department officers. Secretary and Sub-Chairperson dashboards include Meeting Scheduler functionality.
 
 ### 9. Acceptance Criteria
 - [ ] Scoped to user's sub-department (RBAC)
@@ -433,6 +433,7 @@ Create sub-department scoped dashboards. The `DashboardRouter` component routes 
 - [ ] Attendance summary for department
 - [ ] Academic scores for Timihrt leaders
 - [ ] Dashboard routes to correct role-specific page
+- [ ] Secretary and Sub-Chairperson dashboards include Meeting Scheduler
 
 ### 10. Git Branch
 `feature/fe2-010-subdepartment-dashboard`

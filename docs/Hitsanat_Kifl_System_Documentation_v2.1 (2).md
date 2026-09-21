@@ -277,12 +277,14 @@ The management system is a private web application accessible **only to leadersh
 - Announcement management
 - System-wide statistics
 - Member registration approval
+- Meeting Scheduler with automated reminders, attendance tracking, and minutes storage
 
 ### 7.2 Sub-Chairperson Dashboard
 
 - Similar to Chairperson with delegated access
 - Can act on behalf of Chairperson
 - Access to all sub-department dashboards
+- Meeting Scheduler with automated reminders, attendance tracking, and minutes storage
 
 ### 7.3 Secretary Dashboard
 
@@ -292,6 +294,16 @@ The management system is a private web application accessible **only to leadersh
 - Family assignment management
 - Sub-department assignment management
 - Fresh student enrollment processing
+- Meeting Scheduler with automated reminders, attendance tracking, and minutes storage
+- Bulk Import/Export for members, children, and parents via CSV/Excel
+- Birthday & Anniversary Tracker for children's birthdays and member service anniversaries
+- Member Transfer System between sub-departments with audit trail
+- Registration Analytics with trend charts, demographic breakdowns, and growth metrics
+- Batch Operations for bulk member status updates and sub-department assignments
+- Data Quality Dashboard for incomplete record detection and duplicate identification
+- Parent Contact Directory with search, click-to-call, and linked children view
+- Family Tree Visualization for interactive family connection diagrams
+- Audit Trail Viewer for chronological change log with filters
 
 ### 7.4 Timihrt Leader Dashboard
 
@@ -299,6 +311,9 @@ The management system is a private web application accessible **only to leadersh
 - Teacher assignment from Timihrt members
 - Children score and exam tracking
 - Mid exam and final exam management
+- Report Card Generator with PDF and Excel output options
+- Ministry-branded report card template with Ethiopian calendar format
+- Batch generation for entire class with grades, attendance, rank, and average
 - Assignment tracking
 - Reports for Ekd Kifl
 
@@ -317,6 +332,9 @@ The management system is a private web application accessible **only to leadersh
 - Transportation/collection location assignment
 - Special event and training attendance tracking
 - Family-based member organization overview
+- Route performance dashboard with attendance rates and pickup times
+- Parent contact quick view for route emergencies
+- Emergency contact database for all children
 - Attendance reports for Ekd Kifl
 
 ### 7.7 Ekd Leader Dashboard
@@ -329,6 +347,8 @@ The management system is a private web application accessible **only to leadersh
 - Weekly, monthly, quarterly, half-year and full-year report generation
 - Reports aggregated from all sub-departments
 - Announcement creation and publishing
+- Plan approval workflow for changes requiring Chairperson approval
+- Sub-department progress heatmap with color-coded visualization
 
 ### 7.8 Kinetibeb Leader Dashboard
 

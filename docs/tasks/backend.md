@@ -68,3 +68,18 @@ The following tasks are delegated to Israel (Backend Support) but remain under A
 | HRD-010 | Documentation Review | Phase 9 | Israel |
 | DEP-008 | Production Verification Testing | Phase 10 | Israel |
 | DEP-010 | Deployment Documentation | Phase 10 | Israel |
+| MTG-001 | Leadership Meeting Scheduler API | Phase 7 | High |
+| SEC-001 | Bulk Import/Export API | Phase 7 | High |
+| SEC-002 | Member Transfer System API | Phase 7 | High |
+| SEC-003 | Registration Analytics API | Phase 7 | Medium |
+| SEC-004 | Batch Operations API | Phase 7 | Medium |
+| SEC-005 | Data Quality API | Phase 7 | Medium |
+| SEC-006 | Parent Contact Directory API | Phase 7 | Low |
+| SEC-007 | Family Tree API | Phase 7 | Low |
+| SEC-008 | Secretary Audit Trail API | Phase 7 | Low |
+| TIM-001 | Report Card Generator API | Phase 7 | High |
+| KUT-001 | Route Performance API | Phase 7 | Medium |
+| KUT-002 | Parent Contact Quick View API | Phase 7 | Low |
+| KUT-003 | Emergency Contact Database API | Phase 7 | Low |
+| EKD-001 | Plan Approval Workflow API | Phase 7 | Medium |
+| EKD-002 | Progress Heatmap API | Phase 7 | Medium |
