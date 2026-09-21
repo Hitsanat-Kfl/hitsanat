@@ -13,15 +13,35 @@ import { ShellProvider } from "./shell-context";
 
 /**
  * Bridges the shell's locale state into the dashboard widgets so their
- * titleAm/labelAm prop variants render when the user switches to Amharic
- * (Phase 06 §22). Must sit below I18nProvider to read the locale.
+ * titleAm/labelAm prop variants render when the user switches to Amharic.
  */
 function DashboardLocaleBridge({ children }: { children: React.ReactNode }) {
   const { locale } = useI18n();
   return <DashboardLocaleProvider locale={locale}>{children}</DashboardLocaleProvider>;
 }
 
-interface AppShellProps {
+export interface MainContentProps extends React.HTMLAttributes<HTMLElement> {
+  children: React.ReactNode;
+  className?: string;
+}
+
+export function MainContent({ children, className, ...props }: MainContentProps) {
+  return (
+    <main
+      className={cn(
+        "flex-1 overflow-y-auto overflow-x-hidden focus:outline-none",
+        "p-4 sm:p-6 lg:p-8",
+        className
+      )}
+      tabIndex={-1}
+      {...props}
+    >
+      {children}
+    </main>
+  );
+}
+
+export interface AppShellProps {
   children: React.ReactNode;
   roles?: UserRole[];
   userName?: string;
@@ -46,12 +66,12 @@ export function AppShell({
     <I18nProvider>
       <ShellProvider>
         <DashboardLocaleBridge>
-          <div className={cn("flex h-screen overflow-hidden bg-background", className)}>
-            {/* Desktop sidebar */}
+          <div className={cn("flex h-screen w-full overflow-hidden bg-background", className)}>
+            {/* Desktop Sidebar */}
             <AppSidebar roles={roles} />
 
-            {/* Main area */}
-            <div className="flex flex-1 flex-col overflow-hidden">
+            {/* Main Area: Header + Scrollable Content */}
+            <div className="flex flex-1 flex-col min-w-0 overflow-hidden">
               <AppHeader
                 userName={userName}
                 userEmail={userEmail}
@@ -60,13 +80,13 @@ export function AppShell({
                 onLogout={onLogout}
               />
 
-              <main className="flex-1 overflow-auto">{children}</main>
+              <MainContent>{children}</MainContent>
             </div>
 
-            {/* Mobile bottom nav */}
+            {/* Mobile Bottom Navigation & Drawer */}
             <MobileNav roles={roles} />
 
-            {/* Global search overlay */}
+            {/* Global Search / Overlays */}
             <GlobalSearch />
           </div>
         </DashboardLocaleBridge>
@@ -74,3 +94,5 @@ export function AppShell({
     </I18nProvider>
   );
 }
+
+export const AuthenticatedLayout = AppShell;

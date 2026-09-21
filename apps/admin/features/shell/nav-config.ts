@@ -18,8 +18,7 @@ import {
   Users,
 } from "lucide-react";
 
-// Roles come from the single source of truth in @/config/roles.
-export type UserRole = AdminRole;
+export type UserRole = AdminRole | "member-regular";
 
 /**
  * Maps session user globalRoles (UPPERCASE like "SUPER_ADMIN") to
@@ -35,6 +34,7 @@ const SESSION_ROLE_MAP: Record<string, UserRole> = {
   KUTITR_LEADER: "kutitr-leader",
   EKD_LEADER: "ekd-leader",
   KINETIBEB_LEADER: "kinetibeb-leader",
+  MEMBER_REGULAR: "member-regular",
 };
 
 export function mapSessionRolesToNavRoles(globalRoles: string[]): UserRole[] {
@@ -266,11 +266,25 @@ export function getPrimaryNavItems(roles: UserRole[]): NavItem[] {
 }
 
 export function findActiveNavItem(pathname: string): NavItem | undefined {
+  let matchedItem: NavItem | undefined;
+  let longestMatchLength = 0;
+
   for (const section of navigationConfig) {
     for (const item of section.items) {
-      if (item.href === pathname) return item;
-      if (item.href !== "/" && pathname.startsWith(item.href)) return item;
+      if (item.href === pathname) {
+        return item;
+      }
+      if (item.href !== "/" && pathname.startsWith(item.href)) {
+        if (item.href.length > longestMatchLength) {
+          longestMatchLength = item.href.length;
+          matchedItem = item;
+        }
+      }
     }
   }
+
+  if (matchedItem) return matchedItem;
+  if (pathname === "/") return navigationConfig[0]?.items[0];
+
   return undefined;
 }
