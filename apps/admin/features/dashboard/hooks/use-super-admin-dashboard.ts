@@ -1,7 +1,6 @@
 "use client";
 
 import { useCallback, useEffect, useState } from "react";
-import type { KPIData, QuickAction, StatusSummaryItem } from "@repo/ui";
 import { type ApiResponse, type PaginatedResponse, api } from "@/lib/api-client";
 import type { SubDepartment } from "@/lib/types";
 
@@ -52,14 +51,43 @@ export interface RosterEntry {
   userId: string;
   name: string;
   email: string;
+  /** Display-ready post labels, e.g. "Super Admin · Executive" or "Leader · TIMIHRT". */
   posts: string[];
+  /** Sub-department code the post belongs to, when departmental. */
+  department: string | null;
   /** BR-009: the member holds more than one leadership post. */
   conflict: boolean;
   status: "ACTIVE" | "DEACTIVATED";
 }
 
+/** Icon keys the dashboard resolves to Lucide components (serializable). */
+export type QuickActionIconKey =
+  | "users"
+  | "audit-logs"
+  | "permissions"
+  | "members"
+  | "sub-departments"
+  | "reports";
+
+export interface SuperAdminQuickAction {
+  id: string;
+  title: string;
+  description: string;
+  /** Existing application route (no invented routes). */
+  href: string;
+  icon: QuickActionIconKey;
+}
+
 const EXECUTIVE_ROLES = new Set(["SUPER_ADMIN", "CHAIRPERSON", "SUB_CHAIRPERSON", "SECRETARY"]);
 const SUB_DEPT_LEADERSHIP_ROLES = new Set(["Leader", "Sub-Leader"]);
+
+/** Human-readable labels for executive roles in the roster Post column. */
+const EXECUTIVE_ROLE_LABELS: Record<string, string> = {
+  SUPER_ADMIN: "Super Admin",
+  CHAIRPERSON: "Chairperson",
+  SUB_CHAIRPERSON: "Vice Chairperson",
+  SECRETARY: "Secretary",
+};
 
 function isLeadershipSubDeptRole(role: string): boolean {
   return SUB_DEPT_LEADERSHIP_ROLES.has(role);
@@ -74,12 +102,14 @@ function buildRoster(users: AdminUserRow[]): RosterEntry[] {
   const entries: RosterEntry[] = [];
   for (const user of users) {
     const posts: string[] = [];
+    let department: string | null = null;
     if (EXECUTIVE_ROLES.has(user.role)) {
-      posts.push(`${user.role} (global)`);
+      posts.push(`${EXECUTIVE_ROLE_LABELS[user.role] ?? user.role} · Executive`);
     }
     for (const sd of user.subDepartments) {
       if (isLeadershipSubDeptRole(sd.role)) {
-        posts.push(`${sd.role} — ${sd.code}`);
+        posts.push(`${sd.role} · ${sd.code}`);
+        department = department ?? sd.code;
       }
     }
     if (posts.length === 0) continue;
@@ -88,6 +118,7 @@ function buildRoster(users: AdminUserRow[]): RosterEntry[] {
       name: user.name,
       email: user.email,
       posts,
+      department,
       conflict: posts.length > 1,
       status: user.status,
     });
@@ -98,15 +129,23 @@ function buildRoster(users: AdminUserRow[]): RosterEntry[] {
 }
 
 export interface UseSuperAdminDashboardResult {
-  kpis: KPIData[];
+  /** pagination.total from GET /users — every provisioned account. */
+  totalAccounts: number;
+  /** Accounts with lifecycle status ACTIVE (within the loaded page). */
+  activeAccounts: number;
+  /** Accounts actually loaded (the users endpoint caps at 100). */
+  loadedAccounts: number;
   deactivatedAccounts: AdminUserRow[];
-  verificationSummary: StatusSummaryItem[];
+  /** Last 5 provisioned accounts (API returns createdAt desc). */
   recentAccounts: AdminUserRow[];
   roleCounts: RoleCount[];
   leadershipRoster: RosterEntry[];
+  subDepartmentCount: number;
+  /** user id → display name, for resolving audit-log actors. */
+  userNameById: Record<string, string>;
   health: ApiHealth | null;
   healthError: string | null;
-  quickActions: QuickAction[];
+  quickActions: SuperAdminQuickAction[];
   loading: boolean;
   error: string | null;
   refresh: () => void;
@@ -128,59 +167,22 @@ function messageOf(err: unknown): string {
  *
  * Sources (all real endpoints — nothing fabricated):
  *  - GET /users (BR-008, SUPER_ADMIN/CHAIRPERSON only): accounts, roles,
- *    verification status, sub-department assignments.
+ *    lifecycle status, sub-department assignments.
  *  - GET /sub-departments: configured programs.
  *  - GET /health: API service status/version/environment.
- *
- * There is no audit-log domain yet, so no activity/audit section is produced.
  */
 export function useSuperAdminDashboard(): UseSuperAdminDashboardResult {
-  const [kpis, setKpis] = useState<KPIData[]>([]);
+  const [totalAccounts, setTotalAccounts] = useState(0);
+  const [activeAccounts, setActiveAccounts] = useState(0);
+  const [loadedAccounts, setLoadedAccounts] = useState(0);
   const [deactivatedAccounts, setDeactivatedAccounts] = useState<AdminUserRow[]>([]);
-  const [verificationSummary, setVerificationSummary] = useState<StatusSummaryItem[]>([]);
   const [recentAccounts, setRecentAccounts] = useState<AdminUserRow[]>([]);
   const [roleCounts, setRoleCounts] = useState<RoleCount[]>([]);
   const [leadershipRoster, setLeadershipRoster] = useState<RosterEntry[]>([]);
+  const [subDepartmentCount, setSubDepartmentCount] = useState(0);
+  const [userNameById, setUserNameById] = useState<Record<string, string>>({});
   const [health, setHealth] = useState<ApiHealth | null>(null);
   const [healthError, setHealthError] = useState<string | null>(null);
-  const [quickActions] = useState<QuickAction[]>([
-    {
-      id: "qa-users",
-      label: "Manage Users",
-      onClick: () => window.location.assign("/users"),
-      variant: "outline",
-    },
-    {
-      id: "qa-audit-logs",
-      label: "Audit Logs",
-      onClick: () => window.location.assign("/audit-logs"),
-      variant: "outline",
-    },
-    {
-      id: "qa-permissions",
-      label: "Permissions",
-      onClick: () => window.location.assign("/permissions"),
-      variant: "outline",
-    },
-    {
-      id: "qa-members",
-      label: "Manage Members",
-      onClick: () => window.location.assign("/members"),
-      variant: "outline",
-    },
-    {
-      id: "qa-subdepartments",
-      label: "Sub-Departments",
-      onClick: () => window.location.assign("/sub-departments"),
-      variant: "outline",
-    },
-    {
-      id: "qa-reports",
-      label: "View Reports",
-      onClick: () => window.location.assign("/reports"),
-      variant: "outline",
-    },
-  ]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -213,44 +215,19 @@ export function useSuperAdminDashboard(): UseSuperAdminDashboardResult {
     const deactivated = users.filter((u) => u.status === "DEACTIVATED");
     const apiHealth = healthRes.status === "fulfilled" ? healthRes.value : null;
 
-    setKpis([
-      {
-        label: "User Accounts",
-        value: total,
-        description: "All provisioned accounts",
-      },
-      {
-        label: "Active Accounts",
-        value: active.length,
-        description:
-          users.length < total ? `Status ACTIVE (of ${users.length} loaded)` : "Status ACTIVE",
-      },
-      {
-        label: "Sub-Departments",
-        value: departments.length,
-        description: "Configured programs",
-      },
-      {
-        label: "API Service",
-        value: apiHealth ? "Healthy" : "Unreachable",
-        status: apiHealth ? "success" : "destructive",
-        description: apiHealth
-          ? `v${apiHealth.version} · ${apiHealth.environment}`
-          : "Health endpoint not responding",
-      },
-    ]);
-
+    setTotalAccounts(total);
+    setActiveAccounts(active.length);
+    setLoadedAccounts(users.length);
+    setSubDepartmentCount(departments.length);
+    const nameMap: Record<string, string> = {};
+    for (const user of users) {
+      nameMap[user.id] = user.name;
+    }
+    setUserNameById(nameMap);
     setDeactivatedAccounts(deactivated);
-
-    setVerificationSummary([
-      { status: "active", label: "Active accounts", count: active.length },
-      { status: "inactive", label: "Deactivated accounts", count: deactivated.length },
-    ]);
-
-    setLeadershipRoster(buildRoster(users));
-
     // API already returns users ordered by createdAt desc.
     setRecentAccounts(users.slice(0, 5));
+    setLeadershipRoster(buildRoster(users));
 
     const counts = new Map<string, number>();
     for (const user of users) {
@@ -275,17 +252,66 @@ export function useSuperAdminDashboard(): UseSuperAdminDashboardResult {
   }, [fetchData]);
 
   return {
-    kpis,
+    totalAccounts,
+    activeAccounts,
+    loadedAccounts,
     deactivatedAccounts,
-    verificationSummary,
     recentAccounts,
     roleCounts,
     leadershipRoster,
+    subDepartmentCount,
+    userNameById,
     health,
     healthError,
-    quickActions,
+    quickActions: QUICK_ACTIONS,
     loading,
     error,
     refresh: fetchData,
   };
 }
+
+/** Quick actions target existing application routes only. */
+const QUICK_ACTIONS: SuperAdminQuickAction[] = [
+  {
+    id: "qa-users",
+    title: "Users",
+    description: "Manage user accounts",
+    href: "/users",
+    icon: "users",
+  },
+  {
+    id: "qa-audit-logs",
+    title: "Audit Logs",
+    description: "View system activity",
+    href: "/audit-logs",
+    icon: "audit-logs",
+  },
+  {
+    id: "qa-permissions",
+    title: "Permissions",
+    description: "Review role access",
+    href: "/permissions",
+    icon: "permissions",
+  },
+  {
+    id: "qa-members",
+    title: "Members",
+    description: "Manage member records",
+    href: "/members",
+    icon: "members",
+  },
+  {
+    id: "qa-sub-departments",
+    title: "Sub-Departments",
+    description: "Configure programs",
+    href: "/sub-departments",
+    icon: "sub-departments",
+  },
+  {
+    id: "qa-reports",
+    title: "Reports",
+    description: "View ministry reports",
+    href: "/reports",
+    icon: "reports",
+  },
+];

@@ -77,4 +77,3 @@ function extractResourceId(path: string): string {
   const match = path.match(uuidPattern);
   return match ? match[0] : "n/a";
 }
- 
