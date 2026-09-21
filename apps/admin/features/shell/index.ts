@@ -1,4 +1,4 @@
-export { AppShell } from "./app-shell";
+export { AppShell, AuthenticatedLayout, MainContent } from "./app-shell";
 export { AppSidebar } from "./app-sidebar";
 export { AppHeader } from "./app-header";
 export { MobileNav } from "./mobile-nav";

@@ -2,7 +2,7 @@
 
 import { Button, ScrollArea, Separator, Tooltip } from "@repo/ui";
 import { cn } from "@repo/ui/lib/utils";
-import { ChevronLeft, ChevronRight } from "lucide-react";
+import { ChevronLeft, ChevronRight, Church } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import * as React from "react";
@@ -31,33 +31,69 @@ export function AppSidebar({ roles = ["chairperson"], className }: AppSidebarPro
   return (
     <aside
       className={cn(
-        "hidden md:flex flex-col border-r admin-sidebar transition-all duration-200",
-        sidebarCollapsed ? "w-16" : "w-64",
+        "hidden md:flex flex-col border-r admin-sidebar transition-all duration-200 select-none",
+        sidebarCollapsed ? "w-16" : "w-60",
         className
       )}
       aria-label="Sidebar navigation"
     >
-      <div className="flex h-16 items-center justify-between border-b admin-sidebar-border-b px-4">
+      {/* Brand Header */}
+      <div className="flex h-16 items-center justify-between border-b admin-sidebar-border-b px-3.5">
         {!sidebarCollapsed && (
-          <Link href="/" className="flex items-center gap-2">
-            <div className="flex h-8 w-8 items-center justify-center rounded-md bg-primary text-primary-foreground text-sm font-bold">
-              H
+          <Link
+            href="/"
+            className="flex items-center gap-2.5 min-w-0"
+            aria-label="Hitsanat Kifl Home"
+          >
+            <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-md bg-[#E5AE60] text-[#32131F] font-bold text-sm shadow-sm overflow-hidden">
+              <img
+                src="/logo.jpg"
+                alt="Hitsanat Kifl Logo"
+                className="h-full w-full object-cover"
+                onError={(e) => {
+                  (e.currentTarget as HTMLElement).style.display = "none";
+                }}
+              />
+              <Church
+                className="h-5 w-5 hidden [img[style*='display: none']~&]:block"
+                aria-hidden="true"
+              />
             </div>
-            <span className="text-sm font-semibold text-foreground truncate">Hitsanat</span>
+            <div className="flex flex-col min-w-0">
+              <span className="text-[15px] font-semibold text-foreground leading-tight truncate">
+                Hitsanat Kifl
+              </span>
+              <span className="text-[11px] text-muted-foreground leading-tight truncate">
+                Children&apos;s Ministry
+              </span>
+            </div>
           </Link>
         )}
         {sidebarCollapsed && (
           <Link
             href="/"
-            className="mx-auto flex h-8 w-8 items-center justify-center rounded-md bg-primary text-primary-foreground text-sm font-bold"
+            className="mx-auto flex h-9 w-9 items-center justify-center rounded-md bg-[#E5AE60] text-[#32131F] font-bold text-sm shadow-sm overflow-hidden"
+            aria-label="Hitsanat Kifl Home"
           >
-            H
+            <img
+              src="/logo.jpg"
+              alt="Hitsanat Kifl Logo"
+              className="h-full w-full object-cover"
+              onError={(e) => {
+                (e.currentTarget as HTMLElement).style.display = "none";
+              }}
+            />
+            <Church
+              className="h-5 w-5 hidden [img[style*='display: none']~&]:block"
+              aria-hidden="true"
+            />
           </Link>
         )}
       </div>
 
+      {/* Navigation Region - Scrollable */}
       <ScrollArea className="flex-1 py-2">
-        <nav aria-label="Main navigation">
+        <nav aria-label="Main navigation" className="px-2">
           {sections.map((section, sectionIndex) => (
             <SidebarSection
               key={section.id}
@@ -72,18 +108,29 @@ export function AppSidebar({ roles = ["chairperson"], className }: AppSidebarPro
         </nav>
       </ScrollArea>
 
-      <div className="border-t admin-sidebar-border-b p-2">
+      {/* Footer Area - Brand mark & Collapse */}
+      <div className="border-t admin-sidebar-border-b p-2 space-y-1.5">
+        {!sidebarCollapsed && (
+          <div className="px-2 py-1 text-center">
+            <p className="text-[11px] font-medium text-[#B8892D] dark:text-[#E5AE60] tracking-wide">
+              Serving Children · Building Faith
+            </p>
+          </div>
+        )}
         <Button
           variant="ghost"
-          size="icon"
-          className="w-full h-10"
+          size="sm"
+          className="w-full h-9 flex items-center justify-center text-muted-foreground hover:text-foreground"
           onClick={() => setSidebarCollapsed(!sidebarCollapsed)}
           aria-label={sidebarCollapsed ? t("shell.expand") : t("shell.collapse")}
         >
           {sidebarCollapsed ? (
             <ChevronRight className="h-4 w-4" />
           ) : (
-            <ChevronLeft className="h-4 w-4" />
+            <div className="flex items-center gap-2 text-xs">
+              <ChevronLeft className="h-4 w-4" />
+              <span>{t("shell.collapse")}</span>
+            </div>
           )}
         </Button>
       </div>
@@ -107,24 +154,32 @@ function SidebarSection({
   showSeparator: boolean;
 }) {
   return (
-    <div className="px-2 py-1">
-      {showSeparator && <Separator className="my-2" decorative />}
+    <div className="py-1">
+      {showSeparator && <Separator className="my-2 opacity-50" decorative />}
       {!collapsed && (
-        <p className="px-2 py-1.5 text-xs font-medium text-muted-foreground uppercase tracking-wider">
+        <p className="px-3 py-1.5 text-[11px] font-semibold text-muted-foreground uppercase tracking-wider">
           {t(`nav.${section.id}`)}
         </p>
       )}
-      <ul className="space-y-0.5">
-        {section.items.map((item) => (
-          <NavItemElement
-            key={item.id}
-            item={item}
-            isActive={activeItem?.id === item.id}
-            isCurrentPath={pathname === item.href}
-            collapsed={collapsed}
-            t={t}
-          />
-        ))}
+      <ul className="space-y-1">
+        {section.items.map((item) => {
+          const isCurrent =
+            item.href === "/"
+              ? pathname === "/"
+              : pathname === item.href || pathname.startsWith(`${item.href}/`);
+          const isItemActive = isCurrent || activeItem?.id === item.id;
+
+          return (
+            <NavItemElement
+              key={item.id}
+              item={item}
+              isActive={isItemActive}
+              isCurrentPath={isCurrent}
+              collapsed={collapsed}
+              t={t}
+            />
+          );
+        })}
       </ul>
     </div>
   );
@@ -154,21 +209,29 @@ function NavItemElement({
       tabIndex={item.disabled ? -1 : undefined}
       className={cn(
         "flex items-center gap-3 rounded-md px-3 py-2 text-sm font-medium transition-colors",
-        "min-h-[44px] md:min-h-[36px]",
+        "min-h-[40px] h-10",
         "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2",
-        isCurrentPath && "bg-primary/10 text-primary font-semibold",
-        !isCurrentPath && "text-muted-foreground hover:bg-accent hover:text-accent-foreground",
-        item.disabled && "opacity-50 cursor-not-allowed",
+        isActive
+          ? "bg-[#E5AE60] text-[#32131F] font-semibold shadow-sm hover:bg-[#E5AE60]/90"
+          : "text-muted-foreground hover:bg-accent/70 hover:text-accent-foreground",
+        item.disabled && "opacity-50 cursor-not-allowed pointer-events-none",
         collapsed && "justify-center px-0"
       )}
     >
       <Icon
-        className={cn("h-4 w-4 shrink-0", isCurrentPath && "text-primary")}
+        className={cn("h-4 w-4 shrink-0", isActive ? "text-[#32131F]" : "text-muted-foreground")}
         aria-hidden="true"
       />
       {!collapsed && <span className="truncate">{label}</span>}
-      {!collapsed && item.badge && (
-        <span className="ml-auto text-xs font-medium text-muted-foreground">{item.badge}</span>
+      {!collapsed && item.badge !== undefined && (
+        <span
+          className={cn(
+            "ml-auto text-xs font-medium px-1.5 py-0.5 rounded-full",
+            isActive ? "bg-[#32131F]/15 text-[#32131F]" : "bg-muted text-muted-foreground"
+          )}
+        >
+          {item.badge}
+        </span>
       )}
     </Link>
   );
