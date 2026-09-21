@@ -97,3 +97,129 @@
 | `USER_UPDATED` | User details modified |
 | `USER_DEACTIVATED` | User account deactivated |
 | `PASSWORD_RESET` | User password reset |
+
+### 2.9 Leadership Meetings (`/api/v1/meetings`)
+> **Authorization:** Restricted to `CHAIRPERSON`, `SUB_CHAIRPERSON`, and `SECRETARY` for create/update/delete; all leadership roles for read access.
+
+- `POST /api/v1/meetings`: Create a new meeting (title, datetime, location, agenda, invitees, recurring config).
+- `GET /api/v1/meetings`: List meetings with optional filters (`?status=upcoming|completed|cancelled`, `?department=timihrt`).
+- `GET /api/v1/meetings/:id`: Get meeting details including attendees and minutes.
+- `PATCH /api/v1/meetings/:id`: Update meeting details (CHAIRPERSON only).
+- `DELETE /api/v1/meetings/:id`: Cancel a meeting (CHAIRPERSON only).
+- `POST /api/v1/meetings/:id/attendance`: Mark attendance for meeting attendees.
+- `POST /api/v1/meetings/:id/minutes`: Record meeting minutes with action items.
+- `GET /api/v1/meetings/:id/minutes`: Retrieve meeting minutes.
+
+### 2.10 Bulk Import/Export (`/api/v1/bulk-import`)
+> **Authorization:** Restricted to `SECRETARY`, `CHAIRPERSON`, and `SUPER_ADMIN`.
+
+- `POST /api/v1/bulk-import/members`: Import members from CSV/Excel data array.
+- `POST /api/v1/bulk-import/children`: Import children from CSV/Excel data array.
+- `POST /api/v1/bulk-import/parents`: Import parents from CSV/Excel data array.
+- `GET /api/v1/bulk-import/members/export`: Export members as CSV download.
+- `GET /api/v1/bulk-import/children/export`: Export children as CSV download.
+- `GET /api/v1/bulk-import/parents/export`: Export parents as CSV download.
+- `GET /api/v1/bulk-import/jobs`: List import job history with status.
+
+### 2.11 Member Transfers (`/api/v1/member-transfers`)
+> **Authorization:** Restricted to `SECRETARY`.
+
+- `POST /api/v1/member-transfers`: Transfer member between sub-departments (memberId, fromSubDepartment, toSubDepartment, reason).
+- `GET /api/v1/member-transfers`: List transfer history with filters (`?memberId=`, `?subDepartment=`).
+- `GET /api/v1/member-transfers/:id`: Get transfer details.
+
+### 2.12 Registration Analytics (`/api/v1/analytics/registration`)
+> **Authorization:** Restricted to `SECRETARY`, `CHAIRPERSON`, `SUPER_ADMIN`.
+
+- `GET /api/v1/analytics/registration/trends`: Registration trend data over time (daily/weekly/monthly).
+- `GET /api/v1/analytics/registration/demographics`: Gender, campus, year_of_study breakdown.
+- `GET /api/v1/analytics/registration/sub-departments`: Sub-department distribution counts.
+- `GET /api/v1/analytics/registration/growth`: Growth metrics (new vs inactive members).
+
+### 2.13 Batch Operations (`/api/v1/batch`)
+> **Authorization:** Restricted to `SECRETARY`.
+
+- `POST /api/v1/batch/activate`: Activate multiple members by IDs array.
+- `POST /api/v1/batch/deactivate`: Deactivate multiple members by IDs array.
+- `POST /api/v1/batch/assign-subdepartment`: Assign multiple members to a sub-department.
+- `POST /api/v1/batch/update-status`: Update status for multiple members.
+
+### 2.14 Data Quality (`/api/v1/data-quality`)
+> **Authorization:** Restricted to `SECRETARY`.
+
+- `GET /api/v1/data-quality/check`: Run data quality check and return issues.
+- `GET /api/v1/data-quality/issues`: List all unresolved data quality issues.
+- `PATCH /api/v1/data-quality/issues/:id/resolve`: Mark issue as resolved.
+- `GET /api/v1/data-quality/scores`: Field completeness scores per entity type.
+
+### 2.15 Parent Contact Directory (`/api/v1/parent-directory`)
+> **Authorization:** Restricted to `SECRETARY`.
+
+- `GET /api/v1/parent-directory`: List all parents with search (`?search=`, `?childName=`).
+- `GET /api/v1/parent-directory/:id`: Get parent details with linked children.
+- `GET /api/v1/parent-directory/export`: Export parent directory as CSV.
+
+### 2.16 Family Tree (`/api/v1/family-tree`)
+> **Authorization:** Restricted to `SECRETARY`.
+
+- `GET /api/v1/family-tree/:familyId`: Get family tree visualization data (parents, children, relationships).
+- `GET /api/v1/family-tree/member/:memberId`: Get family tree for a specific member.
+
+### 2.17 Secretary Audit Trail (`/api/v1/secretary-audit`)
+> **Authorization:** Restricted to `SECRETARY`.
+
+- `GET /api/v1/secretary-audit`: List audit trail with filters (`?action=`, `?dateFrom=`, `?dateTo=`, `?actor=`).
+- `GET /api/v1/secretary-audit/:id`: Get audit entry details with before/after values.
+
+### 2.18 Report Card Generator (`/api/v1/report-cards`)
+> **Authorization:** Restricted to `TIMIHRT_LEADER`.
+
+- `POST /api/v1/report-cards/generate`: Generate single student report card (childId, academicYear, academicPeriod, templateId).
+- `POST /api/v1/report-cards/batch`: Generate batch report cards for entire class (kutrGroup, academicYear, academicPeriod, templateId).
+- `GET /api/v1/report-cards`: List generated report cards with filters (`?childId=`, `?academicYear=`, `?academicPeriod=`).
+- `GET /api/v1/report-cards/:id`: Get report card details with grades and summary.
+- `GET /api/v1/report-cards/:id/download`: Download report card as PDF or Excel file.
+- `GET /api/v1/report-cards/templates`: List available report card templates.
+- `GET /api/v1/report-cards/templates/:id`: Get template details.
+- `POST /api/v1/report-cards/preview`: Preview report card data before generation (childId, academicYear, academicPeriod).
+
+### 2.19 Kutitr Route Performance (`/api/v1/kutitr/routes`)
+> **Authorization:** Restricted to `KUTITR_LEADER`.
+
+- `GET /api/v1/kutitr/routes/performance`: Get route performance statistics with filters (`?route=`, `?dateFrom=`, `?dateTo=`, `?sessionType=`).
+- `GET /api/v1/kutitr/routes/performance/:routeName`: Get detailed stats for specific route.
+- `POST /api/v1/kutitr/routes/performance`: Record route performance data (routeName, sessionDate, sessionType, expectedChildren, pickedUpChildren, avgPickupTime).
+- `GET /api/v1/kutitr/routes/issues`: List all route issues with filters (`?route=`, `?resolved=`, `?dateFrom=`, `?dateTo=`).
+- `POST /api/v1/kutitr/routes/issues`: Log a new route issue (routeName, sessionDate, issueType, description, childId).
+- `PATCH /api/v1/kutitr/routes/issues/:id/resolve`: Mark issue as resolved.
+
+### 2.20 Parent Contact Quick View (`/api/v1/kutitr/parent-contacts`)
+> **Authorization:** Restricted to `KUTITR_LEADER`.
+
+- `GET /api/v1/kutitr/parent-contacts/route/:routeName`: Get parent contacts for children on specific route.
+- `GET /api/v1/kutitr/parent-contacts/search`: Search parent contacts by child or parent name (`?search=`).
+- `GET /api/v1/kutitr/parent-contacts/child/:childId`: Get parent contacts for specific child.
+
+### 2.21 Emergency Contact Database (`/api/v1/kutitr/emergency-contacts`)
+> **Authorization:** Restricted to `KUTITR_LEADER`.
+
+- `GET /api/v1/kutitr/emergency-contacts`: List all emergency contacts with search (`?search=`, `?route=`, `?collectionPoint=`).
+- `GET /api/v1/kutitr/emergency-contacts/:childId`: Get emergency contacts for specific child.
+- `GET /api/v1/kutitr/emergency-contacts/export`: Export emergency contacts as CSV.
+
+### 2.22 Ekd Plan Approval Workflow (`/api/v1/ekd/approvals`)
+> **Authorization:** Restricted to `EKD_LEADER` (submit) and `CHAIRPERSON` (review).
+
+- `GET /api/v1/ekd/approvals`: List all approval requests with filters (`?status=`, `?submittedBy=`).
+- `POST /api/v1/ekd/approvals`: Submit plan change for approval (planId, changeType, changeDescription, currentValue, proposedValue).
+- `GET /api/v1/ekd/approvals/:id`: Get approval request details.
+- `PATCH /api/v1/ekd/approvals/:id/review`: Review approval request (status: approved/rejected/revision_needed, reviewComments). **Chairperson only.**
+- `PATCH /api/v1/ekd/approvals/:id/revise`: Revise rejected approval for resubmission. **Ekd Leader only.**
+
+### 2.23 Ekd Progress Heatmap (`/api/v1/ekd/progress-heatmap`)
+> **Authorization:** Restricted to `EKD_LEADER`.
+
+- `GET /api/v1/ekd/progress-heatmap`: Get heatmap data for all sub-departments (`?year=`, `?quarter=`).
+- `GET /api/v1/ekd/progress-heatmap/:subDeptId`: Get heatmap data for specific sub-department.
+- `POST /api/v1/ekd/progress-heatmap`: Update progress for a sub-department/goal combination (subDeptId, goalId, activityId, completionPercentage, notes).
+- `GET /api/v1/ekd/progress-heatmap/summary`: Get summary statistics (average completion, most/least progress).

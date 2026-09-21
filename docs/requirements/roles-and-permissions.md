@@ -51,10 +51,10 @@ graph TD
 | Role Identifier | Role Level | Assigned Scope | Key System Responsibilities |
 | :--- | :--- | :--- | :--- |
 | `SUPER_ADMIN` | System | Global (`*`) | Full system administration, database maintenance, leader user account creation & permission management. |
-| `CHAIRPERSON` | Ministry Executive | Global (`*`) | Full operational visibility, leader user account creation/role updates, plan approvals, final report sign-offs. |
-| `SUB_CHAIRPERSON` | Ministry Executive | Global (`*`) | Assists Chairperson; delegated cross-departmental oversight. |
-| `SECRETARY` | Ministry Executive | Administrative Core | Member registration, child/parent registration, family allocation. |
-| `SUB_DEPT_LEADER` | Sub-Department | `Timihrt` | Curriculum, teacher assignments, academic score management. |
+| `CHAIRPERSON` | Ministry Executive | Global (`*`) | Full operational visibility, leader user account creation/role updates, plan approvals, final report sign-offs, meeting scheduling & minutes tracking. |
+| `SUB_CHAIRPERSON` | Ministry Executive | Global (`*`) | Assists Chairperson; delegated cross-departmental oversight, meeting scheduling & minutes tracking. |
+| `SECRETARY` | Ministry Executive | Administrative Core | Member registration, child/parent registration, family allocation, meeting scheduling & minutes tracking, bulk import/export, member transfers, batch operations, data quality management. |
+| `SUB_DEPT_LEADER` | Sub-Department | `Timihrt` | Curriculum, teacher assignments, academic score management, report card generation. |
 | `SUB_DEPT_LEADER` | Sub-Department | `Mezmur` | Hymn repertoire, conductor assignments, Awdemerit preparation. |
 | `SUB_DEPT_LEADER` | Sub-Department | `Kutitr` | Attendance confirmation, 5 transport collection points, headcount. |
 | `SUB_DEPT_LEADER` | Sub-Department | `Ekd` | Master annual plan, event creation, progress aggregation, reports. |
@@ -87,6 +87,21 @@ The matrix below defines permissions across all API resources: `C` (Create), `R`
 | **Periodic Reports (W/M/Q/A)**| CRUD | CRUDA | R | CR (Own) | CR (Own) | CR (Own) | CRUDA (All)| CR (Own) | None |
 | **Public Announcements** | CRUD | CRUDA | CRU | None | None | None | CRUD | None | None |
 | **Telegram Broadcast Triggers**| CRUD | CRUD | CRU | None | None | None | CRUD | None | None |
+| **Leadership Meetings** | CRUD | CRUD | CRUD | R (Assigned) | R (Assigned) | R (Assigned) | R (Assigned) | R (Assigned) | None |
+| **Bulk Import/Export** | CRUD | CRUD | CRUD | None | None | None | None | None | None |
+| **Member Transfers** | CRUD | CRUD | CRUD | None | None | None | None | None | None |
+| **Registration Analytics** | R | R | R | None | None | None | None | None | None |
+| **Batch Operations** | CRUD | CRUD | CRUD | None | None | None | None | None | None |
+| **Data Quality** | CRUD | CRUD | CRUD | None | None | None | None | None | None |
+| **Parent Directory** | R | R | R | R (Dept) | R (Dept) | R (Dept) | R (Dept) | R (Dept) | None |
+| **Family Tree** | R | R | R | R (Dept) | R (Dept) | R (Dept) | R (Dept) | R (Dept) | None |
+| **Secretary Audit Trail** | R | R | R | None | None | None | None | None | None |
+| **Report Cards** | CRUD | R | R | CRUD | None | None | None | None | None |
+| **Route Performance** | CRUD | CRUD | R | R (Own) | None | None | None | None | None |
+| **Parent Contact Quick View** | R | R | R | R (Own) | None | None | None | None | None |
+| **Emergency Contact Database** | R | R | R | R (Own) | None | None | None | None | None |
+| **Plan Approval Workflow** | CRUD | CRUD | CRUD | R (Submit) | None | None | CRUD | None | None |
+| **Progress Heatmap** | CRUD | CRUD | R | CRUD | None | None | CRUD | None | None |
 
 ---
 

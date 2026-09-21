@@ -226,7 +226,7 @@ Auth is the security gateway. Comprehensive tests ensure no regression in authen
 - Reference: `apps/api/tests/health.test.ts` — Test pattern
 
 ### 9. Expected Implementation
-Write integration tests covering: sign-in/sign-out flow, session persistence, role-based access (Chairperson sees all, Timihrt lead sees only Timihrt), scope isolation, non-leader lockout (ADR-0007).
+Write integration tests covering: sign-in/sign-out flow, session persistence, role-based access (Chairperson sees all, Timihrt lead sees only Timihrt), scope isolation, non-leader lockout (ADR-0007), meeting scheduler RBAC (Chairperson, Sub-Chairperson, and Secretary can create meetings).
 
 ### 10. Expected File Changes
 
@@ -327,6 +327,7 @@ Implement member list, detail, and update endpoints.
 - [ ] Detail endpoint returns member with sub-departments and family
 - [ ] Update endpoint modifies member fields
 - [ ] RBAC enforced (Secretary can update all, leaders see own scope)
+- [ ] RBAC: Chairperson, Sub-Chairperson, and Secretary can create meetings
 
 ### 9. Definition of Done
 - [ ] Implementation complete
@@ -685,6 +686,7 @@ Implement academic assessment and scoring endpoints.
 - [ ] Score recording (child, score, recorded_by)
 - [ ] Score query by assessment or child
 - [ ] RBAC: Timihrt leaders manage assessments
+- [ ] RBAC: Chairperson, Sub-Chairperson, and Secretary can create meetings
 
 ### 8. Git Branch
 `feature/bes-015-academic-assessment-api`
@@ -719,6 +721,7 @@ Implement event attendance recording (separate from regular attendance per ADR-0
 - [ ] Attendance status update
 - [ ] Separate from regular session attendance (ADR-0001)
 - [ ] RBAC enforced
+- [ ] RBAC: Chairperson, Sub-Chairperson, and Secretary can create meetings
 
 ### 8. Git Branch
 `feature/bes-016-event-attendance-api`
@@ -823,6 +826,7 @@ Implement sub-department report submission endpoint.
 - [ ] Submission status tracking
 - [ ] RBAC: Sub-department leaders submit own data
 - [ ] Ekd reviews all submissions
+- [ ] RBAC: Chairperson, Sub-Chairperson, and Secretary can create meetings
 
 ### 8. Git Branch
 `feature/bes-019-report-submission`
@@ -855,6 +859,7 @@ Write integration tests for report generation, submission, and retrieval.
 - [ ] Sub-department submission tested
 - [ ] Report retrieval tested
 - [ ] RBAC enforced on all endpoints
+- [ ] RBAC: Chairperson, Sub-Chairperson, and Secretary can create meetings
 
 ### 8. Git Branch
 `feature/bes-020-reporting-integration-tests`

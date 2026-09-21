@@ -252,6 +252,7 @@ Build the sub-department roster view showing members per department.
 - [ ] Click to view roster
 - [ ] Roster shows members with scoped roles
 - [ ] RBAC enforced (leaders see only own)
+- [ ] RBAC: Chairperson, Sub-Chairperson, and Secretary can create meetings
 
 ### 8. Git Branch
 `feature/fe1-005-subdepartment-roster`
@@ -408,6 +409,7 @@ Create a dispatcher with: 5 route columns (Apartama, Gende Boy, Gende Je, Cobalt
 - [ ] Minimum 2 members per route indicator
 - [ ] Mobile-responsive
 - [ ] RBAC: Kutitr exclusive authority
+- [ ] RBAC: Chairperson, Sub-Chairperson, and Secretary can create meetings
 
 ### 10. Git Branch
 `feature/fe1-008-transport-dispatcher`
@@ -465,6 +467,7 @@ Create an executive dashboard with: overall progress summary, sub-department sta
 - [ ] Cross-departmental visibility (RBAC: Chairperson)
 - [ ] Responsive layout
 - [ ] Dashboard routes to correct role-specific page
+- [ ] RBAC: Chairperson, Sub-Chairperson, and Secretary can create meetings
 
 ### 11. Git Branch
 `feature/fe1-009-executive-dashboard`
@@ -498,6 +501,7 @@ Build report generation and viewing interface with period selection.
 - [ ] Report display with tables and charts
 - [ ] Export capability (PDF or print)
 - [ ] RBAC enforced
+- [ ] RBAC: Chairperson, Sub-Chairperson, and Secretary can create meetings
 
 ### 8. Git Branch
 `feature/fe1-010-report-generation`
@@ -592,3 +596,637 @@ Write Playwright E2E tests for public portfolio pages.
 
 ### 8. Git Branch
 `feature/fe1-012-portfolio-e2e`
+
+---
+
+## FE1-013 — Leadership Meeting Scheduler
+
+### 1. Phase
+Phase 7 — Reporting & Dashboard
+
+### 2. Source Implementation Plan
+- New feature: Meeting Scheduler
+
+### 3. Primary Owner
+- **Name:** TBD
+- **Lane:** Frontend 1
+
+### 4. Task Objective
+Build the Meeting Scheduler feature for the Chairperson, Sub-Chairperson, and Secretary dashboards to schedule leadership meetings with automated reminders, attendance tracking, and minutes storage.
+
+### 5. Documentation References
+- `docs/requirements/functional-requirements.md` — FR-13.1.1 to FR-13.1.6
+- `docs/requirements/business-rules.md` — BR-019
+- `docs/api/endpoints.md` — Meetings endpoints
+- `docs/database/entities.md` — Meeting tables
+
+### 6. Repository References
+- `apps/admin/src/app/(authenticated)/chairperson/meetings/` — CREATE
+- `apps/admin/src/components/meetings/` — CREATE
+
+### 7. Related Code
+- Reference: `packages/ui/src/` — Calendar, Modal, Table components
+
+### 8. Expected Implementation
+Create a meeting scheduler with: calendar view, meeting creation form, attendance tracking, minutes recording, recurring meetings support, automated reminders via Telegram integration. Accessible to Chairperson, Sub-Chairperson, and Secretary roles.
+
+### 9. Acceptance Criteria
+- [ ] Calendar view displays all scheduled meetings
+- [ ] Chairperson, Sub-Chairperson, and Secretary can create new meetings with title, date/time, location, agenda, and invitees
+- [ ] Automated reminders sent 24h and 1h before meeting
+- [ ] Attendance marking functionality (Present, Absent, Excused)
+- [ ] Meeting minutes recording with action items
+- [ ] Recurring meetings support (Weekly, Bi-Weekly, Monthly)
+- [ ] Meeting status management (Scheduled, In Progress, Completed, Cancelled)
+- [ ] Mobile responsive design
+
+### 10. Git Branch
+`feature/fe1-013-meeting-scheduler`
+
+---
+
+## FE1-014 — Bulk Import/Export (Secretary)
+
+### 1. Phase
+Phase 7 — Reporting & Dashboard
+
+### 2. Source Implementation Plan
+- New feature: Secretary Dashboard Extensions
+
+### 3. Primary Owner
+- **Name:** TBD
+- **Lane:** Frontend 1
+
+### 4. Task Objective
+Build bulk import/export functionality for the Secretary dashboard to import members, children, and parents via CSV/Excel files and export data as CSV.
+
+### 5. Documentation References
+- `docs/requirements/functional-requirements.md` — FR-14.1
+- `docs/api/endpoints.md` — Bulk Import endpoints
+- `docs/database/entities.md` — bulk_import_jobs table
+
+### 6. Repository References
+- `apps/admin/features/secretary-dashboard/components/bulk-import-export.tsx` — CREATE
+
+### 7. Expected Implementation
+Create a bulk import/export component with: file upload (CSV/Excel), import progress tracking, error reporting, CSV export buttons for members, children, parents.
+
+### 8. Acceptance Criteria
+- [ ] CSV/Excel file upload with drag-and-drop
+- [ ] Import progress indicator
+- [ ] Error reporting for invalid rows/duplicates
+- [ ] CSV export for members, children, parents
+- [ ] Import job history display
+
+### 9. Git Branch
+`feature/fe1-014-bulk-import-export`
+
+---
+
+## FE1-015 — Birthday & Anniversary Tracker (Secretary)
+
+### 1. Phase
+Phase 7 — Reporting & Dashboard
+
+### 2. Source Implementation Plan
+- New feature: Secretary Dashboard Extensions
+
+### 3. Primary Owner
+- **Name:** TBD
+- **Lane:** Frontend 1
+
+### 4. Task Objective
+Build a birthday and anniversary tracker for the Secretary dashboard showing children's birthdays by month and member service anniversaries.
+
+### 5. Documentation References
+- `docs/requirements/functional-requirements.md` — FR-14.2
+- `docs/api/endpoints.md` — Existing children/members endpoints
+
+### 6. Repository References
+- `apps/admin/features/secretary-dashboard/components/birthday-anniversary.tsx` — CREATE
+- `apps/admin/features/secretary-dashboard/hooks/use-birthday-anniversary.ts` — CREATE
+
+### 7. Expected Implementation
+Create a birthday/anniversary tracker with: month selector, children birthdays list with age, member anniversaries list with years served, milestone recognition (1, 5, 10, 15, 20+ years).
+
+### 8. Acceptance Criteria
+- [ ] Month selector for filtering
+- [ ] Children birthdays display with age calculation
+- [ ] Member anniversaries display with years served
+- [ ] Milestone badges for significant years
+- [ ] Empty state when no celebrations
+
+### 9. Git Branch
+`feature/fe1-015-birthday-anniversary`
+
+---
+
+## FE1-016 — Member Transfer System (Secretary)
+
+### 1. Phase
+Phase 7 — Reporting & Dashboard
+
+### 2. Source Implementation Plan
+- New feature: Secretary Dashboard Extensions
+
+### 3. Primary Owner
+- **Name:** TBD
+- **Lane:** Frontend 1
+
+### 4. Task Objective
+Build a member transfer system for the Secretary dashboard to transfer members between sub-departments with documented reason and audit trail.
+
+### 5. Documentation References
+- `docs/requirements/functional-requirements.md` — FR-14.3
+- `docs/api/endpoints.md` — Member Transfers endpoints
+- `docs/database/entities.md` — member_transfers table
+
+### 6. Repository References
+- `apps/admin/features/secretary-dashboard/components/member-transfer.tsx` — CREATE
+- `apps/admin/features/secretary-dashboard/hooks/use-member-transfer.ts` — CREATE
+
+### 7. Expected Implementation
+Create a member transfer component with: member search/selection, sub-department dropdowns, reason text field, transfer history list, confirmation dialog.
+
+### 8. Acceptance Criteria
+- [ ] Member search and selection
+- [ ] From/To sub-department dropdowns
+- [ ] Reason text field (required)
+- [ ] Transfer confirmation dialog
+- [ ] Transfer history list with filters
+
+### 9. Git Branch
+`feature/fe1-016-member-transfer`
+
+---
+
+## FE1-017 — Registration Analytics (Secretary)
+
+### 1. Phase
+Phase 7 — Reporting & Dashboard
+
+### 2. Source Implementation Plan
+- New feature: Secretary Dashboard Extensions
+
+### 3. Primary Owner
+- **Name:** TBD
+- **Lane:** Frontend 1
+
+### 4. Task Objective
+Build registration analytics for the Secretary dashboard showing trends, demographics, and growth metrics with interactive charts.
+
+### 5. Documentation References
+- `docs/requirements/functional-requirements.md` — FR-14.4
+- `docs/api/endpoints.md` — Registration Analytics endpoints
+
+### 6. Repository References
+- `apps/admin/features/secretary-dashboard/components/registration-analytics.tsx` — CREATE
+- `apps/admin/features/secretary-dashboard/hooks/use-registration-analytics.ts` — CREATE
+
+### 7. Expected Implementation
+Create registration analytics with: line chart for trends over time, pie charts for gender/campus breakdown, bar chart for sub-department distribution, growth metrics cards.
+
+### 8. Acceptance Criteria
+- [ ] Line chart showing registration trends
+- [ ] Pie charts for demographics (gender, campus, year)
+- [ ] Bar chart for sub-department distribution
+- [ ] Growth metrics (new vs inactive members)
+- [ ] Date range selector for filtering
+
+### 9. Git Branch
+`feature/fe1-017-registration-analytics`
+
+---
+
+## FE1-018 — Batch Operations (Secretary)
+
+### 1. Phase
+Phase 7 — Reporting & Dashboard
+
+### 2. Source Implementation Plan
+- New feature: Secretary Dashboard Extensions
+
+### 3. Primary Owner
+- **Name:** TBD
+- **Lane:** Frontend 1
+
+### 4. Task Objective
+Build batch operations for the Secretary dashboard to perform bulk updates on members (activate/deactivate, assign to sub-departments).
+
+### 5. Documentation References
+- `docs/requirements/functional-requirements.md` — FR-14.5
+- `docs/api/endpoints.md` — Batch Operations endpoints
+
+### 6. Repository References
+- `apps/admin/features/secretary-dashboard/components/batch-operations.tsx` — CREATE
+
+### 7. Expected Implementation
+Create batch operations with: member multi-select, bulk action dropdown (activate, deactivate, assign), confirmation dialog, progress tracking.
+
+### 8. Acceptance Criteria
+- [ ] Multi-select member list
+- [ ] Bulk action dropdown (activate, deactivate, assign)
+- [ ] Confirmation dialog before execution
+- [ ] Progress indicator for batch operation
+- [ ] Success/error summary after completion
+
+### 9. Git Branch
+`feature/fe1-018-batch-operations`
+
+---
+
+## FE1-019 — Data Quality Dashboard (Secretary)
+
+### 1. Phase
+Phase 7 — Reporting & Dashboard
+
+### 2. Source Implementation Plan
+- New feature: Secretary Dashboard Extensions
+
+### 3. Primary Owner
+- **Name:** TBD
+- **Lane:** Frontend 1
+
+### 4. Task Objective
+Build a data quality dashboard for the Secretary to identify incomplete records, duplicates, and data issues with guided fix workflows.
+
+### 5. Documentation References
+- `docs/requirements/functional-requirements.md` — FR-14.6
+- `docs/api/endpoints.md` — Data Quality endpoints
+- `docs/database/entities.md` — data_quality_checks table
+
+### 6. Repository References
+- `apps/admin/features/secretary-dashboard/components/data-quality.tsx` — CREATE
+- `apps/admin/features/secretary-dashboard/hooks/use-data-quality.ts` — CREATE
+
+### 7. Expected Implementation
+Create a data quality dashboard with: issue list (missing fields, duplicates), severity indicators, data completeness scores, resolve button for each issue.
+
+### 8. Acceptance Criteria
+- [ ] Issue list with entity type and issue description
+- [ ] Severity indicators (warning, error)
+- [ ] Data completeness score per field
+- [ ] Resolve button to mark issues as fixed
+- [ ] Refresh button to re-run quality check
+
+### 9. Git Branch
+`feature/fe1-019-data-quality`
+
+---
+
+## FE1-020 — Parent Contact Directory (Secretary)
+
+### 1. Phase
+Phase 7 — Reporting & Dashboard
+
+### 2. Source Implementation Plan
+- New feature: Secretary Dashboard Extensions
+
+### 3. Primary Owner
+- **Name:** TBD
+- **Lane:** Frontend 1
+
+### 4. Task Objective
+Build a parent contact directory for the Secretary dashboard with search, click-to-call, and linked children view.
+
+### 5. Documentation References
+- `docs/requirements/functional-requirements.md` — FR-14.7
+- `docs/api/endpoints.md` — Parent Directory endpoints
+
+### 6. Repository References
+- `apps/admin/features/secretary-dashboard/components/parent-contact-directory.tsx` — CREATE
+- `apps/admin/features/secretary-dashboard/hooks/use-parent-directory.ts` — CREATE
+
+### 7. Expected Implementation
+Create a parent contact directory with: searchable list, click-to-call button, copy phone number, view linked children, CSV export.
+
+### 8. Acceptance Criteria
+- [ ] Searchable parent list
+- [ ] Click-to-call functionality
+- [ ] Copy phone number button
+- [ ] View linked children modal
+- [ ] CSV export button
+
+### 9. Git Branch
+`feature/fe1-020-parent-directory`
+
+---
+
+## FE1-021 — Family Tree Visualization (Secretary)
+
+### 1. Phase
+Phase 7 — Reporting & Dashboard
+
+### 2. Source Implementation Plan
+- New feature: Secretary Dashboard Extensions
+
+### 3. Primary Owner
+- **Name:** TBD
+- **Lane:** Frontend 1
+
+### 4. Task Objective
+Build a family tree visualization for the Secretary dashboard showing interactive family connection diagrams.
+
+### 5. Documentation References
+- `docs/requirements/functional-requirements.md` — FR-14.8
+- `docs/api/endpoints.md` — Family Tree endpoints
+
+### 6. Repository References
+- `apps/admin/features/secretary-dashboard/components/family-tree.tsx` — CREATE
+- `apps/admin/features/secretary-dashboard/hooks/use-family-tree.ts` — CREATE
+
+### 7. Expected Implementation
+Create a family tree visualization with: interactive diagram, expand/collapse nodes, click-to-view details, print functionality.
+
+### 8. Acceptance Criteria
+- [ ] Interactive family tree diagram
+- [ ] Expand/collapse family branches
+- [ ] Click to view member/child details
+- [ ] Print family tree button
+- [ ] Empty state for families without data
+
+### 9. Git Branch
+`feature/fe1-021-family-tree`
+
+---
+
+## FE1-022 — Audit Trail Viewer (Secretary)
+
+### 1. Phase
+Phase 7 — Reporting & Dashboard
+
+### 2. Source Implementation Plan
+- New feature: Secretary Dashboard Extensions
+
+### 3. Primary Owner
+- **Name:** TBD
+- **Lane:** Frontend 1
+
+### 4. Task Objective
+Build an audit trail viewer for the Secretary dashboard showing chronological change log with filters.
+
+### 5. Documentation References
+- `docs/requirements/functional-requirements.md` — FR-14.9
+- `docs/api/endpoints.md` — Secretary Audit Trail endpoints
+
+### 6. Repository References
+- `apps/admin/features/secretary-dashboard/components/audit-trail-viewer.tsx` — CREATE
+
+### 7. Expected Implementation
+Create an audit trail viewer with: chronological list, filters (action type, date range, actor), expandable rows showing before/after values, pagination.
+
+### 8. Acceptance Criteria
+- [ ] Chronological audit log list
+- [ ] Filter by action type
+- [ ] Filter by date range
+- [ ] Filter by actor
+- [ ] Expandable rows with before/after values
+- [ ] Pagination for large datasets
+
+### 9. Git Branch
+`feature/fe1-022-audit-trail-viewer`
+
+---
+
+## FE1-023 — Report Card Generator (Timihrt Leader)
+
+### 1. Phase
+Phase 7 — Reporting & Dashboard
+
+### 2. Source Implementation Plan
+- New feature: Timihrt Leader Dashboard Extensions
+
+### 3. Primary Owner
+- **Name:** TBD
+- **Lane:** Frontend 1
+
+### 4. Task Objective
+Build a report card generator for the Timihrt Leader dashboard to generate individual PDF report cards or batch Excel sheets with student grades, attendance, rank, and average using ministry-branded template and Ethiopian calendar format.
+
+### 5. Documentation References
+- `docs/requirements/functional-requirements.md` — FR-15.1 to FR-15.5
+- `docs/api/endpoints.md` — Report Card Generator endpoints
+- `docs/database/entities.md` — report_card_templates, generated_report_cards, report_card_grades, report_card_summary tables
+
+### 6. Repository References
+- `apps/admin/features/timihrt-dashboard/components/report-card-generator.tsx` — CREATE
+- `apps/admin/features/timihrt-dashboard/hooks/use-report-cards.ts` — CREATE
+
+### 7. Related Code
+- Existing: `apps/api/src/modules/academic/` — Grade data
+- Existing: `apps/api/src/modules/child/` — Student data
+- Reference: `packages/ui/src/` — Button, Card, Select, Table, Dialog components
+
+### 8. Expected Implementation
+Create a report card generator with: student/Kutr group selection, academic period selector (Ethiopian calendar), single student PDF generation, batch Excel generation for entire class, report card preview, download/print buttons, ministry-branded template.
+
+### 9. Acceptance Criteria
+- [ ] Student selection with search
+- [ ] Kutr group selector for batch generation
+- [ ] Academic period selector (Mid_Term, Final, Annual)
+- [ ] Ethiopian year selector (e.g., 2016/2017 E.C.)
+- [ ] Single student PDF report card generation
+- [ ] Batch Excel generation for entire class
+- [ ] Report card preview before download
+- [ ] PDF download and print buttons
+- [ ] Ministry-branded template with logo
+- [ ] Grades, attendance, rank, and average calculation
+- [ ] Teacher comments section
+
+### 10. Git Branch
+`feature/fe1-023-report-card-generator`
+
+---
+
+## FE1-024 — Route Performance Dashboard (Kutitr Leader)
+
+### 1. Phase
+Phase 7 — Reporting & Dashboard
+
+### 2. Source Implementation Plan
+- New feature: Kutitr Leader Dashboard Extensions
+
+### 3. Primary Owner
+- **Name:** TBD
+- **Lane:** Frontend 1
+
+### 4. Task Objective
+Build a route performance dashboard for the Kutitr Leader to view statistics per transport route including attendance rates, pickup times, and issues logged.
+
+### 5. Documentation References
+- `docs/requirements/functional-requirements.md` — FR-16.1
+- `docs/api/endpoints.md` — Kutitr Route Performance endpoints
+- `docs/database/entities.md` — route_performance_stats, route_issues tables
+
+### 6. Repository References
+- `apps/admin/features/kutitr-dashboard/components/route-performance-dashboard.tsx` — CREATE
+- `apps/admin/features/kutitr-dashboard/hooks/use-route-performance.ts` — CREATE
+
+### 7. Expected Implementation
+Create a route performance dashboard with: route selector, date range filter, attendance rate chart, pickup times display, issues list with severity indicators.
+
+### 8. Acceptance Criteria
+- [ ] Route selector (5 collection points)
+- [ ] Date range filter
+- [ ] Attendance rate display per route
+- [ ] Average pickup time display
+- [ ] Issues logged count and list
+- [ ] Visual charts comparing routes
+
+### 9. Git Branch
+`feature/fe1-024-route-performance-dashboard`
+
+---
+
+## FE1-025 — Parent Contact Quick View (Kutitr Leader)
+
+### 1. Phase
+Phase 7 — Reporting & Dashboard
+
+### 2. Source Implementation Plan
+- New feature: Kutitr Leader Dashboard Extensions
+
+### 3. Primary Owner
+- **Name:** TBD
+- **Lane:** Frontend 1
+
+### 4. Task Objective
+Build a parent contact quick view for the Kutitr Leader to access parent phone numbers for children on each route for emergency situations.
+
+### 5. Documentation References
+- `docs/requirements/functional-requirements.md` — FR-16.2
+- `docs/api/endpoints.md` — Parent Contact Quick View endpoints
+
+### 6. Repository References
+- `apps/admin/features/kutitr-dashboard/components/parent-contact-quick-view.tsx` — CREATE
+
+### 7. Expected Implementation
+Create a parent contact quick view with: route-based parent list, click-to-call buttons, search by child/parent name, emergency highlight.
+
+### 8. Acceptance Criteria
+- [ ] Parent list grouped by route
+- [ ] Click-to-call functionality
+- [ ] Search by child or parent name
+- [ ] Phone number display with copy button
+- [ ] Emergency highlight for urgent contacts
+
+### 9. Git Branch
+`feature/fe1-025-parent-contact-quick-view`
+
+---
+
+## FE1-026 — Emergency Contact Database (Kutitr Leader)
+
+### 1. Phase
+Phase 7 — Reporting & Dashboard
+
+### 2. Source Implementation Plan
+- New feature: Kutitr Leader Dashboard Extensions
+
+### 3. Primary Owner
+- **Name:** TBD
+- **Lane:** Frontend 1
+
+### 4. Task Objective
+Build an emergency contact database for the Kutitr Leader to view comprehensive emergency contacts for all children including medical conditions and allergies.
+
+### 5. Documentation References
+- `docs/requirements/functional-requirements.md` — FR-16.3
+- `docs/api/endpoints.md` — Emergency Contact Database endpoints
+
+### 6. Repository References
+- `apps/admin/features/kutitr-dashboard/components/emergency-contact-database.tsx` — CREATE
+
+### 7. Expected Implementation
+Create an emergency contact database with: searchable list, route/collection point filters, child details with parent contacts, medical info display, CSV export.
+
+### 8. Acceptance Criteria
+- [ ] Searchable list of all children
+- [ ] Filter by route or collection point
+- [ ] Parent names and phone numbers display
+- [ ] Medical conditions/allergies display
+- [ ] Address display
+- [ ] CSV export button
+
+### 9. Git Branch
+`feature/fe1-026-emergency-contact-database`
+
+---
+
+## FE1-027 — Plan Approval Workflow (Ekd Leader)
+
+### 1. Phase
+Phase 7 — Reporting & Dashboard
+
+### 2. Source Implementation Plan
+- New feature: Ekd Leader Dashboard Extensions
+
+### 3. Primary Owner
+- **Name:** TBD
+- **Lane:** Frontend 1
+
+### 4. Task Objective
+Build a plan approval workflow for the Ekd Leader to submit plan changes for Chairperson approval with status tracking.
+
+### 5. Documentation References
+- `docs/requirements/functional-requirements.md` — FR-17.1
+- `docs/api/endpoints.md` — Ekd Plan Approval Workflow endpoints
+- `docs/database/entities.md` — plan_approvals table
+
+### 6. Repository References
+- `apps/admin/features/ekd-dashboard/components/plan-approval-workflow.tsx` — CREATE
+- `apps/admin/features/ekd-dashboard/hooks/use-plan-approvals.ts` — CREATE
+
+### 7. Expected Implementation
+Create a plan approval workflow with: approval request form, status tracking, Chairperson review interface, revision workflow.
+
+### 8. Acceptance Criteria
+- [ ] Submit plan change for approval
+- [ ] Track approval status (pending, approved, rejected, revision_needed)
+- [ ] Chairperson review interface with approve/reject/revision options
+- [ ] Review comments display
+- [ ] Revision workflow for rejected changes
+- [ ] Notification indicators
+
+### 9. Git Branch
+`feature/fe1-027-plan-approval-workflow`
+
+---
+
+## FE1-028 — Sub-Department Progress Heatmap (Ekd Leader)
+
+### 1. Phase
+Phase 7 — Reporting & Dashboard
+
+### 2. Source Implementation Plan
+- New feature: Ekd Leader Dashboard Extensions
+
+### 3. Primary Owner
+- **Name:** TBD
+- **Lane:** Frontend 1
+
+### 4. Task Objective
+Build a sub-department progress heatmap for the Ekd Leader to visualize progress across all sub-departments with color-coded indicators.
+
+### 5. Documentation References
+- `docs/requirements/functional-requirements.md` — FR-17.2
+- `docs/api/endpoints.md` — Ekd Progress Heatmap endpoints
+- `docs/database/entities.md` — dept_progress_heatmap table
+
+### 6. Repository References
+- `apps/admin/features/ekd-dashboard/components/progress-heatmap.tsx` — CREATE
+- `apps/admin/features/ekd-dashboard/hooks/use-progress-heatmap.ts` — CREATE
+
+### 7. Expected Implementation
+Create a progress heatmap with: color-coded matrix, sub-department rows, goal/activity columns, click-to-view details, progress summary.
+
+### 8. Acceptance Criteria
+- [ ] Color-coded matrix (red, orange, yellow, green)
+- [ ] Sub-department rows (Timihrt, Mezmur, Kutitr, Ekd, Kinetibeb)
+- [ ] Goal/activity columns
+- [ ] Click-to-view detailed progress breakdown
+- [ ] Progress summary statistics
+- [ ] Filter by year and quarter
+
+### 9. Git Branch
+`feature/fe1-028-progress-heatmap`

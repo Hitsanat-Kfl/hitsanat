@@ -1212,6 +1212,7 @@ Implement annual plan CRUD with goal and activity management.
 - [ ] Activity weight auto-calculated via engine
 - [ ] Plan status lifecycle (Draft → Distributed → Active → Completed → Archived)
 - [ ] RBAC: Ekd creates, Chairperson approves
+- [ ] RBAC: Chairperson, Sub-Chairperson, and Secretary can create meetings
 
 ### 8. Git Branch
 `feature/core-030-annual-plan-api`
@@ -1316,6 +1317,7 @@ Implement program session creation and listing.
 - [ ] Session list with filtering
 - [ ] Session types constrained per FR-06.1
 - [ ] RBAC enforced
+- [ ] RBAC: Chairperson, Sub-Chairperson, and Secretary can create meetings
 
 ### 8. Git Branch
 `feature/core-033-session-management`
@@ -1384,6 +1386,7 @@ Implement attendance verification and batch confirmation.
 - [ ] Batch update for entire session
 - [ ] Status constrained to Present/Absent/Excused
 - [ ] RBAC: Kutitr leaders can update all, others limited
+- [ ] RBAC: Chairperson, Sub-Chairperson, and Secretary can create meetings
 
 ### 8. Git Branch
 `feature/core-035-attendance-verification`
@@ -1416,6 +1419,7 @@ Implement transport route assignment with multi-member constraint.
 - [ ] Assign members to 5 collection routes
 - [ ] Enforce ≥2 members per route (BR-014)
 - [ ] RBAC: Kutitr exclusive authority (BR-022)
+- [ ] RBAC: Chairperson, Sub-Chairperson, and Secretary can create meetings
 
 ### 8. Git Branch
 `feature/core-036-transport-route-assignment`
@@ -1520,6 +1524,7 @@ Implement report generation and retrieval endpoints.
 - [ ] Report list with filtering by period and sub-department
 - [ ] Report detail with full metrics
 - [ ] RBAC: Ekd generates consolidated, others see own
+- [ ] RBAC: Chairperson, Sub-Chairperson, and Secretary can create meetings
 
 ### 8. Git Branch
 `feature/core-039-report-api`
@@ -1558,6 +1563,7 @@ Implement announcement CRUD and publishing workflow.
 - [ ] Target audience: Public, Members, Parents
 - [ ] Publish endpoint sets is_published=true, published_at
 - [ ] RBAC: Ekd and Chairperson can publish
+- [ ] RBAC: Chairperson, Sub-Chairperson, and Secretary can create meetings
 
 ### 8. Git Branch
 `feature/core-040-announcement-api`
@@ -1628,6 +1634,7 @@ Write comprehensive integration tests spanning multiple modules.
 - [ ] Member → family → child → attendance → planning → reports flow tested
 - [ ] All RBAC boundaries verified
 - [ ] All constraints enforced across modules
+- [ ] RBAC: Chairperson, Sub-Chairperson, and Secretary can create meetings
 
 ### 8. Git Branch
 `feature/core-042-cross-module-integration`
@@ -1660,6 +1667,7 @@ Perform security audit on auth and RBAC systems.
 ### 7. Acceptance Criteria
 - [ ] Session cookies properly configured
 - [ ] RBAC enforced on all protected endpoints
+- [ ] RBAC: Chairperson, Sub-Chairperson, and Secretary can create meetings
 - [ ] Scope isolation verified
 - [ ] No privilege escalation vectors found
 
