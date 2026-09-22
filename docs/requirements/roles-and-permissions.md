@@ -52,7 +52,7 @@ graph TD
 | :--- | :--- | :--- | :--- |
 | `SUPER_ADMIN` | System | Global (`*`) | Full system administration, database maintenance, leader user account creation & permission management. |
 | `CHAIRPERSON` | Ministry Executive | Global (`*`) | Full operational visibility, leader user account creation/role updates, plan approvals, final report sign-offs, meeting scheduling & minutes tracking. |
-| `SUB_CHAIRPERSON` | Ministry Executive | Global (`*`) | Assists Chairperson; delegated cross-departmental oversight, meeting scheduling & minutes tracking. |
+| `SUB_CHAIRPERSON` | Ministry Executive | Global (`*`) | Assists Chairperson; delegated cross-departmental oversight, meeting scheduling & minutes tracking. Holds standing deputy authority over executive approvals (ADR-0018). |
 | `SECRETARY` | Ministry Executive | Administrative Core | Member registration, child/parent registration, family allocation, meeting scheduling & minutes tracking, bulk import/export, member transfers, batch operations, data quality management. |
 | `SUB_DEPT_LEADER` | Sub-Department | `Timihrt` | Curriculum, teacher assignments, academic score management, report card generation. |
 | `SUB_DEPT_LEADER` | Sub-Department | `Mezmur` | Hymn repertoire, conductor assignments, Awdemerit preparation. |
@@ -100,7 +100,7 @@ The matrix below defines permissions across all API resources: `C` (Create), `R`
 | **Route Performance** | CRUD | CRUD | R | R (Own) | None | None | None | None | None |
 | **Parent Contact Quick View** | R | R | R | R (Own) | None | None | None | None | None |
 | **Emergency Contact Database** | R | R | R | R (Own) | None | None | None | None | None |
-| **Plan Approval Workflow** | CRUD | CRUD | CRUD | R (Submit) | None | None | CRUD | None | None |
+| **Plan Approval Workflow** | CRUD | CRUD | R (View) | R (Submit) | None | None | CRUD | None | None |
 | **Progress Heatmap** | CRUD | CRUD | R | CRUD | None | None | CRUD | None | None |
 
 ---
@@ -156,3 +156,15 @@ Agreed in the September 2026 Super Admin review session. Full descriptions: syst
 - **Account self-protection** — no self-deactivation, no last-admin lockout
 - **Break-glass logging** — audit all actions performed under the § 4.3 permission bypass
 - **Session revocation** — force sign-out of live sessions (`SESSIONS_REVOKED`)
+
+### 4.6 Sub-Chairperson Deputy Authority (ADR-0018)
+
+The `SUB_CHAIRPERSON` holds **standing deputy authority** over the Chairperson's executive approval actions — no per-item delegation is required:
+
+- Review of plan change requests (`PATCH /api/v1/ekd/approvals/:id/review`)
+- Periodic report sign-off & archive (`PATCH /api/v1/reports/:id/approve`)
+- Event approval & publish flag (`PATCH /api/v1/events/:id/approve`)
+
+**Explicitly excluded from deputy authority:** user account management (BR-008 remains `SUPER_ADMIN` + `CHAIRPERSON` only) and any ability to re-delegate. All deputy actions are audit-logged under the acting user's own identity, and both executive roles receive the same approval notifications.
+
+> Note: The Vice-Chairperson dashboard's read-only *oversight* view (dashboards.md §1.2) is distinct from these approval *actions*; the Sub-Chairperson can view everything read-only and additionally execute the three approval actions above.

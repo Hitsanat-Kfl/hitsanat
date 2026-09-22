@@ -276,13 +276,14 @@ The management system is a private web application accessible **only to leadersh
 - Event management overview
 - Announcement management
 - System-wide statistics
-- Member registration approval
+- Executive oversight of member registration (registration analytics & data quality; registration itself is lifecycle-based — see business-requirements.md §4.6)
+- Unified Approvals Inbox: plan change requests, report sign-offs, event publish approvals
 - Meeting Scheduler with automated reminders, attendance tracking, and minutes storage
 
 ### 7.2 Sub-Chairperson Dashboard
 
 - Similar to Chairperson with delegated access
-- Can act on behalf of Chairperson
+- Can act on behalf of Chairperson for executive approvals via standing deputy authority (ADR-0018): plan-change reviews, report sign-offs, event approvals. User account management excluded.
 - Access to all sub-department dashboards
 - Meeting Scheduler with automated reminders, attendance tracking, and minutes storage
 

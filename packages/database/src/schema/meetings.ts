@@ -4,8 +4,8 @@ import { index, integer, pgTable, text, timestamp, uuid, varchar } from "drizzle
 
 /**
  * Leadership Meetings table (FR-13.1.1 / BR-019)
- * Stores leadership meetings scheduled by CHAIRPERSON, SUB_CHAIRPERSON,
- * and SECRETARY. PATCH/DELETE restricted to CHAIRPERSON only.
+ * Stores leadership meetings. Create/update/cancel and minutes are managed
+ * by the BR-019 trio: CHAIRPERSON, SUB_CHAIRPERSON, and SECRETARY.
  */
 export const meetings = pgTable(
   "meetings",

@@ -39,5 +39,5 @@ graph TD
 
 1. **`SubmitSubDepartmentWeeklyReportUseCase`:** Sub-department leader submits weekly activity outcomes to Ekd.
 2. **`GenerateConsolidatedReportUseCase`:** Ekd consolidates all sub-department submissions into an executive periodic report.
-3. **`ApprovePeriodicReportUseCase`:** Chairperson signs off and archives approved report.
+3. **`ApprovePeriodicReportUseCase`:** Chairperson (or Sub-Chairperson via ADR-0018) signs off and archives approved report.
 4. **`ExportReportToPdfUseCase`:** Generates print-ready formatted report document.

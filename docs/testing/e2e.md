@@ -39,3 +39,10 @@ journey
 2. **`02-member-lifecycle.e2e.ts`:** Secretary creates member (Stage 1), enriches profile (Stage 2), assigns to Family, and provisions leadership role.
 3. **`03-child-parent-cardinality.e2e.ts`:** Registers child, links Father and Mother, and verifies UI blocks adding a duplicate second Father.
 4. **`04-planning-distribution-rollup.e2e.ts`:** Ekd creates plan $\rightarrow$ Chairperson approves $\rightarrow$ Ekd distributes $\rightarrow$ Sub-dept schedules weekly task $\rightarrow$ Logs output $\rightarrow$ Verifies roll-up score in executive dashboard.
+5. **`05-executive-rbac-negative.e2e.ts`:** Verifies RBAC *denials* for executive actions:
+   - Timihrt Leader attempts `PATCH /api/v1/meetings/:id` → `403` (BR-019: meeting management is CHAIRPERSON/SUB_CHAIRPERSON/SECRETARY only; Secretary must be allowed).
+   - Secretary attempts `PATCH /api/v1/ekd/approvals/:id/review` → `403 FORBIDDEN_INSUFFICIENT_SCOPE` (review is Chairperson/Sub-Chairperson only, ADR-0018).
+   - Sub-Chairperson attempts `POST /api/v1/users/:id/deactivate` → `403` (BR-008: user management is SUPER_ADMIN + CHAIRPERSON only).
+   - Sub-Chairperson attempts `PATCH /api/v1/reports/:id/approve` → allowed (standing deputy authority, ADR-0018).
+   - Timihrt Leader attempts report sign-off → `403`.
+   - All deputy actions are audit-logged under the acting user's identity, never attributed to the Chairperson.

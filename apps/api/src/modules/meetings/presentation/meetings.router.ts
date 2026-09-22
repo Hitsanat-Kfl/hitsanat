@@ -1,10 +1,11 @@
-import { Router } from "express";
 import { requireAuth, requireScopePermission } from "@repo/auth";
+import { Router } from "express";
 import {
   cancelMeeting,
   createMeeting,
   getMeeting,
   listMeetings,
+  recordMeetingAttendance,
   recordMinutes,
   updateMeeting,
 } from "./meetings.controller.js";
@@ -49,18 +50,29 @@ meetingsRouter.post(
   recordMinutes
 );
 
-// Update & cancel: CHAIRPERSON only (FR-13.1.1: update/cancel restricted).
+// Update & cancel: the BR-019 trio (CHAIRPERSON, SUB_CHAIRPERSON, SECRETARY)
+// per docs/api/endpoints.md §2.9 and business-rules.md BR-019.
 meetingsRouter.patch(
   "/:id",
   requireScopePermission({
-    allowedGlobalRoles: ["CHAIRPERSON"],
+    allowedGlobalRoles: ["CHAIRPERSON", "SUB_CHAIRPERSON", "SECRETARY"],
   }),
   updateMeeting
 );
 meetingsRouter.delete(
   "/:id",
   requireScopePermission({
-    allowedGlobalRoles: ["CHAIRPERSON"],
+    allowedGlobalRoles: ["CHAIRPERSON", "SUB_CHAIRPERSON", "SECRETARY"],
   }),
   cancelMeeting
+);
+
+// Attendance: mark invitee attendance (POST /meetings/:id/attendance, §2.9).
+// Same BR-019 trio as create/manage.
+meetingsRouter.post(
+  "/:id/attendance",
+  requireScopePermission({
+    allowedGlobalRoles: ["CHAIRPERSON", "SUB_CHAIRPERSON", "SECRETARY"],
+  }),
+  recordMeetingAttendance
 );

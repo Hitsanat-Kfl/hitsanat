@@ -86,7 +86,7 @@ Implement the strategic planning system: annual master plan creation, 3-factor w
   - Annual plan creation with goals and activities
   - Activity weight auto-calculated via engine
   - Plan status lifecycle (Draft → Distributed → Active → Completed → Archived)
-  - RBAC: Ekd creates, Chairperson approves
+  - RBAC: Ekd creates, Chairperson approves (Sub-Chairperson via ADR-0018 deputy authority)
   - Integration tests verify weight calculation
 - **Reviewer:** Core
 

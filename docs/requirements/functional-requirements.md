@@ -191,5 +191,5 @@ graph LR
 
 ### 2.18 Module M-17: Ekd Leader Dashboard Extensions
 
-- **FR-17.1 (Plan Approval Workflow):** EKD_LEADER can submit plan changes (budget, people, time, or activity modifications) for Chairperson approval. System tracks approval status (Pending, Approved, Rejected) with timestamped comments. Chairperson receives notification and can approve/reject with comments. Rejected changes require revision before resubmission.
+- **FR-17.1 (Plan Approval Workflow):** EKD_LEADER can submit plan changes (budget, people, time, or activity modifications) for Chairperson approval. System tracks approval status (Pending, Approved, Rejected) with timestamped comments. Chairperson and Sub-Chairperson (standing deputy authority, ADR-0018) receive notification and can approve/reject with comments. Rejected changes require revision before resubmission.
 - **FR-17.2 (Sub-Department Progress Heatmap):** EKD_LEADER can view a visual heatmap showing progress across all sub-departments. Color-coded matrix displays: rows = sub-departments (Timihrt, Mezmur, Kutitr, Ekd, Kinetibeb), columns = goals/activities. Color intensity indicates completion percentage (Red: 0-25%, Orange: 26-50%, Yellow: 51-75%, Green: 76-100%). Clicking a cell shows detailed progress breakdown.

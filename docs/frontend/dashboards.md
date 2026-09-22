@@ -9,13 +9,14 @@
 
 ### 1.1 Chairperson Dashboard (`/chairperson`)
 - **Key Metrics:** Total active university members, total enrolled children, system-wide Master Plan weighted achievement rate, active budget utilization.
-- **Approvals Inbox:** Pending member registrations, Annual Master Plan drafts, periodic reports awaiting executive signature.
+- **Approvals Inbox:** Pending plan change requests, periodic reports awaiting executive signature, and events awaiting publish approval — sourced from the unified `/api/v1/approvals` feed (endpoints.md §2.5a). Review actions execute on the owning module endpoints (ADR-0018).
 - **Department Comparison Bar Chart:** Weighted progress index per sub-department.
 - **Meeting Scheduler:** Schedule leadership meetings with automated reminders, track attendance, and store meeting minutes.
+- **Audit Trail Viewer:** Chronological administrative audit log (FR-13.2) with filters by action type and date range.
 
 ### 1.2 Vice-Chairperson (Sub-Chairperson) Dashboard (`/sub-chairperson`)
 - **Delegated Oversight:** Cross-departmental progress snapshot mirroring the Chairperson's comparison chart, read-only.
-- **Deputized Approvals:** Approvals inbox for items the Chairperson has delegated (plan drafts, reports).
+- **Deputized Approvals:** Approvals inbox mirroring the Chairperson's, exercisable via the standing deputy authority defined in ADR-0018 (plan-change reviews, report sign-offs, event approvals). User account management is excluded.
 - **Department Status Board:** Per-sub-department weekly execution status with drill-down links.
 - **Meeting Scheduler:** Schedule leadership meetings with automated reminders, track attendance, and store meeting minutes.
 

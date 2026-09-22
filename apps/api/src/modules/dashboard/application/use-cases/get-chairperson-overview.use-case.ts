@@ -1,6 +1,5 @@
 import { and, count, desc, eq, gte, getDb, sql } from "@repo/database";
 import {
-  academicAssessments,
   annualMasterPlans,
   events,
   members,
@@ -79,8 +78,11 @@ export class GetChairpersonOverviewUseCase {
 
     // Weighted achievement rate: sum(actual progress weight) / sum(total weight).
     let weightedAchievementRate = 0;
+    // Budget utilization: executed (Completed) weekly-execution budget share
+    // relative to the active plan's total budget, 0–100.
     let budgetUtilization = 0;
     if (plan) {
+      budgetUtilization = await this.computeBudgetUtilization(plan.totalBudget, plan.id);
       const goals = await db.select().from(planGoals).where(eq(planGoals.annualPlanId, plan.id));
       if (goals.length > 0) {
         const activities = await db
@@ -155,8 +157,7 @@ export class GetChairpersonOverviewUseCase {
         }
       }
 
-      // Budget utilization from reported metrics on submissions (fallback 0).
-      budgetUtilization = 0;
+      // (Budget utilization computed above via computeBudgetUtilization.)
     }
 
     return {
@@ -190,6 +191,79 @@ export class GetChairpersonOverviewUseCase {
       })),
       generatedAt: new Date().toISOString(),
     };
+  }
+
+  /**
+   * Budget utilization (executive KPI, dashboards.md §1.1): sum of plan
+   * activity budgets that have at least one Completed weekly execution,
+   * divided by the plan's total budget. Approximation: completion of an
+   * activity's weekly executions implies its budget was consumed.
+   */
+  private async computeBudgetUtilization(
+    planTotalBudget: string | null,
+    planId: string
+  ): Promise<number> {
+    const db = getDb();
+    const totalBudget = Number(planTotalBudget ?? 0);
+    if (totalBudget <= 0) return 0;
+
+    const goalRows = await db
+      .select({ id: planGoals.id })
+      .from(planGoals)
+      .where(eq(planGoals.annualPlanId, planId));
+    if (goalRows.length === 0) return 0;
+
+    const activityRows = await db
+      .select({
+        id: planActivities.id,
+        budget: planActivities.budget,
+      })
+      .from(planActivities)
+      .where(
+        sql`${planActivities.planGoalId} IN (${sql.join(
+          goalRows.map((g) => sql`${g.id}`),
+          sql`, `
+        )})`
+      );
+    if (activityRows.length === 0) return 0;
+
+    const distributionRows = await db
+      .select({
+        id: planDistributions.id,
+        planActivityId: planDistributions.planActivityId,
+      })
+      .from(planDistributions)
+      .where(
+        sql`${planDistributions.planActivityId} IN (${sql.join(
+          activityRows.map((a) => sql`${a.id}`),
+          sql`, `
+        )})`
+      );
+    if (distributionRows.length === 0) return 0;
+
+    const completedActivityIds = new Set<string>(
+      (
+        await db
+          .select({ planActivityId: planDistributions.planActivityId })
+          .from(weeklyPlans)
+          .innerJoin(planProgressRecords, eq(planProgressRecords.weeklyPlanId, weeklyPlans.id))
+          .innerJoin(planDistributions, eq(weeklyPlans.planDistributionId, planDistributions.id))
+          .where(
+            and(
+              sql`${weeklyPlans.planDistributionId} IN (${sql.join(
+                distributionRows.map((d) => sql`${d.id}`),
+                sql`, `
+              )})`,
+              eq(planProgressRecords.status, "Completed")
+            )
+          )
+      ).map((r) => r.planActivityId)
+    );
+
+    const consumedBudget = activityRows
+      .filter((a) => completedActivityIds.has(a.id))
+      .reduce((sum, a) => sum + Number(a.budget), 0);
+    return Math.min(100, Math.round((consumedBudget / totalBudget) * 100));
   }
 
   /**
@@ -228,6 +302,3 @@ export class GetChairpersonOverviewUseCase {
     });
   }
 }
-
-// Keep unused imports referenced for future budget utilization computation.
-void academicAssessments;

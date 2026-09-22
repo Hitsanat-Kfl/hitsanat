@@ -50,7 +50,7 @@ graph TD
 
 | Stakeholder Persona | Role Code | Ministry Function | System Interaction Scope |
 | :--- | :--- | :--- | :--- |
-| **Chairperson** (ሰብሳቢ) | `LEADERSHIP_CHAIR` | Head of Hitsanat Kifl; ultimate spiritual and operational overseer | Full management portal access; approves registrations, plans, and reports. |
+| **Chairperson** (ሰብሳቢ) | `LEADERSHIP_CHAIR` | Head of Hitsanat Kifl; ultimate spiritual and operational overseer | Full management portal access; approves plans and reports, and holds executive oversight of member registration (see note below). |
 | **Sub-Chairperson** (ምክትል ሰብሳቢ) | `LEADERSHIP_SUB_CHAIR` | Deputy leader assisting Chairperson; operational coordination | Delegated executive portal access across all sub-departments. |
 | **Secretary** (ጸሐፊ) | `LEADERSHIP_SECRETARY` | Official records manager and registrar | Full CRUD on Members, Children, Parents, Families, and Classifications. |
 | **Timihrt Leader** (የትምህርት ኃላፊ) | `SUB_LEAD_TIMIHRT` | Leads curriculum planning, teacher assignments, and exam scores | Timihrt dashboard; manages educational roadmap, teacher roster, academic records. |
@@ -127,3 +127,5 @@ journey
    - The user interface must present all dates, schedules, academic terms, and birthday queries according to the Ethiopian Calendar (using `ethiopian-calendar-new`).
 5. **Traceable Hierarchical Planning:**
    - No standalone or disconnected activities may exist in isolation; every weekly activity must roll up through monthly and quarterly milestones to an approved Annual Master Plan goal.
+6. **Member Registration Is Lifecycle-Based, Not Approval-Gated:**
+   - New members enter the system through the Stage 1 → Stage 2 → Family → Sub-Department state machine (workflows §5), executed by the Secretary. There is no separate executive approval queue for member registrations; the Chairperson and Secretary hold executive *visibility* over registration progress through registration analytics and the data quality dashboard (FR-13.x, endpoints.md §2.12).

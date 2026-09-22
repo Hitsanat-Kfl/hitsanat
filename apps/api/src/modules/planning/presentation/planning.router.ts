@@ -1,5 +1,5 @@
-import { Router } from "express";
 import { requireAuth, requireScopePermission } from "@repo/auth";
+import { Router } from "express";
 import {
   listPlanApprovals,
   reviewPlanApproval,
@@ -20,12 +20,17 @@ import {
 export const planningRouter: Router = Router();
 
 // Plan Approval Workflow (FR-17.1 / BR-025)
-// Submit: EKD_LEADER (create plan change requests) — list/review: CHAIRPERSON.
+// Submit: Ekd leaders (globalRoles never contains EKD_LEADER — see note) or
+// executives. The Ekd-leader path is resolved via sub-department scope
+// (requiredSubDeptCode: EKD, role Leader/Sub-Leader) because resolveUserScopes
+// only places the four executive roles in globalRoles.
 planningRouter.post(
   "/:id/approvals",
   requireAuth(),
   requireScopePermission({
-    allowedGlobalRoles: ["EKD_LEADER", "CHAIRPERSON"],
+    allowedGlobalRoles: ["CHAIRPERSON", "SUB_CHAIRPERSON"],
+    requiredSubDeptCode: "EKD",
+    allowedSubDeptRoles: ["Leader", "Sub-Leader"],
   }),
   submitPlanApproval
 );
@@ -37,11 +42,13 @@ planningRouter.get(
   }),
   listPlanApprovals
 );
+// Review: Chairperson or Sub-Chairperson via standing deputy authority
+// (ADR-0018).
 planningRouter.patch(
   "/approvals/:approvalId/review",
   requireAuth(),
   requireScopePermission({
-    allowedGlobalRoles: ["CHAIRPERSON"],
+    allowedGlobalRoles: ["CHAIRPERSON", "SUB_CHAIRPERSON"],
   }),
   reviewPlanApproval
 );

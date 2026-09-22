@@ -24,6 +24,8 @@
 | **Public Portfolio**| `/api/v1/public` | Public stats, event countdowns, published news (No login required) |
 | **Users** | `/api/v1/users` | Account CRUD, password reset, deactivation (BR-008) |
 | **Audit Logs** | `/api/v1/audit-logs` | Administrative action trail (SUPER_ADMIN/CHAIRPERSON only) |
+| **Notifications** | `/api/v1/notifications` | In-app notification feed (approval requests, meeting reminders, reactivation events) |
+| **Approvals Inbox** | `/api/v1/approvals` | Unified pending-approval feed for executive dashboards (ADR-0018) |
 
 ---
 
@@ -65,10 +67,24 @@
 - `GET /api/v1/events`: List events with filters (`type`, `upcoming`, `published`).
 - `POST /api/v1/events`: Create special event (Timket, Hosaena, Awdemerit, Adar).
 - `POST /api/v1/events/:id/assign-program`: Assign program segment to a sub-department with $\ge 2$ members.
+- `PATCH /api/v1/events/:id/approve`: Approve event and toggle the publish flag (triggers website countdown and Telegram broadcast). **CHAIRPERSON or SUB_CHAIRPERSON only** (ADR-0018).
 - `GET /api/v1/reports`: List generated periodic reports.
 - `POST /api/v1/reports/generate`: Generate and consolidate a Weekly, Monthly, Quarterly, Half-Year, or Annual report.
+- `PATCH /api/v1/reports/:id/approve`: Executive sign-off; archives the approved report (`ApprovePeriodicReportUseCase`). **CHAIRPERSON or SUB_CHAIRPERSON only** (ADR-0018).
+
+### 2.5a Unified Approvals Inbox (`/api/v1/approvals`)
+> **Authorization:** All endpoints restricted to `CHAIRPERSON` and `SUB_CHAIRPERSON` (ADR-0018); read access also granted to `SUPER_ADMIN`.
+
+Aggregated read-only view over the three approval domains (plan changes §2.22, report sign-offs §2.5, event approvals §2.5) for the executive dashboards' Approvals Inbox:
+
+- `GET /api/v1/approvals?status=pending`: Unified pending-approval feed across domains, with `?domain=plan|report|event` filter. Each item carries `domain`, `resourceId`, `submittedBy`, `submittedAt`, and a `reviewHref` pointing to the owning module endpoint.
+- `GET /api/v1/approvals/summary`: Counts per domain and per status for badge/indicator widgets.
+
+> Review actions are **not** exposed here; they remain on the owning module endpoints above so that domain-specific validation, comments, and audit trails stay in one place.
 
 ### 2.6 Public & Announcements (`/api/v1/announcements`, `/api/v1/public`)
+> **Authorization:** Create/publish restricted to `EKD_LEADER` and `CHAIRPERSON` (FR-11.1); `SUPER_ADMIN` per §4.3 bypass.
+
 - `GET /api/v1/announcements`: List announcements with audience filters.
 - `POST /api/v1/announcements`: Create and publish announcement (triggers Telegram webhook).
 - `GET /api/v1/public/stats`: Public sanitized statistics (Active members count, Children count, Events count).
@@ -104,8 +120,8 @@
 - `POST /api/v1/meetings`: Create a new meeting (title, datetime, location, agenda, invitees, recurring config).
 - `GET /api/v1/meetings`: List meetings with optional filters (`?status=upcoming|completed|cancelled`, `?department=timihrt`).
 - `GET /api/v1/meetings/:id`: Get meeting details including attendees and minutes.
-- `PATCH /api/v1/meetings/:id`: Update meeting details (CHAIRPERSON only).
-- `DELETE /api/v1/meetings/:id`: Cancel a meeting (CHAIRPERSON only).
+- `PATCH /api/v1/meetings/:id`: Update meeting details (CHAIRPERSON, SUB_CHAIRPERSON, or SECRETARY — BR-019).
+- `DELETE /api/v1/meetings/:id`: Cancel a meeting (CHAIRPERSON, SUB_CHAIRPERSON, or SECRETARY — BR-019).
 - `POST /api/v1/meetings/:id/attendance`: Mark attendance for meeting attendees.
 - `POST /api/v1/meetings/:id/minutes`: Record meeting minutes with action items.
 - `GET /api/v1/meetings/:id/minutes`: Retrieve meeting minutes.
@@ -208,12 +224,12 @@
 - `GET /api/v1/kutitr/emergency-contacts/export`: Export emergency contacts as CSV.
 
 ### 2.22 Ekd Plan Approval Workflow (`/api/v1/ekd/approvals`)
-> **Authorization:** Restricted to `EKD_LEADER` (submit) and `CHAIRPERSON` (review).
+> **Authorization:** Restricted to `EKD_LEADER` (submit) and `CHAIRPERSON`/`SUB_CHAIRPERSON` (review — ADR-0018).
 
 - `GET /api/v1/ekd/approvals`: List all approval requests with filters (`?status=`, `?submittedBy=`).
 - `POST /api/v1/ekd/approvals`: Submit plan change for approval (planId, changeType, changeDescription, currentValue, proposedValue).
 - `GET /api/v1/ekd/approvals/:id`: Get approval request details.
-- `PATCH /api/v1/ekd/approvals/:id/review`: Review approval request (status: approved/rejected/revision_needed, reviewComments). **Chairperson only.**
+- `PATCH /api/v1/ekd/approvals/:id/review`: Review approval request (status: approved/rejected/revision_needed, reviewComments). **Chairperson or Sub-Chairperson (ADR-0018).**
 - `PATCH /api/v1/ekd/approvals/:id/revise`: Revise rejected approval for resubmission. **Ekd Leader only.**
 
 ### 2.23 Ekd Progress Heatmap (`/api/v1/ekd/progress-heatmap`)
@@ -223,3 +239,23 @@
 - `GET /api/v1/ekd/progress-heatmap/:subDeptId`: Get heatmap data for specific sub-department.
 - `POST /api/v1/ekd/progress-heatmap`: Update progress for a sub-department/goal combination (subDeptId, goalId, activityId, completionPercentage, notes).
 - `GET /api/v1/ekd/progress-heatmap/summary`: Get summary statistics (average completion, most/least progress).
+
+### 2.24 Notifications (`/api/v1/notifications`)
+> **Authorization:** Authenticated leadership users; each user sees only their own feed.
+
+In-app notification feed backing FR-17.1 (approval notifications) and FR-13.1.2 (meeting reminders). Telegram delivery remains with the standalone bot service (ADR-0006).
+
+- `GET /api/v1/notifications`: List the current user's notifications with filters (`?unread=true`, `?type=`).
+- `PATCH /api/v1/notifications/:id/read`: Mark a single notification as read.
+- `POST /api/v1/notifications/read-all`: Mark all of the current user's notifications as read.
+- `GET /api/v1/notifications/unread-count`: Unread count for badge indicators.
+
+**Notification Types:**
+| Type | Trigger | Recipients |
+| :--- | :--- | :--- |
+| `PLAN_APPROVAL_REQUESTED` | Ekd submits a plan change for review (FR-17.1) | CHAIRPERSON, SUB_CHAIRPERSON |
+| `PLAN_APPROVAL_DECIDED` | Executive approves/rejects/requests revision | Submitting Ekd Leader |
+| `REPORT_AWAITING_SIGNOFF` | Periodic report generated | CHAIRPERSON, SUB_CHAIRPERSON |
+| `EVENT_AWAITING_APPROVAL` | Event created pending publish approval | CHAIRPERSON, SUB_CHAIRPERSON |
+| `MEETING_REMINDER_24H` / `MEETING_REMINDER_1H` | Scheduled reminder job (FR-13.1.2) | Meeting invitees |
+| `USER_REACTIVATED` | Account restored (FR-13.6) | CHAIRPERSON, SUPER_ADMIN |

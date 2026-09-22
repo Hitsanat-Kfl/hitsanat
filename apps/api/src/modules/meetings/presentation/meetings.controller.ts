@@ -4,6 +4,7 @@ import {
   GetMeetingUseCase,
   ListMeetingsUseCase,
 } from "../application/use-cases/meeting-query.use-cases.js";
+import { RecordMeetingAttendanceUseCase } from "../application/use-cases/record-meeting-attendance.use-case.js";
 import {
   CancelMeetingUseCase,
   RecordMinutesUseCase,
@@ -70,7 +71,7 @@ export async function getMeeting(req: Request, res: Response) {
   }
 }
 
-/** PATCH /meetings/:id — CHAIRPERSON only (enforced at router level). */
+/** PATCH /meetings/:id — BR-019 trio (enforced at router level). */
 export async function updateMeeting(req: Request, res: Response) {
   try {
     requireSession(req);
@@ -91,7 +92,7 @@ export async function updateMeeting(req: Request, res: Response) {
   }
 }
 
-/** DELETE /meetings/:id — CHAIRPERSON only (enforced at router level). */
+/** DELETE /meetings/:id — BR-019 trio (enforced at router level). */
 export async function cancelMeeting(req: Request, res: Response) {
   try {
     requireSession(req);
@@ -115,6 +116,26 @@ export async function recordMinutes(req: Request, res: Response) {
     res.status(200).json({ success: true, data: meeting });
   } catch (error) {
     handleError(res, error);
+  }
+}
+
+/**
+ * POST /meetings/:id/attendance — mark invitee attendance (endpoints.md §2.9).
+ * Body: { attendance: [{ userId, status: Attended | Absent | Accepted | Declined }] }
+ * BR-019 trio at router level; identity of the marker comes from the session.
+ */
+export async function recordMeetingAttendance(req: Request, res: Response) {
+  try {
+    const session = requireSession(req);
+    const useCase = new RecordMeetingAttendanceUseCase(meetingsRepository);
+    const result = await useCase.execute({
+      meetingId: req.params.id as string,
+      markedBy: session.id,
+      entries: Array.isArray(req.body.attendance) ? req.body.attendance : [],
+    });
+    res.status(200).json({ success: true, data: result });
+  } catch (error) {
+    handleError(res, error, 404);
   }
 }
 

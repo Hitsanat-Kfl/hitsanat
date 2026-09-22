@@ -2,6 +2,10 @@ import { and, count, desc, eq, getDb } from "@repo/database";
 import { annualMasterPlans, planApprovals } from "@repo/database/schema";
 import type { PlanApproval } from "@repo/domain";
 import { BusinessRuleViolationError, PlanApprovalStatus, ValidationError } from "@repo/domain";
+import {
+  notifyPlanApprovalDecided,
+  notifyPlanApprovalRequested,
+} from "../../notifications-link.js";
 
 const VALID_STATUSES = ["Pending", "Approved", "Rejected", "Revision_Needed"];
 
@@ -22,13 +26,15 @@ function toPlanApproval(row: typeof planApprovals.$inferSelect): PlanApproval {
 
 export class SubmitPlanApprovalUseCase {
   /**
-   * FR-17.1: EKD_LEADER submits plan changes for Chairperson approval.
+   * FR-17.1: Ekd leader submits plan changes for executive approval.
    * Rejected/revision-needed changes must be revised before resubmission.
    */
   async execute(input: {
     annualPlanId: string;
     requestedBy: string;
     changeSummary: string;
+    /** Display name of the requester, used for notification text. */
+    requestedByName?: string;
   }): Promise<PlanApproval> {
     if (!input.changeSummary?.trim()) {
       throw new ValidationError("changeSummary is required");
@@ -58,6 +64,15 @@ export class SubmitPlanApprovalUseCase {
         status: "Pending",
       })
       .returning();
+
+    // FR-17.1 / §2.24: notify Chairperson + Sub-Chairperson (fire-and-forget).
+    notifyPlanApprovalRequested({
+      approvalId: row.id,
+      planId: row.annualPlanId,
+      requestedByName: input.requestedByName ?? "Ekd Leader",
+      changeSummary: row.changeSummary,
+    });
+
     return toPlanApproval(row);
   }
 }
@@ -140,6 +155,15 @@ export class ReviewPlanApprovalUseCase {
         .set({ approvedBy: input.reviewedBy, approvedAt: new Date(), status: "Active" })
         .where(eq(annualMasterPlans.id, row.annualPlanId));
     }
+
+    // FR-17.1 / §2.24: notify the submitting Ekd leader of the decision
+    // (fire-and-forget; audit records the actual acting executive per ADR-0018).
+    notifyPlanApprovalDecided({
+      approvalId: row.id,
+      requestedById: existing[0].requestedBy,
+      decision: input.decision,
+      reviewComments: input.reviewComments,
+    });
 
     return toPlanApproval(row);
   }
