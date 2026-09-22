@@ -111,12 +111,10 @@ export function PageShell({
   return (
     <div className={cn("flex-1 overflow-auto", className)}>
       <div
-        className={cn("mx-auto py-6 px-4 sm:px-6 lg:px-8", fullWidth ? "max-w-full" : "max-w-7xl")}
+        className={cn("mx-auto py-2 px-1 sm:px-2 lg:px-3", fullWidth ? "max-w-full" : "max-w-7xl")}
       >
         {hasHeader && (
-          <header className="mb-6 space-y-4">
-            {breadcrumbs && breadcrumbs.length > 0 && <Breadcrumb items={breadcrumbs} />}
-
+          <header className="mb-4 space-y-3">
             {(title || actions) && (
               <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
                 <div className="space-y-1">

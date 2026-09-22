@@ -75,6 +75,9 @@ export const userResponseSchema = z.object({
   role: z.string(),
   memberId: uuidSchema.nullable(),
   emailVerified: z.boolean(),
+  image: z.string().url().nullable(),
+  status: z.enum(["ACTIVE", "DEACTIVATED"]),
+  deactivatedAt: z.string().datetime().nullable(),
   subDepartments: z.array(
     z.object({
       subDepartmentId: uuidSchema,

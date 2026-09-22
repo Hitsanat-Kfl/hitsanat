@@ -74,6 +74,8 @@ export interface ReportSubmission extends BaseEntity {
   notes?: string;
   reviewedBy?: string;
   reviewedAt?: Date;
+  /** Chairperson review comments (approve/reject/return rationale). */
+  reviewComments?: string;
 }
 
 export type CreatePeriodicReport = Omit<PeriodicReport, "id" | "createdAt" | "updatedAt">;

@@ -12,6 +12,7 @@ import {
 import { cn } from "@repo/ui/lib/utils";
 import { Globe, LogOut, Settings, User } from "lucide-react";
 import * as React from "react";
+import { useRouter } from "next/navigation";
 import { type Locale, useI18n } from "./i18n";
 
 interface UserMenuProps {
@@ -36,6 +37,7 @@ export function UserMenu({
   className,
 }: UserMenuProps) {
   const { locale, setLocale, t } = useI18n();
+  const router = useRouter();
 
   return (
     <Popover>
@@ -64,12 +66,12 @@ export function UserMenu({
 
         <Separator decorative />
 
-        <PopoverItem onClick={onProfile}>
+        <PopoverItem onClick={() => router.push("/settings")}>
           <User className="mr-2 h-4 w-4" aria-hidden="true" />
           {t("user.profile")}
         </PopoverItem>
 
-        <PopoverItem onClick={onSettings}>
+        <PopoverItem onClick={() => router.push("/settings")}>
           <Settings className="mr-2 h-4 w-4" aria-hidden="true" />
           {t("user.settings")}
         </PopoverItem>

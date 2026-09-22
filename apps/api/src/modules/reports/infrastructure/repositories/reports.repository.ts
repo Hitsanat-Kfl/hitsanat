@@ -222,7 +222,7 @@ export class DrizzleReportsRepository implements ReportsRepository {
 
   async reviewSubmission(
     id: string,
-    data: { reviewedBy: string; status: string }
+    data: { reviewedBy: string; status: string; reviewComments?: string }
   ): Promise<ReportSubmission> {
     const db = getDb();
     const rows = await db
@@ -231,6 +231,7 @@ export class DrizzleReportsRepository implements ReportsRepository {
         status: data.status,
         reviewedBy: data.reviewedBy,
         reviewedAt: new Date(),
+        reviewComments: data.reviewComments ?? null,
       })
       .where(eq(reportSubmissions.id, id))
       .returning();
@@ -255,6 +256,7 @@ function toSubmission(row: typeof reportSubmissions.$inferSelect): ReportSubmiss
     notes: row.notes ?? undefined,
     reviewedBy: row.reviewedBy ?? undefined,
     reviewedAt: row.reviewedAt ?? undefined,
+    reviewComments: row.reviewComments ?? undefined,
     createdAt: row.createdAt,
   };
 }

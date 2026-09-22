@@ -5,3 +5,4 @@ export * from "./planning.js";
 export * from "./attendance.js";
 export * from "./academic.js";
 export * from "./reports.js";
+export * from "./meetings.js";

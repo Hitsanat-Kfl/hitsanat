@@ -393,6 +393,15 @@ importers:
         specifier: ^5.7.3
         version: 5.9.3
 
+  packages/design-tokens:
+    devDependencies:
+      '@repo/typescript-config':
+        specifier: workspace:*
+        version: link:../typescript-config
+      typescript:
+        specifier: ^5.7.3
+        version: 5.9.3
+
   packages/domain:
     devDependencies:
       '@repo/typescript-config':

@@ -11,27 +11,38 @@ interface I18nContextValue {
 }
 
 const translations: Record<string, { en: string; am: string }> = {
-  // Navigation Sections
+  // Navigation Sections - Admin Shell
+  "nav.overview": { en: "Overview", am: "አጠቃላይ" },
+  "nav.organization": { en: "Organization", am: "ድርጅት" },
+  "nav.user-management": { en: "User Management", am: "የተጠቃሚ አስተዳደር" },
+  "nav.security-access": { en: "Security & Access", am: "ደህንነት እና መድረስ" },
+  "nav.audit": { en: "Audit", am: "ማጣቀሻ" },
+  "nav.system": { en: "System", am: "ስርዓት" },
+
+  // Legacy Navigation Sections (kept for compatibility)
   "nav.main": { en: "Main", am: "ዋና" },
   "nav.ministry": { en: "Ministry", am: "አገልግሎት" },
   "nav.programs": { en: "Programs", am: "ፕሮግራሞች" },
   "nav.administration": { en: "Administration", am: "አስተዳደር" },
   "nav.operations": { en: "Operations", am: "ሥራ አመራር" },
 
-  // Navigation Items
+  // Navigation Items - Admin Shell
   "nav.dashboard": { en: "Dashboard", am: "ዳሽቦርድ" },
   "nav.members": { en: "Members", am: "አባላት" },
   "nav.children": { en: "Children", am: "ህፃናት" },
-  "nav.sub-departments": { en: "Sub-Departments", am: "ንዑሳን ክፍላት" },
+  "nav.sub-departments": { en: "Subdepartments", am: "ንዑሳን ክፍላት" },
+  "nav.users": { en: "User Accounts", am: "የተጠቃሚ መገለጫዎች" },
+  "nav.permissions": { en: "Roles & Permissions", am: "ሚSSION እና ፍቃዶች" },
+  "nav.audit-logs": { en: "Audit Log", am: "የአዲስ መዝገቦች" },
+  "nav.settings": { en: "Settings", am: "ማስተካከያዎች" },
+
+  // Legacy Navigation Items (kept for compatibility)
   "nav.attendance": { en: "Attendance", am: "ክትትል" },
   "nav.academic": { en: "Academic", am: "ትምህርት" },
   "nav.events": { en: "Events", am: "መርሐግብሮች" },
   "nav.transport": { en: "Transport", am: "ትራንስፖርት" },
   "nav.planning": { en: "Planning", am: "ዕቅድ" },
   "nav.reports": { en: "Reports", am: "ሪፖርቶች" },
-  "nav.users": { en: "User Accounts", am: "የተጠቃሚ መለያዎች" },
-  "nav.audit-logs": { en: "Audit Logs", am: "የኦዲት መዝገቦች" },
-  "nav.permissions": { en: "Permissions", am: "ፈቃዶች" },
 
   // Search
   "search.placeholder": { en: "Search...", am: "ፈልግ..." },

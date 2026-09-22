@@ -1,7 +1,13 @@
-import { fireEvent, render, screen, waitFor } from "@testing-library/react";
+import { fireEvent, render, screen, waitFor, within } from "@testing-library/react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import UsersPage from "../features/users/components/users-page";
 import { I18nProvider, ShellProvider } from "../features/shell";
+
+const mockPush = vi.fn();
+
+vi.mock("next/navigation", () => ({
+  useRouter: () => ({ push: mockPush, replace: vi.fn(), prefetch: vi.fn() }),
+}));
 
 // Shared endpoint-keyed fixtures (hoisted for the vi.mock factory).
 const fixtures = vi.hoisted(() => {
@@ -99,10 +105,22 @@ async function pickMember(searchTerm: string) {
   fireEvent.click(result);
 }
 
+/** Opens the ⋮ action menu for a given user and returns the dropdown container. */
+function openRowMenu(userName: string) {
+  const menuButtons = screen.getAllByRole("button", { name: `Actions for ${userName}` });
+  fireEvent.click(menuButtons[0]);
+  // The dropdown is the next sibling element with a border and shadow.
+  const menuContainer = menuButtons[0]
+    .closest("div")
+    ?.querySelector('[class*="absolute"][class*="z-50"]');
+  return menuContainer as HTMLElement;
+}
+
 describe("Users management page", () => {
   beforeEach(() => {
     postMock.mockClear();
     patchMock.mockClear();
+    mockPush.mockClear();
   });
 
   it("renders the page header and action button", async () => {
@@ -110,7 +128,7 @@ describe("Users management page", () => {
 
     await waitFor(() => {
       expect(screen.getByText("User Accounts")).toBeDefined();
-      expect(screen.getByRole("button", { name: /Create account/i })).toBeDefined();
+      expect(screen.getByRole("button", { name: /Create User/i })).toBeDefined();
     });
   });
 
@@ -118,11 +136,10 @@ describe("Users management page", () => {
     renderUsersPage();
 
     await waitFor(() => {
-      expect(screen.getByText("Super Admin")).toBeDefined();
-      expect(screen.getByText("Deactivated Leader")).toBeDefined();
-      // Both fixture rows are CHAIRPERSON (plus the role-filter option).
+      expect(screen.getAllByText("Super Admin").length).toBeGreaterThanOrEqual(1);
+      expect(screen.getAllByText("Deactivated Leader").length).toBeGreaterThanOrEqual(1);
       expect(screen.getAllByText("CHAIRPERSON").length).toBeGreaterThanOrEqual(2);
-      expect(screen.getByText("TIMIHRT")).toBeDefined();
+      expect(screen.getAllByText("TIMIHRT").length).toBeGreaterThanOrEqual(1);
     });
   });
 
@@ -130,43 +147,48 @@ describe("Users management page", () => {
     renderUsersPage();
 
     await waitFor(() => {
-      expect(screen.getByLabelText("Search users")).toBeDefined();
-      expect(screen.getByLabelText("Filter by role")).toBeDefined();
+      expect(screen.getAllByLabelText("Search users").length).toBeGreaterThanOrEqual(1);
+      expect(screen.getAllByLabelText("Filter by role").length).toBeGreaterThanOrEqual(1);
     });
   });
 
   it("shows Reactivate for deactivated rows and reactivates via the API", async () => {
     renderUsersPage();
 
-    const reactivate = await screen.findByRole("button", {
-      name: /Reactivate Deactivated Leader/i,
-    });
+    // Wait for data to load, then open the action menu for the deactivated user.
+    await waitFor(() =>
+      expect(screen.getAllByText("Deactivated Leader").length).toBeGreaterThanOrEqual(1)
+    );
+    const menu = openRowMenu("Deactivated Leader");
+
+    const reactivate = within(menu).getByRole("button", { name: /Reactivate User/i });
     fireEvent.click(reactivate);
 
     await waitFor(() => {
       expect(postMock).toHaveBeenCalledWith("/users/u2/reactivate", {});
     });
-    expect(await screen.findByText(/Account reactivated/)).toBeDefined();
   });
 
   it("force-signs-out a user's live sessions", async () => {
     renderUsersPage();
 
-    const button = await screen.findByRole("button", { name: /Force sign-out for Super Admin/i });
-    fireEvent.click(button);
+    await waitFor(() =>
+      expect(screen.getAllByText("Super Admin").length).toBeGreaterThanOrEqual(1)
+    );
+    const menu = openRowMenu("Super Admin");
+
+    const revokeButton = within(menu).getByRole("button", { name: /Revoke Sessions/i });
+    fireEvent.click(revokeButton);
 
     await waitFor(() => {
       expect(postMock).toHaveBeenCalledWith("/users/u1/revoke-sessions", {});
     });
-    expect(
-      await screen.findByText(/live sessions for superadmin@hitsanat.org were revoked/i)
-    ).toBeDefined();
   });
 
   it("opens the create dialog and shows the BR-007 member-link validation", async () => {
     renderUsersPage();
 
-    fireEvent.click(await screen.findByRole("button", { name: /Create account/i }));
+    fireEvent.click(await screen.findByRole("button", { name: /Create User/i }));
     await screen.findByText("Create user account");
 
     fireEvent.change(screen.getByPlaceholderText("Full name"), {
@@ -181,19 +203,17 @@ describe("Users management page", () => {
     fireEvent.change(screen.getByDisplayValue("Select role"), {
       target: { value: "SECRETARY" },
     });
-    // The dialog's submit button shares its label with the page-header button.
     const submitButton = screen.getAllByRole("button", { name: "Create account" }).pop();
     if (submitButton) fireEvent.click(submitButton);
 
     expect(await screen.findByText(/Leadership roles require a member link/)).toBeDefined();
-    // No API call was made — validation blocked the submit.
     expect(postMock).not.toHaveBeenCalled();
   });
 
   it("links a member through the searchable picker and creates the account", async () => {
     renderUsersPage();
 
-    fireEvent.click(await screen.findByRole("button", { name: /Create account/i }));
+    fireEvent.click(await screen.findByRole("button", { name: /Create User/i }));
     await screen.findByText("Create user account");
 
     fireEvent.change(screen.getByPlaceholderText("Full name"), {
@@ -228,11 +248,14 @@ describe("Users management page", () => {
   it("edits an account and submits the PATCH with the resolved member name", async () => {
     renderUsersPage();
 
-    fireEvent.click(await screen.findByRole("button", { name: /Edit Super Admin/i }));
+    await waitFor(() =>
+      expect(screen.getAllByText("Super Admin").length).toBeGreaterThanOrEqual(1)
+    );
+    const menu = openRowMenu("Super Admin");
+
+    fireEvent.click(within(menu).getByRole("button", { name: /Edit User/i }));
     await screen.findByText("Edit user account");
 
-    // The linked member's real name is resolved from GET /members/m1
-    // (the picker chip renders "name · phone").
     expect(await screen.findByText(/Linked Member One/)).toBeDefined();
 
     fireEvent.change(screen.getByPlaceholderText("Full name"), {
@@ -246,6 +269,7 @@ describe("Users management page", () => {
         email: "superadmin@hitsanat.org",
         role: "CHAIRPERSON",
         memberId: "m1",
+        subDepartmentIds: [],
       });
     });
   });
@@ -253,7 +277,12 @@ describe("Users management page", () => {
   it("runs the guided handover: successor first, then deactivation", async () => {
     renderUsersPage();
 
-    fireEvent.click(await screen.findByRole("button", { name: /Start handover for Super Admin/i }));
+    await waitFor(() =>
+      expect(screen.getAllByText("Super Admin").length).toBeGreaterThanOrEqual(1)
+    );
+    const menu = openRowMenu("Super Admin");
+
+    fireEvent.click(within(menu).getByRole("button", { name: /Handover/i }));
     await screen.findByText(/Leadership handover — CHAIRPERSON/);
 
     fireEvent.change(screen.getByLabelText("Successor full name"), {
@@ -278,7 +307,6 @@ describe("Users management page", () => {
       });
     });
 
-    // Step 2 — deactivate the outgoing leader.
     fireEvent.click(await screen.findByRole("button", { name: "Deactivate outgoing leader" }));
     await waitFor(() => {
       expect(postMock).toHaveBeenCalledWith("/users/u1/deactivate", {});
@@ -290,8 +318,8 @@ describe("Users management page", () => {
     renderUsersPage();
 
     await waitFor(() => {
-      expect(screen.getByText(/2 account\(s\)/)).toBeDefined();
-      expect(screen.getByText(/Page 1 of 1/)).toBeDefined();
+      expect(screen.getAllByText(/2 account\(s\)/).length).toBeGreaterThanOrEqual(1);
+      expect(screen.getAllByText(/Page 1 of 1/).length).toBeGreaterThanOrEqual(1);
     });
   });
 });

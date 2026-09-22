@@ -1,4 +1,10 @@
 import { Router } from "express";
+import { requireAuth, requireScopePermission } from "@repo/auth";
+import {
+  listPlanApprovals,
+  reviewPlanApproval,
+  submitPlanApproval,
+} from "./plan-approvals.controller.js";
 import {
   createAnnualPlan,
   createWeeklyPlan,
@@ -12,6 +18,33 @@ import {
 } from "./planning.controller.js";
 
 export const planningRouter: Router = Router();
+
+// Plan Approval Workflow (FR-17.1 / BR-025)
+// Submit: EKD_LEADER (create plan change requests) — list/review: CHAIRPERSON.
+planningRouter.post(
+  "/:id/approvals",
+  requireAuth(),
+  requireScopePermission({
+    allowedGlobalRoles: ["EKD_LEADER", "CHAIRPERSON"],
+  }),
+  submitPlanApproval
+);
+planningRouter.get(
+  "/approvals",
+  requireAuth(),
+  requireScopePermission({
+    allowedGlobalRoles: ["CHAIRPERSON", "SUB_CHAIRPERSON"],
+  }),
+  listPlanApprovals
+);
+planningRouter.patch(
+  "/approvals/:approvalId/review",
+  requireAuth(),
+  requireScopePermission({
+    allowedGlobalRoles: ["CHAIRPERSON"],
+  }),
+  reviewPlanApproval
+);
 
 // Annual Plan CRUD
 planningRouter.post("/", createAnnualPlan);

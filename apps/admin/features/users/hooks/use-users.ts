@@ -1,7 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useState } from "react";
-import { type PaginatedResponse, api } from "@/lib/api-client";
+import { type ApiResponse, type PaginatedResponse, api } from "@/lib/api-client";
 
 /**
  * Mirror of the API's UserWithSubDepartments contract (users module).
@@ -30,6 +30,7 @@ export interface ManagedUser {
 export interface UserFilters {
   search?: string;
   role?: string;
+  status?: "ACTIVE" | "DEACTIVATED";
   page?: number;
 }
 
@@ -56,6 +57,7 @@ export interface CreateUserPayload {
   password: string;
   role: string;
   memberId?: string;
+  subDepartmentIds?: string[];
 }
 
 export interface UpdateUserPayload {
@@ -63,6 +65,7 @@ export interface UpdateUserPayload {
   email?: string;
   role?: string;
   memberId?: string | null;
+  subDepartmentIds?: string[];
 }
 
 /** PE-02 error codes from the users API. */
@@ -138,7 +141,12 @@ export function useUsers(initialFilters: UserFilters = {}): UseUsersResult {
       if (filters.role) params.set("role", filters.role);
 
       const response = await api.get<PaginatedResponse<ManagedUser>>(`/users?${params.toString()}`);
-      setUsers(response.data);
+
+      const filtered = filters.status
+        ? response.data.filter((u) => u.status === filters.status)
+        : response.data;
+
+      setUsers(filtered);
       setPagination(response.pagination);
     } catch (err) {
       setError(userActionErrorMessage(err));
@@ -230,4 +238,41 @@ export function useUsers(initialFilters: UserFilters = {}): UseUsersResult {
     reactivate,
     revokeSessions,
   };
+}
+
+interface UseUserResult {
+  user: ManagedUser | null;
+  loading: boolean;
+  error: string | null;
+  refresh: () => void;
+}
+
+export function useUser(id: string | null): UseUserResult {
+  const [user, setUser] = useState<ManagedUser | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  const fetchUser = useCallback(async () => {
+    if (!id) {
+      setLoading(false);
+      setError("No user ID provided.");
+      return;
+    }
+    setLoading(true);
+    setError(null);
+    try {
+      const response = await api.get<ApiResponse<ManagedUser>>(`/users/${id}`);
+      setUser(response.data);
+    } catch (err) {
+      setError(userActionErrorMessage(err));
+    } finally {
+      setLoading(false);
+    }
+  }, [id]);
+
+  useEffect(() => {
+    fetchUser();
+  }, [fetchUser]);
+
+  return { user, loading, error, refresh: fetchUser };
 }

@@ -33,3 +33,6 @@ export * from "./reports.js";
 
 // Auth & Session Management
 export * from "./auth.js";
+
+// Leadership Meetings & Plan Approvals
+export * from "./meetings.js";

@@ -48,6 +48,7 @@ export const reportSubmissions = pgTable("report_submissions", {
   notes: text("notes"),
   reviewedBy: uuid("reviewed_by"),
   reviewedAt: timestamp("reviewed_at", { withTimezone: true }),
+  reviewComments: text("review_comments"),
   createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
   updatedAt: timestamp("updated_at", { withTimezone: true }).defaultNow().notNull(),
 });

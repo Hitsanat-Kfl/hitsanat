@@ -82,6 +82,7 @@ export async function reviewSubmission(req: Request, res: Response) {
       id: req.params.submissionId as string,
       reviewedBy: req.body.userId || "system",
       status: req.body.status,
+      reviewComments: req.body.reviewComments,
     });
     res.status(200).json({ success: true, data: submission });
   } catch (error) {

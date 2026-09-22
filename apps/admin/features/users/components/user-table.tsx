@@ -3,7 +3,7 @@
 import {
   Badge,
   Button,
-  Spinner,
+  Skeleton,
   StatusBadge,
   Table,
   TableBody,
@@ -12,34 +12,200 @@ import {
   TableHeader,
   TableRow,
 } from "@repo/ui";
-import { useState } from "react";
+import { ArrowRightLeft, Key, MoreVertical, Pencil, RefreshCw, ShieldOff, X } from "lucide-react";
+import { useEffect, useRef, useState } from "react";
 import type { ManagedUser } from "../hooks/use-users";
 
 interface UserTableProps {
   users: ManagedUser[];
   loading: boolean;
+  onView: (user: ManagedUser) => void;
   onResetPassword: (user: ManagedUser) => void;
-  onDeactivate: (user: ManagedUser) => Promise<void>;
-  /** PE-02: open the edit dialog. */
+  onDeactivate: (user: ManagedUser) => void;
   onEdit: (user: ManagedUser) => void;
-  /** PE-01: restore a deactivated account. */
   onReactivate: (user: ManagedUser) => Promise<void>;
-  /** PE-08: force sign-out of live sessions. */
   onRevokeSessions: (user: ManagedUser) => Promise<void>;
-  /** PE-04: guided leadership handover. */
   onHandover: (user: ManagedUser) => void;
 }
 
-function formatDate(value: string): string {
-  const parsed = new Date(value);
-  return Number.isNaN(parsed.getTime())
-    ? "—"
-    : parsed.toLocaleDateString("en-ET", { month: "short", day: "numeric", year: "numeric" });
+function RowActionMenu({
+  user,
+  onResetPassword,
+  onDeactivate,
+  onEdit,
+  onReactivate,
+  onRevokeSessions,
+  onHandover,
+}: {
+  user: ManagedUser;
+  onResetPassword: (user: ManagedUser) => void;
+  onDeactivate: (user: ManagedUser) => void;
+  onEdit: (user: ManagedUser) => void;
+  onReactivate: (user: ManagedUser) => Promise<void>;
+  onRevokeSessions: (user: ManagedUser) => Promise<void>;
+  onHandover: (user: ManagedUser) => void;
+}) {
+  const [open, setOpen] = useState(false);
+  const menuRef = useRef<HTMLDivElement>(null);
+  const deactivated = user.status === "DEACTIVATED";
+  const isLeadership =
+    user.role === "SUPER_ADMIN" ||
+    user.role === "CHAIRPERSON" ||
+    user.role === "SUB_CHAIRPERSON" ||
+    user.role === "SECRETARY";
+
+  useEffect(() => {
+    if (!open) return;
+    const handleClickOutside = (event: MouseEvent) => {
+      if (menuRef.current && !menuRef.current.contains(event.target as Node)) {
+        setOpen(false);
+      }
+    };
+    const handleEscape = (event: KeyboardEvent) => {
+      if (event.key === "Escape") setOpen(false);
+    };
+    document.addEventListener("mousedown", handleClickOutside);
+    document.addEventListener("keydown", handleEscape);
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+      document.removeEventListener("keydown", handleEscape);
+    };
+  }, [open]);
+
+  return (
+    <div ref={menuRef} className="relative">
+      <Button
+        variant="ghost"
+        size="icon"
+        className="h-8 w-8"
+        onClick={() => setOpen(!open)}
+        aria-label={`Actions for ${user.name}`}
+        aria-expanded={open}
+        aria-haspopup="true"
+      >
+        {open ? <X className="h-4 w-4" /> : <MoreVertical className="h-4 w-4" />}
+      </Button>
+      {open && (
+        <div className="absolute right-0 top-full z-50 mt-1 min-w-[180px] overflow-hidden rounded-md border bg-white shadow-md">
+          <button
+            type="button"
+            onClick={() => {
+              onEdit(user);
+              setOpen(false);
+            }}
+            className="flex w-full items-center gap-2 px-3 py-2 text-left text-sm hover:bg-muted"
+          >
+            <Pencil className="h-4 w-4" aria-hidden="true" />
+            Edit User
+          </button>
+          {isLeadership && (
+            <button
+              type="button"
+              onClick={() => {
+                onHandover(user);
+                setOpen(false);
+              }}
+              className="flex w-full items-center gap-2 px-3 py-2 text-left text-sm hover:bg-muted"
+            >
+              <ArrowRightLeft className="h-4 w-4" aria-hidden="true" />
+              Handover
+            </button>
+          )}
+          <button
+            type="button"
+            onClick={() => {
+              onResetPassword(user);
+              setOpen(false);
+            }}
+            className="flex w-full items-center gap-2 px-3 py-2 text-left text-sm hover:bg-muted"
+          >
+            <Key className="h-4 w-4" aria-hidden="true" />
+            Reset Password
+          </button>
+          <button
+            type="button"
+            onClick={() => {
+              void onRevokeSessions(user);
+              setOpen(false);
+            }}
+            className="flex w-full items-center gap-2 px-3 py-2 text-left text-sm hover:bg-muted"
+          >
+            <ShieldOff className="h-4 w-4" aria-hidden="true" />
+            Revoke Sessions
+          </button>
+          {deactivated ? (
+            <button
+              type="button"
+              onClick={() => {
+                void onReactivate(user);
+                setOpen(false);
+              }}
+              className="flex w-full items-center gap-2 px-3 py-2 text-left text-sm hover:bg-muted"
+            >
+              <RefreshCw className="h-4 w-4" aria-hidden="true" />
+              Reactivate User
+            </button>
+          ) : (
+            <button
+              type="button"
+              onClick={() => {
+                onDeactivate(user);
+                setOpen(false);
+              }}
+              className="flex w-full items-center gap-2 px-3 py-2 text-left text-sm text-destructive hover:bg-muted"
+            >
+              <ShieldOff className="h-4 w-4" aria-hidden="true" />
+              Deactivate User
+            </button>
+          )}
+        </div>
+      )}
+    </div>
+  );
+}
+
+function TableSkeleton() {
+  return (
+    <div className="rounded-md border">
+      <Table>
+        <TableHeader>
+          <TableRow>
+            <TableHead>User</TableHead>
+            <TableHead>Role</TableHead>
+            <TableHead>Status</TableHead>
+            <TableHead className="w-[60px]">
+              <span className="sr-only">Actions</span>
+            </TableHead>
+          </TableRow>
+        </TableHeader>
+        <TableBody>
+          {[0, 1, 2, 3, 4].map((i) => (
+            <TableRow key={i}>
+              <TableCell>
+                <Skeleton className="h-4 w-32" />
+                <Skeleton className="mt-1 h-3 w-40" />
+              </TableCell>
+              <TableCell>
+                <Skeleton className="h-5 w-20" />
+              </TableCell>
+              <TableCell>
+                <Skeleton className="h-5 w-16" />
+              </TableCell>
+              <TableCell>
+                <Skeleton className="h-8 w-8 ml-auto" />
+              </TableCell>
+            </TableRow>
+          ))}
+        </TableBody>
+      </Table>
+    </div>
+  );
 }
 
 export function UserTable({
   users,
   loading,
+  onView,
   onResetPassword,
   onDeactivate,
   onEdit,
@@ -47,23 +213,8 @@ export function UserTable({
   onRevokeSessions,
   onHandover,
 }: UserTableProps) {
-  const [pendingId, setPendingId] = useState<string | null>(null);
-
-  const run = async (user: ManagedUser, action: (user: ManagedUser) => Promise<void>) => {
-    setPendingId(user.id);
-    try {
-      await action(user);
-    } finally {
-      setPendingId(null);
-    }
-  };
-
   if (loading) {
-    return (
-      <div className="flex items-center justify-center py-12" aria-busy="true">
-        <Spinner size="lg" />
-      </div>
-    );
+    return <TableSkeleton />;
   }
 
   return (
@@ -74,9 +225,7 @@ export function UserTable({
             <TableHead>User</TableHead>
             <TableHead>Role</TableHead>
             <TableHead>Status</TableHead>
-            <TableHead className="hidden md:table-cell">Sub-departments</TableHead>
-            <TableHead className="hidden sm:table-cell">Created</TableHead>
-            <TableHead>
+            <TableHead className="w-[60px]">
               <span className="sr-only">Actions</span>
             </TableHead>
           </TableRow>
@@ -84,114 +233,46 @@ export function UserTable({
         <TableBody>
           {users.length === 0 ? (
             <TableRow>
-              <TableCell colSpan={6} className="py-8 text-center text-muted-foreground">
-                No accounts found. Create one to get started.
+              <TableCell colSpan={4} className="py-12 text-center">
+                <p className="text-sm font-medium text-foreground">No users found</p>
+                <p className="mt-1 text-sm text-muted-foreground">
+                  Try changing your search or filters.
+                </p>
               </TableCell>
             </TableRow>
           ) : (
             users.map((user) => {
               const deactivated = user.status === "DEACTIVATED";
+              const subDept = user.subDepartments.length > 0 ? user.subDepartments[0].code : null;
               return (
                 <TableRow key={user.id}>
                   <TableCell>
-                    <div className="min-w-0">
+                    <button
+                      type="button"
+                      onClick={() => onView(user)}
+                      className="min-w-0 text-left hover:underline"
+                    >
                       <p className="truncate text-sm font-medium text-foreground">{user.name}</p>
                       <p className="truncate text-xs text-muted-foreground">{user.email}</p>
-                    </div>
+                      {subDept && <p className="mt-0.5 text-xs text-muted-foreground">{subDept}</p>}
+                    </button>
                   </TableCell>
                   <TableCell>
-                    <Badge variant="secondary">{user.role}</Badge>
+                    <Badge variant="secondary">{user.role.replaceAll("_", " ")}</Badge>
                   </TableCell>
                   <TableCell>
                     <StatusBadge status={deactivated ? "inactive" : "active"} size="sm" />
-                    {deactivated && user.deactivatedAt && (
-                      <p className="mt-1 text-xs text-muted-foreground">
-                        since {formatDate(user.deactivatedAt)}
-                      </p>
-                    )}
-                  </TableCell>
-                  <TableCell className="hidden md:table-cell">
-                    {user.subDepartments.length === 0 ? (
-                      <span className="text-xs text-muted-foreground">—</span>
-                    ) : (
-                      <div className="flex flex-wrap gap-1">
-                        {user.subDepartments.map((sd) => (
-                          <Badge key={sd.subDepartmentId} variant="outline">
-                            {sd.code}
-                          </Badge>
-                        ))}
-                      </div>
-                    )}
-                  </TableCell>
-                  <TableCell className="hidden sm:table-cell text-sm text-muted-foreground">
-                    {formatDate(user.createdAt)}
                   </TableCell>
                   <TableCell>
-                    <div className="flex flex-wrap items-center justify-end gap-1">
-                      {deactivated ? (
-                        // PE-01: restore the account
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          disabled={pendingId === user.id}
-                          onClick={() => run(user, onReactivate)}
-                          aria-label={`Reactivate ${user.name}`}
-                        >
-                          Reactivate
-                        </Button>
-                      ) : (
-                        <>
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            onClick={() => onEdit(user)}
-                            aria-label={`Edit ${user.name}`}
-                          >
-                            Edit
-                          </Button>
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            onClick={() => onResetPassword(user)}
-                            aria-label={`Reset password for ${user.name}`}
-                          >
-                            Reset password
-                          </Button>
-                          {user.role === "SUPER_ADMIN" ||
-                          user.role === "CHAIRPERSON" ||
-                          user.role === "SUB_CHAIRPERSON" ||
-                          user.role === "SECRETARY" ? (
-                            <Button
-                              variant="ghost"
-                              size="sm"
-                              onClick={() => onHandover(user)}
-                              aria-label={`Start handover for ${user.name}`}
-                            >
-                              Handover
-                            </Button>
-                          ) : null}
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            disabled={pendingId === user.id}
-                            onClick={() => run(user, onRevokeSessions)}
-                            aria-label={`Force sign-out for ${user.name}`}
-                          >
-                            Force sign-out
-                          </Button>
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            className="text-destructive hover:text-destructive"
-                            disabled={pendingId === user.id}
-                            onClick={() => run(user, onDeactivate)}
-                            aria-label={`Deactivate ${user.name}`}
-                          >
-                            Deactivate
-                          </Button>
-                        </>
-                      )}
-                    </div>
+                    <RowActionMenu
+                      user={user}
+                      onResetPassword={onResetPassword}
+                      onDeactivate={onDeactivate}
+                      onEdit={onEdit}
+                      onReactivate={onReactivate}
+                      onRevokeSessions={onRevokeSessions}
+                      onHandover={onHandover}
+                    />
                   </TableCell>
                 </TableRow>
               );

@@ -22,6 +22,7 @@ import {
   type MemberApiRow,
   type PickedMember,
 } from "./member-picker";
+import { SubDepartmentPicker } from "./sub-department-picker";
 
 const ROLE_OPTIONS = [
   { value: "SECRETARY", label: "Secretary" },
@@ -48,6 +49,9 @@ export function EditUserDialog({ user, onOpenChange, onUpdate }: EditUserDialogP
   const [email, setEmail] = useState(user.email);
   const [role, setRole] = useState(user.role);
   const [member, setMember] = useState<PickedMember | null>(null);
+  const [subDepartmentIds, setSubDepartmentIds] = useState<string[]>(
+    user.subDepartments.map((sd) => sd.subDepartmentId)
+  );
   const [submitting, setSubmitting] = useState(false);
   const [formError, setFormError] = useState<string | null>(null);
 
@@ -55,6 +59,7 @@ export function EditUserDialog({ user, onOpenChange, onUpdate }: EditUserDialogP
     setName(user.name);
     setEmail(user.email);
     setRole(user.role);
+    setSubDepartmentIds(user.subDepartments.map((sd) => sd.subDepartmentId));
     if (!user.memberId) {
       setMember(null);
       return;
@@ -101,6 +106,7 @@ export function EditUserDialog({ user, onOpenChange, onUpdate }: EditUserDialogP
         email: email.trim(),
         role,
         memberId: member ? member.id : null,
+        subDepartmentIds,
       };
       await onUpdate(user.id, payload);
       onOpenChange(false);
@@ -162,6 +168,19 @@ export function EditUserDialog({ user, onOpenChange, onUpdate }: EditUserDialogP
           >
             <MemberPicker value={member} onChange={setMember} />
           </FormField>
+
+          {member && (
+            <FormField
+              label="Sub-departments"
+              helperText="Optional — assign this account to one or more sub-departments."
+            >
+              <SubDepartmentPicker
+                value={subDepartmentIds}
+                onChange={setSubDepartmentIds}
+                disabled={submitting}
+              />
+            </FormField>
+          )}
 
           <div className="flex items-center gap-2">
             <Badge variant="outline">{user.status}</Badge>
