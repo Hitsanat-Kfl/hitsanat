@@ -374,7 +374,7 @@ The Super Admin dashboard provides system-wide administration, access, and opera
 
 **System Overview (KPIs):**
 - User Accounts — total provisioned accounts
-- Active Accounts — email-verified accounts
+- Active Accounts — accounts with lifecycle status `ACTIVE` (see FR-13.6 note: lifecycle status, not email verification)
 - Sub-Departments — configured programs
 - API Service — health status, version, environment
 
@@ -461,61 +461,54 @@ The Super Admin sees all navigation items:
 **Operations:**
 - Planning, Reports
 
-#### 7.10.6 Planned Enhancements (v2.2 — Proposed, Not Yet Implemented)
+#### 7.10.6 Planned Enhancements (v2.2) — ✅ Implemented
 
-The following capabilities are proposed for the Super Admin role. They are documented here as the agreed requirements from the September 2026 review session; none are implemented yet.
+The capabilities below were proposed in the September 2026 review session and are now **implemented and covered by tests** (users module, audit module, admin UI, and the PE-07 break-glass middleware). Status per item:
 
-**PE-01 Account Reactivation (`/users`):**
-The users page today supports deactivation only, while the Super Admin dashboard explicitly flags "Deactivated Accounts — requiring attention". This creates an incomplete loop: a deactivated account can never be restored.
+**PE-01 Account Reactivation (`/users`) — ✅ Implemented:**
 
-- Add **Reactivate** action alongside Deactivate (unbans the Supabase Auth account)
-- Requires new API endpoint `POST /users/:id/reactivate`
-- Log new audit action: `USER_REACTIVATED`
-- Surface reactivation as a one-click action from the "Deactivated Accounts" dashboard widget
+- **Reactivate** action alongside Deactivate (`POST /users/:id/reactivate`, unban via Supabase Admin API)
+- Audit action `USER_REACTIVATED` recorded
+- One-click reactivation from the dashboard's "Deactivated Accounts" widget
 
-**PE-02 Edit User / Role Reassignment (`/users`):**
-BR-008 grants the Super Admin authority to "assign or reassign leadership roles", but the backend `PATCH /users/:id` endpoint is currently unused by the frontend. There is no way to change a user's role, name, email, or member link after creation.
+**PE-02 Edit User / Role Reassignment (`/users`) — ✅ Implemented:**
 
-- Add **Edit User** dialog wired to `PATCH /users/:id`
-- Editable fields: full name, email, role, linked member
-- Role changes must re-validate BR-007 (leadership requires linked member) and BR-009 (one leadership post per member)
-- Log audit action `USER_UPDATED` with a payload diff of changed fields
+- **Edit User** dialog wired to `PATCH /users/:id` (name, email, role, linked member)
+- Role changes re-validate BR-007 and BR-009 before write
+- Audit action `USER_UPDATED` records a field-level old → new diff
 
-**PE-03 Searchable Member Picker (`/users`):**
-The create/edit dialogs currently ask the operator to paste a raw member UUID from the Members page.
+**PE-03 Searchable Member Picker (`/users`) — ✅ Implemented:**
 
-- Replace the UUID text input with a searchable member picker (search by name or phone)
-- Stretch goal: a combined "register leader" flow that creates the member record and provisions the account in one pass
+- Create/Edit/Handover dialogs use a searchable member picker (name or phone) instead of raw UUID input
+- Deferred stretch goal: combined "register leader" flow (member record + account in one pass)
 
-**PE-04 Leadership Handover Workflow (`/users`):**
-Leadership rotates annually as members graduate. The most common Super Admin task is a role handover, which today must be performed as unguided manual steps.
+**PE-04 Leadership Handover Workflow (`/users`) — ✅ Implemented:**
 
-- Documented sequence: create successor account → reassign role (BR-008) → deactivate outgoing leader's account
-- Proposed: a guided **Handover** action on the user table that walks this sequence with validation at each step
+- Guided **Handover** action on the user table and detail view (successor account first, then role reassignment, then outgoing-leader deactivation) with validation at each step
 
-**PE-05 Audit Log Filters & Export (`/audit-logs`):**
-The audit trail is currently a plain chronological table.
+**PE-05 Audit Log Filters & Export (`/audit-logs`) — ✅ Implemented:**
 
-- Filter by action type, date range, and actor
+- Filters by action type, date range, and actor (searchable actor picker)
 - Server-side pagination
-- CSV export for incident review
+- CSV export (`GET /audit-logs?format=csv`, 10,000-row safety cap)
 
-**PE-06 Account Self-Protection Guard Rails:**
-Prevent account lockout scenarios.
+**PE-06 Account Self-Protection Guard Rails — ✅ Implemented:**
 
-- Block the Super Admin from deactivating their own account
-- Block deactivating the last remaining active `SUPER_ADMIN`/`CHAIRPERSON` account
+- Self-deactivation rejected (`AccountSelfDeactivationError`)
+- Deactivating the last remaining active `SUPER_ADMIN`/`CHAIRPERSON` rejected (lockout protection)
 
-**PE-07 Break-Glass Action Logging:**
-Because `SUPER_ADMIN` bypasses all permission checks (`packages/permissions/src/checker.ts`), actions performed under bypass should be explicitly recorded.
+**PE-07 Break-Glass Action Logging — ✅ Implemented:**
 
-- Log every super-admin write action to the audit trail, including actions on resources outside normal RBAC scope
+- Global `breakGlassAuditMiddleware` records every write allowed *only* through the SUPER_ADMIN bypass as audit action `BYPASS_ACTION` (resource, method, path, status); self-auditing controllers are excluded to avoid double entries
 
-**PE-08 Session Revocation (`/users`):**
-Deactivation bans future sign-ins but does not terminate live sessions (e.g., stolen credentials).
+**PE-08 Session Revocation (`/users`) — ✅ Implemented:**
 
-- Add **Force sign-out** action that revokes a user's active Supabase sessions
-- Log audit action `SESSIONS_REVOKED`
+- **Force sign-out** action (`POST /users/:id/revoke-sessions`) revokes a user's active Supabase sessions without deactivating the account
+- Audit action `SESSIONS_REVOKED` recorded
+
+**Remaining (not yet implemented):**
+- Seed/migration status on the dashboard (the `system_metadata` table exists but is unused; only the API `/health` ping is shown)
+- OD-05 permission-overrides scope decision (see `open-decisions.md`)
 
 **Lower-priority candidates (deferred):**
 - Dependency health checks (DB, Supabase, Telegram worker) beyond the current API `/health` ping

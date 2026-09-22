@@ -36,9 +36,10 @@
 - **Audit Trail Viewer:** Chronological change log with filters by action type, date range, and actor.
 
 ### 1.4 Super Admin Dashboard (`/super-admin`)
-- **Account Provisioning Console:** Create, update, reset, and deactivate leader accounts (BR-008) with one-leadership-post validation (BR-009).
-- **Leadership Roster Matrix:** All leadership posts (executive + per-sub-department) with conflict highlighting.
-- **System Health & Audit:** System metadata checks, audit log stream, seed/migration status.
+- **Account Provisioning Console:** Create, update, reset, deactivate, and reactivate leader accounts (BR-008, FR-13.6) with one-leadership-post validation (BR-009); guided handover and session revocation from `/users`.
+- **Leadership Roster Matrix:** All leadership posts (executive + per-sub-department) with BR-009 conflict highlighting.
+- **System Health & Audit:** API health (status/version/environment), audit log stream, role distribution, recently provisioned accounts.
+- *Planned:* seed/migration status panel (system_metadata table exists but is not yet surfaced).
 
 ### 1.5 Timihrt Leader Dashboard (`/timihrt`)
 - **Curriculum Roadmap:** Syllabus timeline for `Kutr 1` & `Kutr 2`.

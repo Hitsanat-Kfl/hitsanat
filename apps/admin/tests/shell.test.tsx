@@ -186,7 +186,9 @@ describe("AuthenticatedLayout / AppShell", () => {
     );
 
     expect(screen.getByTestId("page-content")).toBeDefined();
-    expect(screen.getByText("Hitsanat Kifl")).toBeDefined();
+    // Brand appears in both the desktop sidebar and the mobile compact header;
+    // responsive CSS decides which is visible at runtime.
+    expect(screen.getAllByText("Hitsanat Kifl").length).toBeGreaterThan(0);
   });
 });
 

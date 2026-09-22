@@ -10,27 +10,28 @@ import {
   ScrollArea,
 } from "@repo/ui";
 import { cn } from "@repo/ui/lib/utils";
-import { Church, Menu, MoreHorizontal, X } from "lucide-react";
+import { Globe, LogOut, MoreHorizontal, Settings, X } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import * as React from "react";
-import { BrandLogo } from "./app-sidebar";
-import { useI18n } from "./i18n";
+import type * as React from "react";
 import {
   type AdminNavItem,
-  type AdminNavSection,
   type AdminNavRole,
+  type AdminNavSection,
   findAdminActiveNavItem,
   getAdminNavigationForRoles,
   getAdminPrimaryNavItems,
 } from "./admin-nav-config";
+import { BrandLogo } from "./app-sidebar";
+import { useI18n } from "./i18n";
 import { useShell } from "./shell-context";
 
 interface MobileNavProps {
   roles?: AdminNavRole[];
+  onLogout?: () => void;
 }
 
-export function MobileNav({ roles = ["chairperson"] }: MobileNavProps) {
+export function MobileNav({ roles = ["chairperson"], onLogout }: MobileNavProps) {
   const { mobileMenuOpen, setMobileMenuOpen } = useShell();
   const pathname = usePathname();
   const { t } = useI18n();
@@ -40,9 +41,9 @@ export function MobileNav({ roles = ["chairperson"] }: MobileNavProps) {
 
   return (
     <>
-      {/* Bottom navigation bar — primary items + More drawer trigger */}
+      {/* Bottom navigation bar — high-frequency destinations only (§14) */}
       <nav
-        className="fixed bottom-0 inset-x-0 z-40 border-t admin-mobile-nav md:hidden bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/80"
+        className="admin-mobile-nav fixed bottom-0 inset-x-0 z-40 border-t md:hidden"
         aria-label="Mobile navigation"
       >
         <ul className="flex items-stretch h-16 pb-[env(safe-area-inset-bottom,0px)]">
@@ -60,17 +61,24 @@ export function MobileNav({ roles = ["chairperson"] }: MobileNavProps) {
                   href={item.href}
                   aria-current={isCurrentPath ? "page" : undefined}
                   className={cn(
-                    "flex flex-col items-center justify-center gap-1 py-1.5 px-1 h-full w-full text-[11px] font-medium transition-colors select-none",
-                    "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2",
+                    "relative flex flex-col items-center justify-center gap-1 py-1.5 px-1 h-full w-full text-[11px] font-medium transition-colors select-none",
+                    "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-inset",
                     isCurrentPath
                       ? "text-primary font-semibold"
                       : "text-muted-foreground hover:text-foreground"
                   )}
                 >
+                  {/* Gold active indicator (§14: gold only where appropriate) */}
+                  {isCurrentPath && (
+                    <span
+                      className="absolute top-0 h-0.5 w-8 rounded-full bg-[hsl(var(--admin-sidebar-active))]"
+                      aria-hidden="true"
+                    />
+                  )}
                   <div
                     className={cn(
                       "flex items-center justify-center h-8 w-12 rounded-full transition-colors",
-                      isCurrentPath ? "bg-[#E5AE60]/25 text-[#32131F] dark:text-[#E5AE60]" : ""
+                      isCurrentPath ? "bg-primary/10 text-primary" : ""
                     )}
                   >
                     <Icon className="h-5 w-5 shrink-0" aria-hidden="true" />
@@ -81,13 +89,13 @@ export function MobileNav({ roles = ["chairperson"] }: MobileNavProps) {
             );
           })}
 
-          {/* Menu trigger for all other items */}
+          {/* Menu trigger for all other destinations (drawer, §15) */}
           <li className="flex-1">
             <Drawer open={mobileMenuOpen} onOpenChange={setMobileMenuOpen} side="left">
               <DrawerTrigger
                 className={cn(
-                  "flex flex-col items-center justify-center gap-1 py-1.5 px-1 h-full w-full text-[11px] font-medium transition-colors select-none",
-                  "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2",
+                  "relative flex flex-col items-center justify-center gap-1 py-1.5 px-1 h-full w-full text-[11px] font-medium transition-colors select-none",
+                  "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-inset",
                   mobileMenuOpen
                     ? "text-primary font-semibold"
                     : "text-muted-foreground hover:text-foreground"
@@ -95,10 +103,16 @@ export function MobileNav({ roles = ["chairperson"] }: MobileNavProps) {
                 aria-label={t("shell.menu")}
                 aria-expanded={mobileMenuOpen}
               >
+                {mobileMenuOpen && (
+                  <span
+                    className="absolute top-0 h-0.5 w-8 rounded-full bg-[hsl(var(--admin-sidebar-active))]"
+                    aria-hidden="true"
+                  />
+                )}
                 <div
                   className={cn(
                     "flex items-center justify-center h-8 w-12 rounded-full transition-colors",
-                    mobileMenuOpen ? "bg-[#E5AE60]/25 text-[#32131F] dark:text-[#E5AE60]" : ""
+                    mobileMenuOpen ? "bg-primary/10 text-primary" : ""
                   )}
                 >
                   <MoreHorizontal className="h-5 w-5 shrink-0" aria-hidden="true" />
@@ -106,22 +120,23 @@ export function MobileNav({ roles = ["chairperson"] }: MobileNavProps) {
                 <span>{t("shell.menu")}</span>
               </DrawerTrigger>
 
-              <DrawerContent className="max-w-xs sm:max-w-sm">
-                <DrawerHeader className="border-b admin-sidebar-border-b px-4 py-3">
+              {/* Burgundy drawer — mobile equivalent of the desktop sidebar (§15) */}
+              <DrawerContent className="admin-drawer max-w-xs sm:max-w-sm">
+                <DrawerHeader className="admin-drawer-border-b border-b px-4 py-3">
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-2.5">
                       <BrandLogo className="h-9 w-9 text-xs" iconSize="h-4 w-4" />
                       <div className="text-left">
-                        <DrawerTitle className="text-sm font-semibold text-foreground leading-tight">
+                        <DrawerTitle className="text-sm font-semibold text-white leading-tight">
                           Hitsanat Kifl
                         </DrawerTitle>
-                        <p className="text-[11px] text-muted-foreground leading-tight">
+                        <p className="text-[11px] text-white/70 leading-tight">
                           Children&apos;s Ministry
                         </p>
                       </div>
                     </div>
                     <DrawerClose
-                      className="min-h-[44px] min-w-[44px] rounded-md p-2 text-muted-foreground hover:bg-accent hover:text-accent-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 flex items-center justify-center"
+                      className="min-h-[44px] min-w-[44px] rounded-md p-2 text-white/70 hover:bg-white/10 hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/60 focus-visible:ring-offset-2 flex items-center justify-center"
                       aria-label="Close navigation drawer"
                     >
                       <X className="h-5 w-5" aria-hidden="true" />
@@ -143,15 +158,62 @@ export function MobileNav({ roles = ["chairperson"] }: MobileNavProps) {
                     ))}
                   </nav>
                 </ScrollArea>
+
+                {/* Drawer footer: Settings / Language / Sign out (§15) */}
+                <div className="admin-drawer-border-b border-t px-3 py-2 space-y-1">
+                  <DrawerFooterLink href="/settings" onNavigate={() => setMobileMenuOpen(false)}>
+                    <Settings className="h-4 w-4 shrink-0" aria-hidden="true" />
+                    {t("user.settings")}
+                  </DrawerFooterLink>
+                  <DrawerFooterButton onClick={() => setMobileMenuOpen(false)}>
+                    <LogOut className="h-4 w-4 shrink-0" aria-hidden="true" />
+                    {t("user.logout")}
+                  </DrawerFooterButton>
+                </div>
               </DrawerContent>
             </Drawer>
           </li>
         </ul>
       </nav>
-
-      {/* Spacer to prevent content from being hidden behind bottom nav */}
-      <div className="h-16 md:hidden" aria-hidden="true" />
     </>
+  );
+}
+
+function DrawerFooterLink({
+  href,
+  onNavigate,
+  children,
+}: {
+  href: string;
+  onNavigate: () => void;
+  children: React.ReactNode;
+}) {
+  return (
+    <Link
+      href={href}
+      onClick={onNavigate}
+      className="flex items-center gap-3 rounded-md px-3 py-2.5 text-sm font-medium text-white/70 hover:bg-white/10 hover:text-white transition-colors min-h-[44px] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/60 focus-visible:ring-offset-2"
+    >
+      {children}
+    </Link>
+  );
+}
+
+function DrawerFooterButton({
+  onClick,
+  children,
+}: {
+  onClick?: () => void;
+  children: React.ReactNode;
+}) {
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      className="flex w-full items-center gap-3 rounded-md px-3 py-2.5 text-sm font-medium text-white/70 hover:bg-white/10 hover:text-white transition-colors min-h-[44px] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/60 focus-visible:ring-offset-2"
+    >
+      {children}
+    </button>
   );
 }
 
@@ -170,7 +232,7 @@ function MobileNavSection({
 }) {
   return (
     <div className="px-3 py-1.5">
-      <p className="px-3 py-1 text-[11px] font-semibold text-muted-foreground uppercase tracking-wider">
+      <p className="px-3 py-1 text-[11px] font-semibold text-white/70 uppercase tracking-wider">
         {t(`nav.${section.id}`)}
       </p>
       <ul className="space-y-1">
@@ -180,6 +242,7 @@ function MobileNavSection({
             item.href === "/"
               ? pathname === "/"
               : pathname === item.href || pathname.startsWith(`${item.href}/`);
+          const isItemActive = isCurrentPath || activeItem?.id === item.id;
           const label = t(`nav.${item.id}`);
 
           return (
@@ -192,17 +255,17 @@ function MobileNavSection({
                 onClick={onNavigate}
                 className={cn(
                   "flex items-center gap-3 rounded-md px-3 py-2.5 text-sm font-medium transition-colors min-h-[44px]",
-                  "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2",
-                  isCurrentPath
-                    ? "bg-[#E5AE60] text-[#32131F] font-semibold shadow-sm"
-                    : "text-muted-foreground hover:bg-accent hover:text-accent-foreground",
+                  "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/60 focus-visible:ring-offset-2",
+                  isItemActive
+                    ? "bg-[hsl(var(--admin-sidebar-active))] text-[hsl(var(--admin-sidebar-active-text))] font-semibold hover:bg-[hsl(var(--admin-sidebar-active))]/90"
+                    : "text-white/70 hover:bg-white/10 hover:text-white",
                   item.disabled && "opacity-50 cursor-not-allowed pointer-events-none"
                 )}
               >
                 <Icon
                   className={cn(
                     "h-4 w-4 shrink-0",
-                    isCurrentPath ? "text-[#32131F]" : "text-muted-foreground"
+                    isItemActive ? "text-[hsl(var(--admin-sidebar-active-text))]" : "text-white/70"
                   )}
                   aria-hidden="true"
                 />
@@ -211,9 +274,9 @@ function MobileNavSection({
                   <span
                     className={cn(
                       "ml-auto text-xs font-medium px-1.5 py-0.5 rounded-full",
-                      isCurrentPath
-                        ? "bg-[#32131F]/15 text-[#32131F]"
-                        : "bg-muted text-muted-foreground"
+                      isItemActive
+                        ? "bg-[hsl(var(--admin-sidebar-active-text))]/15 text-[hsl(var(--admin-sidebar-active-text))]"
+                        : "bg-white/10 text-white/70"
                     )}
                   >
                     {item.badge}

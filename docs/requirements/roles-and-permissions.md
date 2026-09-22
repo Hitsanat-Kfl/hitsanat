@@ -144,18 +144,20 @@ The `SUPER_ADMIN` role bypasses all permission checks. This is a design decision
 | Audit Logs | `/audit-logs` | Chronological audit trail of administrative actions |
 | Permission Matrix | `/permissions` | Static reference view of role-based access control |
 
-### 4.5 Planned Enhancements (v2.2 — Proposed, Not Yet Implemented)
+### 4.5 Planned Enhancements (v2.2 — ✅ Implemented)
 
-Agreed in the September 2026 Super Admin review session. Full descriptions: system documentation § 7.10.6; requirement text: functional-requirements.md FR-13.6 – FR-13.13.
+Agreed in the September 2026 Super Admin review session; all items are now implemented and tested. Full descriptions: system documentation § 7.10.6; requirement text: functional-requirements.md FR-13.6 – FR-13.13.
 
-- **Account reactivation** — restore deactivated accounts (`USER_REACTIVATED`)
-- **Edit user / role reassignment** — expose the existing `PATCH /users/:id` in the UI to reassign leadership roles per BR-008
-- **Searchable member picker** — replace raw member UUID entry for BR-007 member links
-- **Leadership handover workflow** — guided annual role-transfer sequence
-- **Audit log filters & CSV export** — action, date, and actor filtering with export
-- **Account self-protection** — no self-deactivation, no last-admin lockout
-- **Break-glass logging** — audit all actions performed under the § 4.3 permission bypass
-- **Session revocation** — force sign-out of live sessions (`SESSIONS_REVOKED`)
+- ✅ **Account reactivation** — restore deactivated accounts (`POST /users/:id/reactivate`, `USER_REACTIVATED`)
+- ✅ **Edit user / role reassignment** — edit dialog on `PATCH /users/:id` reassigning leadership roles per BR-008, with BR-007/BR-009 revalidation
+- ✅ **Searchable member picker** — replaces raw member UUID entry for BR-007 member links
+- ✅ **Leadership handover workflow** — guided annual role-transfer sequence (successor-first)
+- ✅ **Audit log filters & CSV export** — action, date, and actor filtering with export
+- ✅ **Account self-protection** — no self-deactivation, no last-admin lockout
+- ✅ **Break-glass logging** — `BYPASS_ACTION` audit entries for all actions performed under the § 4.3 permission bypass
+- ✅ **Session revocation** — force sign-out of live sessions (`POST /users/:id/revoke-sessions`, `SESSIONS_REVOKED`)
+
+**Remaining:** seed/migration status on the Super Admin dashboard (system_metadata table exists but unused); OD-05 permission-overrides decision still open.
 
 ### 4.6 Sub-Chairperson Deputy Authority (ADR-0018)
 

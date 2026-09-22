@@ -110,9 +110,12 @@ Aggregated read-only view over the three approval domains (plan changes §2.22, 
 | Action | Description |
 | :--- | :--- |
 | `USER_CREATED` | New user account provisioned |
-| `USER_UPDATED` | User details modified |
+| `USER_UPDATED` | User details modified (field-level diff) |
 | `USER_DEACTIVATED` | User account deactivated |
+| `USER_REACTIVATED` | Deactivated account restored (FR-13.6) |
 | `PASSWORD_RESET` | User password reset |
+| `SESSIONS_REVOKED` | Live sessions force-signed-out (FR-13.13) |
+| `BYPASS_ACTION` | Write performed under the SUPER_ADMIN permission bypass (FR-13.12) |
 
 ### 2.9 Leadership Meetings (`/api/v1/meetings`)
 > **Authorization:** Restricted to `CHAIRPERSON`, `SUB_CHAIRPERSON`, and `SECRETARY` for create/update/delete; all leadership roles for read access.

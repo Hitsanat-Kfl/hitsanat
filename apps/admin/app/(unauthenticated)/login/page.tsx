@@ -54,9 +54,11 @@ function LoginForm() {
       {/* Left panel — ministry identity */}
       <div className="login-cross-pattern hidden lg:flex lg:w-1/2 lg:items-center lg:justify-center">
         <div className="relative z-10 max-w-md px-8 text-center">
-          <div className="mx-auto mb-6 flex h-16 w-16 items-center justify-center rounded-2xl bg-white/20 text-2xl font-bold text-white">
-            H
-          </div>
+          <img
+            src="/logo.jpg"
+            alt="Hitsanat Kifl Logo"
+            className="mx-auto mb-6 h-16 w-16 rounded-xl object-cover ring-2 ring-white/40"
+          />
           <h1 className="text-3xl font-bold tracking-tight text-white">Hitsanat Kifl</h1>
           <p className="mt-2 text-lg text-white/80">የህጻናት ክፍል</p>
           <p className="mt-4 text-sm text-white/60">Children&apos;s Ministry Management System</p>
@@ -72,9 +74,11 @@ function LoginForm() {
         <div className="w-full max-w-md space-y-8">
           {/* Mobile-only logo (hidden on lg+ where left panel shows) */}
           <div className="text-center lg:hidden">
-            <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-xl bg-primary text-primary-foreground text-xl font-bold">
-              H
-            </div>
+            <img
+              src="/logo.jpg"
+              alt="Hitsanat Kifl Logo"
+              className="mx-auto h-14 w-14 rounded-xl object-cover"
+            />
             <h1 className="mt-4 text-2xl font-bold tracking-tight text-foreground">
               Hitsanat Kifl
             </h1>

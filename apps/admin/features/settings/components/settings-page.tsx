@@ -23,8 +23,8 @@ import { api } from "@/lib/api-client";
 import { createClient } from "@/lib/supabase/client";
 
 const T = {
-  burgundy: "#32131F",
-  gold: "#E5AE60",
+  burgundy: "#5F0113",
+  gold: "#F3C913",
   muted: "#7A8599",
   border: "#E7EBEF",
   surface: "#FFFFFF",
@@ -122,7 +122,7 @@ function Toggle({
       className={cn(
         "relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200",
         "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2",
-        checked ? "bg-[#32131F]" : "bg-gray-300"
+        checked ? "bg-[#5F0113]" : "bg-gray-300"
       )}
     >
       <span
@@ -414,7 +414,7 @@ export default function SettingsPage() {
                   className={cn(
                     "h-8 rounded-md px-3 text-[12px] font-medium border transition-colors",
                     locale === "en"
-                      ? "border-[#32131F] bg-[#32131F] text-white"
+                      ? "border-[#5F0113] bg-[#5F0113] text-white"
                       : "border-gray-200 bg-white text-gray-600 hover:bg-gray-50"
                   )}
                 >
@@ -426,7 +426,7 @@ export default function SettingsPage() {
                   className={cn(
                     "h-8 rounded-md px-3 text-[12px] font-medium border transition-colors",
                     locale === "am"
-                      ? "border-[#32131F] bg-[#32131F] text-white"
+                      ? "border-[#5F0113] bg-[#5F0113] text-white"
                       : "border-gray-200 bg-white text-gray-600 hover:bg-gray-50"
                   )}
                 >
