@@ -4,9 +4,11 @@ import helmet from "helmet";
 import swaggerUi from "swagger-ui-express";
 import { env } from "./config/index.js";
 import { openApiSpec, swaggerJsonHandler } from "./infrastructure/swagger.js";
+import { approvalsRouter } from "./modules/approvals/presentation/approvals.router.js";
 import { auditRouter } from "./modules/audit/presentation/audit.router.js";
 import { dashboardRouter } from "./modules/dashboard/presentation/dashboard.controller.js";
 import { meetingsRouter } from "./modules/meetings/presentation/meetings.router.js";
+import { notificationsRouter } from "./modules/notifications/presentation/notifications.router.js";
 import { announcementsRouter } from "./modules/announcements/presentation/announcements.router.js";
 import { academicRouter } from "./modules/academic/presentation/academic.router.js";
 import { attendanceRouter } from "./modules/attendance/presentation/attendance.router.js";
@@ -99,6 +101,12 @@ export function createApp(): Express {
 
   // Leadership meetings (FR-13.1.1 / BR-019)
   app.use(`${env.API_PREFIX}/meetings`, meetingsRouter);
+
+  // In-app notification feed (FR-17.1 / FR-13.1.2 / §2.24)
+  app.use(`${env.API_PREFIX}/notifications`, notificationsRouter);
+
+  // Unified Approvals Inbox (§2.5a, ADR-0018)
+  app.use(`${env.API_PREFIX}/approvals`, approvalsRouter);
 
   // Executive dashboards (RPT-004: Chairperson overview)
   app.use(`${env.API_PREFIX}/dashboards`, dashboardRouter);

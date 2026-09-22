@@ -1,6 +1,6 @@
 import { and, count, desc, eq, gte, inArray } from "@repo/database";
 import { getDb } from "@repo/database";
-import { meetings, meetingInvitees, subDepartmentMembers, users } from "@repo/database/schema";
+import { meetingInvitees, meetings, subDepartmentMembers, users } from "@repo/database/schema";
 import type { CreateMeetingInvitee, Meeting, MeetingInvitee } from "@repo/domain";
 import { type InviteeResponseStatus, MeetingStatus } from "@repo/domain";
 import type { MeetingsRepository } from "../../domain/repositories/meetings.repository.js";

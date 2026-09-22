@@ -1211,7 +1211,7 @@ Implement annual plan CRUD with goal and activity management.
 - [ ] Annual plan creation with goals and activities
 - [ ] Activity weight auto-calculated via engine
 - [ ] Plan status lifecycle (Draft → Distributed → Active → Completed → Archived)
-- [ ] RBAC: Ekd creates, Chairperson approves
+- [ ] RBAC: Ekd creates, Chairperson approves (Sub-Chairperson via ADR-0018 deputy authority)
 - [ ] RBAC: Chairperson, Sub-Chairperson, and Secretary can create meetings
 
 ### 8. Git Branch

@@ -1,5 +1,7 @@
+import { requireAuth, requireScopePermission } from "@repo/auth";
 import { Router } from "express";
 import {
+  approveReport,
   generateReport,
   getReport,
   listReports,
@@ -10,30 +12,64 @@ import {
 
 export const reportsRouter: Router = Router();
 
+// All report endpoints require a valid session.
+reportsRouter.use(requireAuth());
+
 // Report Generation & Retrieval (CORE-039)
-reportsRouter.post("/generate", generateReport);
-reportsRouter.get("/", listReports);
-reportsRouter.get("/:id", getReport);
+// Read: all leadership roles. Generate: Ekd consolidates; executives may too.
+reportsRouter.post(
+  "/generate",
+  requireScopePermission({
+    allowedGlobalRoles: ["CHAIRPERSON", "SUB_CHAIRPERSON", "SECRETARY", "EKD_LEADER"],
+  }),
+  generateReport
+);
+reportsRouter.get(
+  "/",
+  requireScopePermission({
+    allowedGlobalRoles: ["CHAIRPERSON", "SUB_CHAIRPERSON", "SECRETARY", "EKD_LEADER"],
+  }),
+  listReports
+);
+reportsRouter.get(
+  "/:id",
+  requireScopePermission({
+    allowedGlobalRoles: ["CHAIRPERSON", "SUB_CHAIRPERSON", "SECRETARY", "EKD_LEADER"],
+  }),
+  getReport
+);
+
+// Executive sign-off (ApprovePeriodicReportUseCase, endpoints.md §2.5).
+// CHAIRPERSON or SUB_CHAIRPERSON only (ADR-0018 standing deputy authority).
+reportsRouter.patch(
+  "/:id/approve",
+  requireScopePermission({
+    allowedGlobalRoles: ["CHAIRPERSON", "SUB_CHAIRPERSON"],
+  }),
+  approveReport
+);
 
 // Sub-Department Submissions (BES-019)
-reportsRouter.post("/submissions", submitReport);
-reportsRouter.get("/submissions/list", listSubmissions);
-reportsRouter.put("/submissions/:submissionId/review", reviewSubmission);
-
-// TODO RPT-004 (Frontend 2): Executive Dashboard - Chairperson Overview
-// Build Chairperson executive dashboard in apps/admin
-// Overall progress summary, sub-department status cards
-// Planning completion percentage, attendance summary
-// Key KPI widgets, cross-departmental visibility
-
-// TODO RPT-005 (Frontend 2): Sub-Department Dashboard
-// Build sub-department scoped dashboards in apps/admin
-// Scoped to user's sub-department (RBAC)
-// Department-specific KPIs, progress tracking
-// Attendance summary, academic scores for Timihrt leaders
-
-// TODO RPT-006 (Frontend 2): Report Generation UI
-// Build report generation and viewing interface in apps/admin
-// Report period selector (Weekly/Monthly/Quarterly/Annual)
-// Report generation trigger, report display with tables and charts
-// Export capability (PDF or print), RBAC enforced
+reportsRouter.post(
+  "/submissions",
+  requireScopePermission({
+    allowedGlobalRoles: ["CHAIRPERSON", "SUB_CHAIRPERSON", "SECRETARY", "EKD_LEADER"],
+  }),
+  submitReport
+);
+reportsRouter.get(
+  "/submissions/list",
+  requireScopePermission({
+    allowedGlobalRoles: ["CHAIRPERSON", "SUB_CHAIRPERSON", "SECRETARY", "EKD_LEADER"],
+  }),
+  listSubmissions
+);
+// Review of submissions: executive sign-off roles (ADR-0018) — never the
+// submitting leader. Identity comes from the session, not the body.
+reportsRouter.put(
+  "/submissions/:submissionId/review",
+  requireScopePermission({
+    allowedGlobalRoles: ["CHAIRPERSON", "SUB_CHAIRPERSON"],
+  }),
+  reviewSubmission
+);

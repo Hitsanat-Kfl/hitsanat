@@ -3,4 +3,4 @@ export * from "./schema/index.js";
 
 // Re-export drizzle-orm comparison and filter operators so that consumers
 // share the same type resolution context as the schema definitions.
-export { eq, and, or, ilike, desc, asc, count, sql, inArray, gte, lte } from "drizzle-orm";
+export { eq, and, or, ilike, desc, asc, count, sql, inArray, gte, lte, isNull } from "drizzle-orm";

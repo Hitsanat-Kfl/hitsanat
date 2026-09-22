@@ -64,6 +64,13 @@
       "when": 1789218400000,
       "tag": "0008_meetings_plan_approvals",
       "breakpoints": true
+    },
+    {
+      "idx": 9,
+      "version": "7",
+      "when": 1789304800000,
+      "tag": "0009_notifications",
+      "breakpoints": true
     }
   ]
 }

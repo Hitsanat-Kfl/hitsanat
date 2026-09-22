@@ -5,12 +5,12 @@ import {
   SubmitPlanApprovalUseCase,
 } from "../application/use-cases/plan-approval.use-cases.js";
 
-function requireSession(req: Request): { id: string } {
+function requireSession(req: Request): { id: string; name: string } {
   const user = req.sessionUser;
   if (!user) {
     throw Object.assign(new Error("Authentication required"), { statusCode: 401 });
   }
-  return user;
+  return { id: user.id, name: user.name };
 }
 
 export async function submitPlanApproval(req: Request, res: Response) {
@@ -21,6 +21,7 @@ export async function submitPlanApproval(req: Request, res: Response) {
       annualPlanId: req.params.id as string,
       requestedBy: session.id,
       changeSummary: req.body.changeSummary,
+      requestedByName: session.name,
     });
     res.status(201).json({ success: true, data: approval });
   } catch (error) {

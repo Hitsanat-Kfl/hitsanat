@@ -117,6 +117,40 @@ stateDiagram-v2
 
 ---
 
+## 5a. Plan Change Approval Workflow (Ekd → Chairperson)
+
+Complements the Master Plan flow in §4 (step 4) and implements FR-17.1 / BR-025. Review authority is held by the Chairperson or the Sub-Chairperson via standing deputy authority (ADR-0018).
+
+```mermaid
+sequenceDiagram
+    autonumber
+    actor Ekd as Ekd Leader
+    actor Exec as Chairperson / Sub-Chairperson
+    participant System as Management System
+    participant Ntf as Notifications
+
+    Ekd->>System: Submit plan change request (budget / people / time / activity)
+    System-->>System: Create approval record (status: Pending)
+    System->>Ntf: PLAN_APPROVAL_REQUESTED → Chairperson + Sub-Chairperson
+    Exec->>System: Open Approvals Inbox (GET /api/v1/approvals?status=pending)
+    Exec->>System: Review request details & diff
+    alt Approve
+        Exec->>System: PATCH /ekd/approvals/:id/review (status: approved, comments)
+        System-->>System: Apply change to Master Plan (recompute weights if needed)
+        System->>Ntf: PLAN_APPROVAL_DECIDED → Ekd Leader
+    else Reject
+        Exec->>System: PATCH /ekd/approvals/:id/review (status: rejected, comments)
+        System->>Ntf: PLAN_APPROVAL_DECIDED → Ekd Leader
+        Ekd->>System: Revise (PATCH /ekd/approvals/:id/revise) → resubmit as new Pending request
+    else Revision needed
+        Exec->>System: PATCH /ekd/approvals/:id/review (status: revision_needed, comments)
+        System->>Ntf: PLAN_APPROVAL_DECIDED → Ekd Leader
+        Ekd->>System: Address comments → resubmit (status: Pending)
+    end
+```
+
+---
+
 ## 6. Special Event & Training Workflow (e.g. Timket, Hosaena)
 
 ```mermaid

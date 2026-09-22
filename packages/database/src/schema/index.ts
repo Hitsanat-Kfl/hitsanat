@@ -36,3 +36,6 @@ export * from "./auth.js";
 
 // Leadership Meetings & Plan Approvals
 export * from "./meetings.js";
+
+// In-App Notifications (FR-17.1 / FR-13.1.2)
+export * from "./notifications.js";

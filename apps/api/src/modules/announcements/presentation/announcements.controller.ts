@@ -6,12 +6,21 @@ import { DrizzleAnnouncementsRepository } from "../infrastructure/repositories/a
 
 const announcementsRepository = new DrizzleAnnouncementsRepository();
 
+function requireSession(req: Request): { id: string; name: string } {
+  const user = req.sessionUser;
+  if (!user) {
+    throw Object.assign(new Error("Authentication required"), { statusCode: 401 });
+  }
+  return { id: user.id, name: user.name };
+}
+
 export async function createAnnouncement(req: Request, res: Response) {
   try {
+    const session = requireSession(req);
     const useCase = new CreateAnnouncementUseCase(announcementsRepository);
     const announcement = await useCase.execute({
       ...req.body,
-      createdBy: req.body.userId || "system",
+      createdBy: session.id,
     });
     res.status(201).json({ success: true, data: announcement });
   } catch (error) {
@@ -42,6 +51,7 @@ export async function listAnnouncements(req: Request, res: Response) {
 
 export async function publishAnnouncement(req: Request, res: Response) {
   try {
+    requireSession(req);
     const useCase = new PublishAnnouncementUseCase(announcementsRepository);
     const announcement = await useCase.execute(req.params.id as string);
     res.status(200).json({ success: true, data: announcement });
