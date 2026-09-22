@@ -6,6 +6,7 @@ export {
   ASSIGNABLE_ROLES,
   LEADERSHIP_ROLE_SET,
   userActionErrorMessage,
+  useUser,
   useUsers,
 } from "./hooks/use-users";
 export type { CreateUserPayload, ManagedUser, UserFilters } from "./hooks/use-users";

@@ -76,7 +76,7 @@ describe("Chairperson Dashboard", () => {
     );
 
     await waitFor(() => {
-      expect(screen.getByText("Home")).toBeDefined();
+      expect(screen.getByText("Executive Overview")).toBeDefined();
     });
   });
 

@@ -25,3 +25,13 @@ export {
   type NavItem,
   type NavSection,
 } from "./nav-config";
+export {
+  adminNavigationConfig,
+  getAdminNavigationForRoles,
+  getAdminPrimaryNavItems,
+  findAdminActiveNavItem,
+  mapSessionRolesToAdminNavRoles,
+  type AdminNavRole,
+  type AdminNavItem,
+  type AdminNavSection,
+} from "./admin-nav-config";

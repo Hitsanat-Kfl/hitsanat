@@ -16,6 +16,7 @@ import {
 import { useState } from "react";
 import { type CreateUserPayload, LEADERSHIP_ROLE_SET } from "../hooks/use-users";
 import { MemberPicker, type PickedMember } from "./member-picker";
+import { SubDepartmentPicker } from "./sub-department-picker";
 
 interface CreateUserDialogProps {
   open: boolean;
@@ -41,6 +42,7 @@ export function CreateUserDialog({ open, onOpenChange, onCreate }: CreateUserDia
   const [password, setPassword] = useState("");
   const [role, setRole] = useState("");
   const [member, setMember] = useState<PickedMember | null>(null);
+  const [subDepartmentIds, setSubDepartmentIds] = useState<string[]>([]);
   const [submitting, setSubmitting] = useState(false);
   const [formError, setFormError] = useState<string | null>(null);
 
@@ -52,6 +54,7 @@ export function CreateUserDialog({ open, onOpenChange, onCreate }: CreateUserDia
     setPassword("");
     setRole("");
     setMember(null);
+    setSubDepartmentIds([]);
     setFormError(null);
   };
 
@@ -76,6 +79,7 @@ export function CreateUserDialog({ open, onOpenChange, onCreate }: CreateUserDia
         password,
         role,
         ...(member ? { memberId: member.id } : {}),
+        ...(subDepartmentIds.length > 0 ? { subDepartmentIds } : {}),
       });
       resetForm();
       onOpenChange(false);
@@ -160,6 +164,19 @@ export function CreateUserDialog({ open, onOpenChange, onCreate }: CreateUserDia
           >
             <MemberPicker value={member} onChange={setMember} />
           </FormField>
+
+          {member && (
+            <FormField
+              label="Sub-departments"
+              helperText="Optional — assign this account to one or more sub-departments."
+            >
+              <SubDepartmentPicker
+                value={subDepartmentIds}
+                onChange={setSubDepartmentIds}
+                disabled={submitting}
+              />
+            </FormField>
+          )}
 
           {formError && !formError.startsWith("Leadership") && (
             <p role="alert" className="text-sm text-destructive">

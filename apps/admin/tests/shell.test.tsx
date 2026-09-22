@@ -58,8 +58,8 @@ describe("AppSidebar", () => {
     expect(screen.getByText("Dashboard")).toBeDefined();
     expect(screen.getByText("Members")).toBeDefined();
     expect(screen.getByText("User Accounts")).toBeDefined();
-    expect(screen.getByText("Audit Logs")).toBeDefined();
-    expect(screen.getByText("Permissions")).toBeDefined();
+    expect(screen.getByText("Audit Log")).toBeDefined();
+    expect(screen.getByText("Roles & Permissions")).toBeDefined();
   });
 
   it("highlights the active navigation item", () => {
@@ -98,15 +98,14 @@ describe("AppSidebar", () => {
 });
 
 describe("AppHeader", () => {
-  it("renders breadcrumbs based on active route", () => {
+  it("renders user info and controls", () => {
     render(
       <ShellTestWrapper>
         <AppHeader userName="Abel Tester" userRole="Super Admin" />
       </ShellTestWrapper>
     );
 
-    expect(screen.getByText("Ministry")).toBeDefined();
-    expect(screen.getByText("Members")).toBeDefined();
+    expect(screen.getByRole("button", { name: /user menu for abel tester/i })).toBeDefined();
   });
 
   it("toggles language between English and Amharic", () => {

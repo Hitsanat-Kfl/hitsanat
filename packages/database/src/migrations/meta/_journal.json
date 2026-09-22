@@ -50,6 +50,20 @@
       "when": 1789045600000,
       "tag": "0006_account_status_audit_indexes",
       "breakpoints": true
+    },
+    {
+      "idx": 7,
+      "version": "7",
+      "when": 1789132000000,
+      "tag": "0007_reports_tables",
+      "breakpoints": true
+    },
+    {
+      "idx": 8,
+      "version": "7",
+      "when": 1789218400000,
+      "tag": "0008_meetings_plan_approvals",
+      "breakpoints": true
     }
   ]
 }

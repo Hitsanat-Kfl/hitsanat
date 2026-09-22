@@ -8,12 +8,12 @@ import { usePathname } from "next/navigation";
 import * as React from "react";
 import { useI18n } from "./i18n";
 import {
-  type NavItem,
-  type NavSection,
-  type UserRole,
-  findActiveNavItem,
-  getNavigationForRoles,
-} from "./nav-config";
+  type AdminNavItem,
+  type AdminNavSection,
+  type AdminNavRole,
+  findAdminActiveNavItem,
+  getAdminNavigationForRoles,
+} from "./admin-nav-config";
 import { useShell } from "./shell-context";
 
 function BrandLogo({
@@ -47,7 +47,7 @@ function BrandLogo({
 }
 
 interface AppSidebarProps {
-  roles?: UserRole[];
+  roles?: AdminNavRole[];
   className?: string;
 }
 
@@ -55,14 +55,14 @@ export function AppSidebar({ roles = ["chairperson"], className }: AppSidebarPro
   const { sidebarCollapsed, setSidebarCollapsed } = useShell();
   const pathname = usePathname();
   const { t } = useI18n();
-  const sections = getNavigationForRoles(roles);
-  const activeItem = findActiveNavItem(pathname);
+  const sections = getAdminNavigationForRoles(roles);
+  const activeItem = findAdminActiveNavItem(pathname);
 
   return (
     <aside
       className={cn(
         "hidden md:flex flex-col border-r admin-sidebar transition-all duration-200 select-none",
-        sidebarCollapsed ? "w-16" : "w-60",
+        sidebarCollapsed ? "w-[68px]" : "w-60",
         className
       )}
       aria-label="Sidebar navigation"
@@ -152,8 +152,8 @@ function SidebarSection({
   t,
   showSeparator,
 }: {
-  section: NavSection;
-  activeItem?: NavItem;
+  section: AdminNavSection;
+  activeItem?: AdminNavItem;
   collapsed: boolean;
   pathname: string;
   t: (key: string) => string;
@@ -198,7 +198,7 @@ function NavItemElement({
   collapsed,
   t,
 }: {
-  item: NavItem;
+  item: AdminNavItem;
   isActive: boolean;
   isCurrentPath: boolean;
   collapsed: boolean;

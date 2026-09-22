@@ -7,7 +7,7 @@ import { usePathname } from "next/navigation";
 import * as React from "react";
 import { SearchTrigger } from "./global-search";
 import { useI18n } from "./i18n";
-import { findActiveNavItem } from "./nav-config";
+import { findAdminActiveNavItem } from "./admin-nav-config";
 import { NotificationCenter } from "./notification-center";
 import { useShell } from "./shell-context";
 import { UserMenu } from "./user-menu";
@@ -34,7 +34,7 @@ export function AppHeader({
   const { setMobileMenuOpen } = useShell();
   const { locale, setLocale, t } = useI18n();
   const pathname = usePathname();
-  const activeNav = findActiveNavItem(pathname);
+  const activeNav = findAdminActiveNavItem(pathname);
 
   // Auto-generate breadcrumbs if not explicitly provided
   const headerBreadcrumbs: BreadcrumbItem[] = React.useMemo(() => {
@@ -44,7 +44,7 @@ export function AppHeader({
     }
     const sectionLabel = activeNav.section ? t(`nav.${activeNav.section}`) : undefined;
     const items: BreadcrumbItem[] = [{ label: t("nav.dashboard"), href: "/" }];
-    if (sectionLabel && sectionLabel !== t("nav.main")) {
+    if (sectionLabel && sectionLabel !== t("nav.overview")) {
       items.push({ label: sectionLabel });
     }
     items.push({ label: t(`nav.${activeNav.id}`) });
@@ -54,12 +54,12 @@ export function AppHeader({
   return (
     <header
       className={cn(
-        "sticky top-0 z-30 flex h-16 items-center justify-between gap-4 border-b admin-header px-4 sm:px-6 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60",
+        "sticky top-0 z-30 flex h-16 items-center justify-between gap-4 border-b admin-header px-4 sm:px-6 bg-background/95",
         className
       )}
       aria-label="Application header"
     >
-      {/* Left Area: Mobile Menu Trigger & Context / Breadcrumbs */}
+      {/* Left Area: Mobile Menu Trigger & Context */}
       <div className="flex items-center gap-3 min-w-0">
         <Button
           variant="ghost"
@@ -70,10 +70,6 @@ export function AppHeader({
         >
           <Menu className="h-5 w-5" aria-hidden="true" />
         </Button>
-
-        <div className="hidden sm:block truncate">
-          <Breadcrumb items={headerBreadcrumbs} className="text-xs" />
-        </div>
       </div>
 
       {/* Right Area: Search, Language, Notifications, User Menu */}
@@ -89,7 +85,7 @@ export function AppHeader({
           aria-label={`Switch to ${locale === "en" ? "Amharic" : "English"}`}
         >
           <Globe className="h-4 w-4" aria-hidden="true" />
-          <span className="font-semibold">{locale === "en" ? "EN" : "አማ"}</span>
+          <span className="font-semibold">{locale === "en" ? "English" : "አማርኛ"}</span>
         </Button>
 
         <NotificationCenter />

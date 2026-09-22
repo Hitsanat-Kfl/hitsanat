@@ -58,6 +58,6 @@ export interface ReportsRepository {
   }>;
   reviewSubmission(
     id: string,
-    data: { reviewedBy: string; status: string }
+    data: { reviewedBy: string; status: string; reviewComments?: string }
   ): Promise<ReportSubmission>;
 }

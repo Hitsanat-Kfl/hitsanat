@@ -8,7 +8,7 @@ import { AppSidebar } from "./app-sidebar";
 import { GlobalSearch } from "./global-search";
 import { I18nProvider, useI18n } from "./i18n";
 import { MobileNav } from "./mobile-nav";
-import type { UserRole } from "./nav-config";
+import type { AdminNavRole } from "./admin-nav-config";
 import { ShellProvider } from "./shell-context";
 
 /**
@@ -30,7 +30,7 @@ export function MainContent({ children, className, ...props }: MainContentProps)
     <main
       className={cn(
         "flex-1 overflow-y-auto overflow-x-hidden focus:outline-none",
-        "p-4 sm:p-6 lg:p-8",
+        "px-2 py-3 sm:px-3 sm:py-4 lg:px-4 lg:py-4",
         className
       )}
       tabIndex={-1}
@@ -43,7 +43,7 @@ export function MainContent({ children, className, ...props }: MainContentProps)
 
 export interface AppShellProps {
   children: React.ReactNode;
-  roles?: UserRole[];
+  roles?: AdminNavRole[];
   userName?: string;
   userEmail?: string;
   userRole?: string;

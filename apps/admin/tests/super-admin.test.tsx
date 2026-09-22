@@ -160,7 +160,7 @@ describe("Super Admin Dashboard", () => {
     renderDashboard();
 
     await waitFor(() => {
-      expect(screen.getByText("Total Accounts")).toBeDefined();
+      expect(screen.getByText("Account Status")).toBeDefined();
       // "Active" appears in the donut legend and elsewhere (status dots),
       // so scope the assertion to the donut's figure.
       const donut = screen.getByRole("img", { name: /Account status: 1 active, 1 deactivated/ });

@@ -17,26 +17,26 @@ import * as React from "react";
 import { BrandLogo } from "./app-sidebar";
 import { useI18n } from "./i18n";
 import {
-  type NavItem,
-  type NavSection,
-  type UserRole,
-  findActiveNavItem,
-  getNavigationForRoles,
-  getPrimaryNavItems,
-} from "./nav-config";
+  type AdminNavItem,
+  type AdminNavSection,
+  type AdminNavRole,
+  findAdminActiveNavItem,
+  getAdminNavigationForRoles,
+  getAdminPrimaryNavItems,
+} from "./admin-nav-config";
 import { useShell } from "./shell-context";
 
 interface MobileNavProps {
-  roles?: UserRole[];
+  roles?: AdminNavRole[];
 }
 
 export function MobileNav({ roles = ["chairperson"] }: MobileNavProps) {
   const { mobileMenuOpen, setMobileMenuOpen } = useShell();
   const pathname = usePathname();
   const { t } = useI18n();
-  const primaryItems = getPrimaryNavItems(roles);
-  const allSections = getNavigationForRoles(roles);
-  const activeItem = findActiveNavItem(pathname);
+  const primaryItems = getAdminPrimaryNavItems(roles);
+  const allSections = getAdminNavigationForRoles(roles);
+  const activeItem = findAdminActiveNavItem(pathname);
 
   return (
     <>
@@ -162,8 +162,8 @@ function MobileNavSection({
   t,
   onNavigate,
 }: {
-  section: NavSection;
-  activeItem?: NavItem;
+  section: AdminNavSection;
+  activeItem?: AdminNavItem;
   pathname: string;
   t: (key: string) => string;
   onNavigate: () => void;

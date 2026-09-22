@@ -5,6 +5,8 @@ interface ReviewSubmissionInput {
   id: string;
   reviewedBy: string;
   status: string;
+  /** Chairperson review comments (required when returning a submission). */
+  reviewComments?: string;
 }
 
 export class ReviewSubmissionUseCase {
@@ -26,6 +28,7 @@ export class ReviewSubmissionUseCase {
     return this.repo.reviewSubmission(input.id, {
       reviewedBy: input.reviewedBy,
       status: input.status,
+      reviewComments: input.reviewComments,
     });
   }
 }
