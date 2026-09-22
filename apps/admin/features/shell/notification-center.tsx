@@ -57,9 +57,9 @@ const mockNotifications: Notification[] = [
 ];
 
 const typeIcons: Record<Notification["type"], React.ReactNode> = {
-  info: <Info className="h-4 w-4 text-blue-500" />,
-  success: <Check className="h-4 w-4 text-emerald-500" />,
-  warning: <AlertTriangle className="h-4 w-4 text-amber-500" />,
+  info: <Info className="h-4 w-4 text-info" />,
+  success: <Check className="h-4 w-4 text-success" />,
+  warning: <AlertTriangle className="h-4 w-4 text-warning" />,
   error: <XCircle className="h-4 w-4 text-destructive" />,
 };
 

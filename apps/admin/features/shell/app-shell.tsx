@@ -30,13 +30,16 @@ export function MainContent({ children, className, ...props }: MainContentProps)
     <main
       className={cn(
         "flex-1 overflow-y-auto overflow-x-hidden focus:outline-none",
-        "px-2 py-3 sm:px-3 sm:py-4 lg:px-4 lg:py-4",
+        // Shell spec §9/§21: 16px mobile page padding, 24–32px desktop,
+        // workspace capped at ~1440px so content never over-stretches.
+        // pb-20 clears the fixed mobile bottom nav (h-16).
+        "px-4 py-4 md:px-6 md:py-5 xl:px-8 xl:py-6 pb-20 md:pb-5",
         className
       )}
       tabIndex={-1}
       {...props}
     >
-      {children}
+      <div className="mx-auto w-full max-w-[1440px]">{children}</div>
     </main>
   );
 }
@@ -67,6 +70,10 @@ export function AppShell({
       <ShellProvider>
         <DashboardLocaleBridge>
           <div className={cn("flex h-screen w-full overflow-hidden bg-background", className)}>
+            {/* Mobile Bottom Navigation & Drawer (fixed overlays — keep out of
+                the flex row so they never become phantom flex children) */}
+            <MobileNav roles={roles} onLogout={onLogout} />
+
             {/* Desktop Sidebar */}
             <AppSidebar roles={roles} />
 
@@ -82,9 +89,6 @@ export function AppShell({
 
               <MainContent>{children}</MainContent>
             </div>
-
-            {/* Mobile Bottom Navigation & Drawer */}
-            <MobileNav roles={roles} />
 
             {/* Global Search / Overlays */}
             <GlobalSearch />

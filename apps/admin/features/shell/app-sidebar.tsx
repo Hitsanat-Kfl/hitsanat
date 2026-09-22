@@ -28,7 +28,7 @@ function BrandLogo({
   return (
     <div
       className={cn(
-        "flex shrink-0 items-center justify-center rounded-md bg-[#E5AE60] text-[#32131F] font-bold shadow-sm overflow-hidden",
+        "flex shrink-0 items-center justify-center rounded-md overflow-hidden",
         className
       )}
     >
@@ -44,6 +44,17 @@ function BrandLogo({
       )}
     </div>
   );
+}
+
+/** White-ringed logo variant for the burgundy sidebar/login surfaces. */
+function BrandLogoOnBrand({
+  className,
+  iconSize = "h-5 w-5",
+}: {
+  className?: string;
+  iconSize?: string;
+}) {
+  return <BrandLogo className={cn("ring-2 ring-white/40", className)} iconSize={iconSize} />;
 }
 
 interface AppSidebarProps {
@@ -75,13 +86,16 @@ export function AppSidebar({ roles = ["chairperson"], className }: AppSidebarPro
             className="flex items-center gap-2.5 min-w-0"
             aria-label="Hitsanat Kifl Home"
           >
-            <BrandLogo className="h-9 w-9 text-sm" />
+            <BrandLogoOnBrand className="h-9 w-9 text-sm" />
             <div className="flex flex-col min-w-0">
-              <span className="text-[15px] font-semibold text-foreground leading-tight truncate">
+              <span className="text-[15px] font-semibold text-white leading-tight truncate">
                 Hitsanat Kifl
               </span>
-              <span className="text-[11px] text-muted-foreground leading-tight truncate">
+              <span className="text-[11px] text-white/70 leading-tight truncate">
                 Children&apos;s Ministry
+              </span>
+              <span className="text-[10px] text-white/50 leading-tight truncate">
+                Management System
               </span>
             </div>
           </Link>
@@ -92,7 +106,7 @@ export function AppSidebar({ roles = ["chairperson"], className }: AppSidebarPro
             className="mx-auto flex items-center justify-center"
             aria-label="Hitsanat Kifl Home"
           >
-            <BrandLogo className="h-9 w-9 text-sm" />
+            <BrandLogoOnBrand className="h-9 w-9 text-sm" />
           </Link>
         )}
       </div>
@@ -118,7 +132,7 @@ export function AppSidebar({ roles = ["chairperson"], className }: AppSidebarPro
       <div className="border-t admin-sidebar-border-b p-2 space-y-1.5">
         {!sidebarCollapsed && (
           <div className="px-2 py-1 text-center">
-            <p className="text-[11px] font-medium text-[#B8892D] dark:text-[#E5AE60] tracking-wide">
+            <p className="text-[11px] font-medium text-white/70 tracking-wide">
               Serving Children · Building Faith
             </p>
           </div>
@@ -126,7 +140,7 @@ export function AppSidebar({ roles = ["chairperson"], className }: AppSidebarPro
         <Button
           variant="ghost"
           size="sm"
-          className="w-full h-9 flex items-center justify-center text-muted-foreground hover:text-foreground"
+          className="w-full h-9 flex items-center justify-center text-white/70 hover:text-white hover:bg-white/10"
           onClick={() => setSidebarCollapsed(!sidebarCollapsed)}
           aria-label={sidebarCollapsed ? t("shell.expand") : t("shell.collapse")}
         >
@@ -163,7 +177,7 @@ function SidebarSection({
     <div className="py-1">
       {showSeparator && <Separator className="my-2 opacity-50" decorative />}
       {!collapsed && (
-        <p className="px-3 py-1.5 text-[11px] font-semibold text-muted-foreground uppercase tracking-wider">
+        <p className="px-3 py-1.5 text-[11px] font-semibold text-white/70 uppercase tracking-wider">
           {t(`nav.${section.id}`)}
         </p>
       )}
@@ -216,16 +230,19 @@ function NavItemElement({
       className={cn(
         "flex items-center gap-3 rounded-md px-3 py-2 text-sm font-medium transition-colors",
         "min-h-[40px] h-10",
-        "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2",
+        "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/60 focus-visible:ring-offset-2",
         isActive
-          ? "bg-[#E5AE60] text-[#32131F] font-semibold shadow-sm hover:bg-[#E5AE60]/90"
-          : "text-muted-foreground hover:bg-accent/70 hover:text-accent-foreground",
+          ? "bg-[hsl(var(--admin-sidebar-active))] text-[hsl(var(--admin-sidebar-active-text))] font-semibold hover:bg-[hsl(var(--admin-sidebar-active))]/90"
+          : "text-white/90 hover:bg-white/10 hover:text-white",
         item.disabled && "opacity-50 cursor-not-allowed pointer-events-none",
         collapsed && "justify-center px-0"
       )}
     >
       <Icon
-        className={cn("h-4 w-4 shrink-0", isActive ? "text-[#32131F]" : "text-muted-foreground")}
+        className={cn(
+          "h-4 w-4 shrink-0",
+          isActive ? "text-[hsl(var(--admin-sidebar-active-text))]" : "text-white"
+        )}
         aria-hidden="true"
       />
       {!collapsed && <span className="truncate">{label}</span>}
@@ -233,7 +250,9 @@ function NavItemElement({
         <span
           className={cn(
             "ml-auto text-xs font-medium px-1.5 py-0.5 rounded-full",
-            isActive ? "bg-[#32131F]/15 text-[#32131F]" : "bg-muted text-muted-foreground"
+            isActive
+              ? "bg-[hsl(var(--admin-sidebar-active-text))]/15 text-[hsl(var(--admin-sidebar-active-text))]"
+              : "bg-white/10 text-white/70"
           )}
         >
           {item.badge}
@@ -254,4 +273,4 @@ function NavItemElement({
 
   return <li>{linkContent}</li>;
 }
-export { BrandLogo };
+export { BrandLogo, BrandLogoOnBrand };

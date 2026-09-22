@@ -46,9 +46,9 @@ function formatDate(value: string | null): string {
 // ============================================================
 
 const T = {
-  burgundy: "#32131F",
+  burgundy: "#5F0113",
   burgundyLight: "#F8EEF2",
-  gold: "#E5AE60",
+  gold: "#F3C913",
   goldLight: "#F9EEDB",
   foreground: "#182235",
   muted: "#718096",
