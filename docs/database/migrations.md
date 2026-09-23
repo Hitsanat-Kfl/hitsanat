@@ -15,7 +15,7 @@ graph LR
     ReviewSQL[Review Generated SQL in packages/database/drizzle/*.sql]
     ApplyLocal[Run pnpm db:migrate against Local Docker DB]
     CommitGit[Commit Migration SQL with Feature Branch]
-    ApplyProd[GitHub Actions / Render applies migration on deployment]
+    ApplyProd[GitHub Actions / Railway applies migration on deployment]
 
     SchemaTS --> GenerateSQL --> ReviewSQL --> ApplyLocal --> CommitGit --> ApplyProd
 ```
@@ -23,13 +23,13 @@ graph LR
 ### 1.1 Key Commands
 ```bash
 # Generate SQL migration file from Drizzle schema diff
-pnpm --filter @hitsanat/database db:generate
+pnpm --filter @repo/database db:generate
 
 # Apply pending migrations to the active database
-pnpm --filter @hitsanat/database db:migrate
+pnpm --filter @repo/database db:migrate
 
 # Open Drizzle Studio for visual database inspection
-pnpm --filter @hitsanat/database db:studio
+pnpm --filter @repo/database db:studio
 ```
 
 ---
@@ -41,7 +41,7 @@ The seed script idempotently initializes:
 1. **The 5 Fixed Sub-Departments:** `TIMIHRT`, `MEZMUR`, `KUTITR`, `EKD`, `KINETIBEB`.
 2. **The 5 Collection Locations:** `Apartama`, `Gende Boy`, `Gende Je`, `Cobalt`, `Bate`.
 3. **The 2 Child Groups:** `Kutr 1`, `Kutr 2`.
-4. **Initial Super Admin Account:** Provisioned securely with Better Auth.
+4. **Initial Super Admin Account:** Provisioned securely with Supabase Auth.
 
 ### 2.2 Action PLN Reference Master Plan Seeding
 The 2016 E.C. Action Plan (`Action PLN.xlsx`) is seeded as the canonical initial master plan template:

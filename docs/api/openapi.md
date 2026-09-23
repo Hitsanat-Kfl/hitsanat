@@ -20,7 +20,7 @@ graph TD
     ZodSchemas -->|Frontend Form Validation| ReactHookForm[React Hook Form / TanStack Query]
     ZodSchemas -->|OpenAPI Registry| OpenAPISpec[OpenAPI 3.1 JSON Document]
     
-    OpenAPISpec --> SwaggerUI[Interactive Swagger UI /api/docs]
+    OpenAPISpec --> SwaggerUI[Interactive Swagger UI /docs]
 ```
 
 ---
@@ -31,7 +31,7 @@ In each module, endpoints register their schemas using the central OpenAPI regis
 
 ```typescript
 import { OpenAPIRegistry } from '@asteasolutions/zod-to-openapi';
-import { CreateMemberStage1Schema, MemberResponseSchema } from '@hitsanat/validation';
+import { CreateMemberStage1Schema, MemberResponseSchema } from '@repo/validation';
 
 export const memberOpenApiRegistry = new OpenAPIRegistry();
 

@@ -33,8 +33,8 @@
 ## M2 — Authentication Ready
 **Phase:** 2 (Authentication & Authorization)
 **Exit Criteria:**
-- [ ] Better Auth configured
-- [ ] Auth tables migrated
+- [ ] Supabase Auth configured
+- [ ] Application user tables migrated
 - [ ] RBAC middleware enforces scoped permissions
 - [ ] Login endpoint works end-to-end
 - [ ] Admin login page functional

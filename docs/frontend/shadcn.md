@@ -23,10 +23,10 @@ Components reside inside `packages/ui/src/components/` and are consumed across `
 
 | Component | Shared Path | Ministry Use Case |
 | :--- | :--- | :--- |
-| **Data Table** | `@hitsanat/ui/data-table` | Member directory, Child roster, Exam scores, Master Plan matrix |
-| **Drawer / Dialog** | `@hitsanat/ui/dialog`, `@hitsanat/ui/drawer` | Mobile attendance verification, stage 1 member fast entry modal |
-| **Date Picker (Ethiopian)** | `@hitsanat/ui/ethiopian-date-picker` | Birthday selector, session scheduler, event calendar |
-| **Badge / Status Pill** | `@hitsanat/ui/badge` | Attendance status (`Expected`, `Present`, `Absent`, `Excused`) |
-| **Progress Bar** | `@hitsanat/ui/progress` | Plan completion percentage, budget expenditure indicators |
-| **Combobox / Multi-Select** | `@hitsanat/ui/combobox` | Sub-department assignment (multi-select), parent linking |
-| **Metric Card (StatCard)** | `@hitsanat/ui/stat-card` | Executive KPI widgets (Active Servants, Enrolled Kids, Weights) |
+| **Data Table** | `@repo/ui/data-table` | Member directory, Child roster, Exam scores, Master Plan matrix |
+| **Drawer / Dialog** | `@repo/ui/dialog`, `@repo/ui/drawer` | Mobile attendance verification, stage 1 member fast entry modal |
+| **Date Picker (Ethiopian)** | `@repo/ui/ethiopian-date-picker` | Birthday selector, session scheduler, event calendar |
+| **Badge / Status Pill** | `@repo/ui/badge` | Attendance status (`Expected`, `Present`, `Absent`, `Excused`) |
+| **Progress Bar** | `@repo/ui/progress` | Plan completion percentage, budget expenditure indicators |
+| **Combobox / Multi-Select** | `@repo/ui/combobox` | Sub-department assignment (multi-select), parent linking |
+| **Metric Card (StatCard)** | `@repo/ui/stat-card` | Executive KPI widgets (Active Servants, Enrolled Kids, Weights) |

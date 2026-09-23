@@ -16,8 +16,8 @@ Ethiopian calendar conversion requires accurate date math, handling 13 months (M
    ```bash
    pnpm add ethiopian-calendar-new
    ```
-2. Encapsulate all library imports and domain extensions within the shared package `@hitsanat/calendar`.
-3. No application or module may import date conversion utilities directly; all calendar conversions must pass through `@hitsanat/calendar`.
+2. Encapsulate all library imports and domain extensions within the shared package `@repo/calendar`.
+3. No application or module may import date conversion utilities directly; all calendar conversions must pass through `@repo/calendar`.
 
 ---
 

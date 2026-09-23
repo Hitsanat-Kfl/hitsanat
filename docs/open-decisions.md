@@ -28,13 +28,13 @@ In accordance with the Source-of-Truth governance rules, all unresolved technica
 
 ### OD-02: Public Swagger API Documentation Production Exposure
 
-- **Problem:** Should `/api/docs` (Swagger UI) remain publicly accessible in the production cloud environment (`api.hitsanat.org`), or should it be restricted?
+- **Problem:** Should `/docs` (Swagger UI) remain publicly accessible in the production cloud environment (`api.hitsanat.org`), or should it be restricted?
 - **Source of Ambiguity:** Section 12 states: *"Swagger must be available in development. Production exposure must be controlled according to the security requirements. Do not expose sensitive internal information through Swagger."*
 - **Affected Modules:** `apps/api/src/shared/docs`, `apps/api/src/server.ts`.
 - **Possible Options:**
-  1. **Option A (Publicly Accessible in Production):** Expose `/api/docs` in production with internal sensitive endpoints filtered out using OpenAPI tags.
-  2. **Option B (Basic Auth Gate in Production):** Protect `/api/docs` with a lightweight HTTP Basic Authentication username/password in production.
-  3. **Option C (Disabled in Production):** Disable `/api/docs` entirely in production; available only in local and staging environments.
+  1. **Option A (Publicly Accessible in Production):** Expose `/docs` in production with internal sensitive endpoints filtered out using OpenAPI tags.
+  2. **Option B (Basic Auth Gate in Production):** Protect `/docs` with a lightweight HTTP Basic Authentication username/password in production.
+  3. **Option C (Disabled in Production):** Disable `/docs` entirely in production; available only in local and staging environments.
 - **Recommended Option:** **Option B** (HTTP Basic Auth in production) allows developers and external integrators to inspect live contracts without exposing the API explorer to anonymous scrapers.
 - **Decision Status:** `PROPOSED (Option B)`
 

@@ -27,7 +27,7 @@ graph TD
         subgraph Private Internal Network
             ApiServer[apps/api - Express.js REST API<br/>api.hitsanat.org]
             TelegramWorker[apps/telegram - Bot Worker]
-            PostgresDB[(PostgreSQL 15 Database<br/>postgres.railway.internal:5432)]
+            PostgresDB[(PostgreSQL 16 Database<br/>postgres.railway.internal:5432)]
         end
     end
 
@@ -46,11 +46,11 @@ graph TD
 
 | Application / Service | Target Platform | Runtime / Build Command | Output Path | Public URL |
 | :--- | :--- | :--- | :--- | :--- |
-| `apps/admin` | **Vercel** | `pnpm --filter @hitsanat/admin build` | `.next` | `https://admin.hitsanat.org` |
-| `apps/portfolio` | **Vercel** | `pnpm --filter @hitsanat/portfolio build` | `.next` | `https://hitsanat.org` |
-| `apps/api` | **Railway** | `pnpm install --frozen-lockfile && pnpm --filter @hitsanat/database db:migrate && pnpm --filter @hitsanat/api build`<br>Start: `node apps/api/dist/server.js` | `apps/api/dist` | `https://api.hitsanat.org` |
-| `apps/telegram` | **Railway** | `pnpm --filter @hitsanat/telegram build`<br>Start: `node apps/telegram/dist/index.js` | `apps/telegram/dist` | Internal Private Worker |
-| Database | **Railway** | Managed PostgreSQL 15 | Private Port 5432 | `postgres.railway.internal` |
+| `apps/admin` | **Vercel** | `pnpm --filter @repo/admin build` | `.next` | `https://admin.hitsanat.org` |
+| `apps/portfolio` | **Vercel** | `pnpm --filter @repo/portfolio build` | `.next` | `https://hitsanat.org` |
+| `apps/api` | **Railway** | `pnpm install --frozen-lockfile && pnpm --filter @repo/database db:migrate && pnpm --filter @repo/api build`<br>Start: `node apps/api/dist/server.js` | `apps/api/dist` | `https://api.hitsanat.org` |
+| `apps/telegram` | **Railway** | `pnpm --filter @repo/telegram build`<br>Start: `node apps/telegram/dist/index.js` | `apps/telegram/dist` | Internal Private Worker |
+| Database | **Railway** | Managed PostgreSQL 16 | Private Port 5432 | `postgres.railway.internal` |
 
 ---
 

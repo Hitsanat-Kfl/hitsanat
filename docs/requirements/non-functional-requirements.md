@@ -2,7 +2,7 @@
 
 ## Hitsanat Kifl Children's Ministry Management System
 **Document Version:** 2.1  
-**Target Infrastructure:** Free-Tier Cloud Ecosystem (Render, Vercel, Supabase)  
+**Target Infrastructure:** Free-Tier Cloud Ecosystem (Railway, Vercel, Supabase)  
 
 ---
 
@@ -43,13 +43,13 @@ mindmap
 
 ### 2.2 Security & Data Privacy
 - **NFR-02.1 (Child Data Protection):** Contact details and home addresses of children and parents must never be exposed via public endpoints. Only authenticated leaders with relevant scope can query child profiles.
-- **NFR-02.2 (Authentication & Session Management):** User authentication is powered by Better Auth using httpOnly, secure, SameSite cookies with cryptographically signed tokens.
+- **NFR-02.2 (Authentication & Session Management):** User authentication is powered by Supabase Auth using httpOnly, secure, SameSite cookies with cryptographically signed tokens.
 - **NFR-02.3 (Authorization Enforcement):** Role-Based Access Control (RBAC) must be validated at the API controller layer prior to executing domain logic. Client-side hiding of UI elements is considered cosmetic and not a security boundary.
 - **NFR-02.4 (Injection & CSRF Defense):** All incoming HTTP payloads must be validated against strict Zod schemas. SQL injection is prevented through parameterized queries via Drizzle ORM. CORS policies restrict mutations to authorized origins.
 
 ### 2.3 Reliability, Availability & Portability
 - **NFR-03.1 (Stateless Backend):** `apps/api` must be completely stateless. No session state, files, or persistent caching may rely on the local disk filesystem.
-- **NFR-03.2 (Database Portability):** While Supabase PostgreSQL is the initial managed host, database schemas, constraints, and queries must adhere to standard ANSI SQL/PostgreSQL 15+ without proprietary vendor locks, ensuring portability to AWS RDS, self-hosted Postgres, or Neon.
+- **NFR-03.2 (Database Portability):** While Supabase PostgreSQL is the initial managed host, database schemas, constraints, and queries must adhere to standard ANSI SQL/PostgreSQL 16+ without proprietary vendor locks, ensuring portability to AWS RDS, self-hosted Postgres, or Neon.
 - **NFR-03.3 (Data Integrity & Transactions):** All cross-entity mutations (e.g., creating an event with assignments and auto-seeding attendance records) must execute within atomic database transactions (`tx`).
 
 ### 2.4 Usability & Localization (Ethiopian Context)

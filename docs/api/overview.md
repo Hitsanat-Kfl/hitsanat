@@ -2,8 +2,8 @@
 
 ## Hitsanat Kifl Children's Ministry Management System
 **Document Version:** 2.1  
-**Base URL:** `https://api.hitsanat.org/api/v1` (Production) / `http://localhost:4000/api/v1` (Development)  
-**API Specification:** RESTful JSON + OpenAPI 3.1 (Swagger UI at `/api/docs`)  
+**Base URL:** `https://api.hitsanat.org/api/v1` (Production) / `http://localhost:3001/api/v1` (Development)  
+**API Specification:** RESTful JSON + OpenAPI 3.1 (Swagger UI at `/docs`)  
 
 ---
 
@@ -12,7 +12,7 @@
 ```mermaid
 graph LR
     Request[HTTP Request] --> GlobalMiddlewares[CORS / Helmet / Logger]
-    GlobalMiddlewares --> AuthGuard[Better Auth Session Guard]
+    GlobalMiddlewares --> AuthGuard[Supabase Auth Session Guard]
     AuthGuard --> ScopeGuard[Scoped Permission Guard]
     ScopeGuard --> ZodValidator[Zod Schema Validation]
     ZodValidator --> Controller[Express Controller]

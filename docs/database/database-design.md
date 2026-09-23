@@ -2,7 +2,7 @@
 
 ## Hitsanat Kifl Children's Ministry Management System
 **Document Version:** 2.1  
-**Database Engine:** PostgreSQL 15+  
+**Database Engine:** PostgreSQL 16+  
 **ORM Tooling:** Drizzle ORM (`packages/database`)  
 
 ---

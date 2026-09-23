@@ -11,7 +11,7 @@
 | Task ID | Task Description | Module | Priority | Owner | Reviewer | Dependencies | Acceptance Criteria | Test Requirements |
 | :--- | :--- | :--- | :---: | :--- | :--- | :--- | :--- | :--- |
 | **TSK-01** | Database Schema & Drizzle Setup | `packages/database` | **P0** | **Core Lead** | Self / PM | None | Drizzle schemas & initial migration generated | Migration integration test |
-| **TSK-02** | Better Auth & Scoped RBAC Engine | `packages/auth`, `packages/permissions` | **P0** | **Core Lead** | Self / PM | TSK-01 | Session cookies working; scoped middleware denies non-leaders | Scoped RBAC security test suite |
+| **TSK-02** | Supabase Auth & Scoped RBAC Engine | `packages/auth`, `packages/permissions` | **P0** | **Core Lead** | Self / PM | TSK-01 | Session cookies working; scoped middleware denies non-leaders | Scoped RBAC security test suite |
 | **TSK-03** | Ethiopian Calendar Package Adapter | `packages/calendar` | **P0** | **Core Lead** | Self / PM | None | Bidirectional Gregorian/Ethiopian conversion; birthday month queries | 100% unit test coverage |
 | **TSK-04** | Planning 3-Factor Weight Engine | `packages/domain` | **P0** | **Core Lead** | Self / PM | None | Mathematical weight formula matching Action PLN ($\sum = 100\%$) | Unit test suite for 25 activities |
 | **TSK-05** | Member Stage 1 & 2 Use Cases & API | `apps/api/src/modules/members` | **P1** | **Israel** | Core Lead | TSK-01, TSK-02 | Secretary can create draft and enrich member profiles | Route integration test |

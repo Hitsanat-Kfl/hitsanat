@@ -34,5 +34,5 @@ graph TD
 ### For Frontend Contributors:
 1. Work inside `apps/admin`, `apps/portfolio`, and `packages/ui`.
 2. Ensure components adapt to mobile screens ($360\text{ px}$) using shadcn/ui primitives.
-3. Validate forms with React Hook Form using schemas from `@hitsanat/validation`.
+3. Validate forms with React Hook Form using schemas from `@repo/validation`.
 4. Query endpoints using TanStack Query hooks; coordinate contract updates with the Core Lead.
