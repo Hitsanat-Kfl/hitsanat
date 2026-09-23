@@ -204,6 +204,8 @@ declare global {
       sessionUser?: SessionUser;
       /** PE-07: set by requireScopePermission when the SUPER_ADMIN bypass allowed the request. */
       permissionBypassUsed?: boolean;
+      /** BR-035: set by requireScopePermission when an active temporary grant allowed the request. */
+      permissionGrantUsed?: boolean;
     }
   }
 }
@@ -257,6 +259,41 @@ export interface RequireScopePermissionOptions {
   allowedGlobalRoles?: string[];
   requiredSubDeptCode?: string;
   allowedSubDeptRoles?: string[];
+  /**
+   * BR-035: when both resource and action are provided and the role/sub-dept
+   * checks fail, an active temporary grant for this pair may still allow
+   * the request. Omit both to keep the synchronous role-only path.
+   */
+  resource?: string;
+  action?: string;
+}
+
+/**
+ * BR-035: true when the user has at least one non-revoked, unexpired grant
+ * covering the exact resource+action pair.
+ */
+async function hasActiveGrant(userId: string, resource: string, action: string): Promise<boolean> {
+  const db = getDb();
+  const result = await db.execute(sql`
+    SELECT id FROM permission_grants
+    WHERE user_id = ${userId}
+      AND resource = ${resource}
+      AND action = ${action}
+      AND revoked_at IS NULL
+      AND expires_at > now()
+    LIMIT 1
+  `);
+  return Array.isArray(result) && result.length > 0;
+}
+
+function denyScope(res: Response): Response {
+  return res.status(403).json({
+    success: false,
+    error: {
+      code: "FORBIDDEN_INSUFFICIENT_SCOPE",
+      message: "You do not have permission to perform this action in this sub-department scope.",
+    },
+  });
 }
 
 /**
@@ -303,12 +340,24 @@ export function requireScopePermission(options: RequireScopePermissionOptions) {
       }
     }
 
-    return res.status(403).json({
-      success: false,
-      error: {
-        code: "FORBIDDEN_INSUFFICIENT_SCOPE",
-        message: "You do not have permission to perform this action in this sub-department scope.",
-      },
-    });
+    // BR-035: role checks failed — consult an active temporary grant when
+    // this middleware is bound to a concrete resource+action pair.
+    if (options.resource && options.action) {
+      hasActiveGrant(user.id, options.resource, options.action)
+        .then((granted) => {
+          if (granted) {
+            req.permissionGrantUsed = true;
+            next();
+          } else {
+            denyScope(res);
+          }
+        })
+        .catch(() => {
+          denyScope(res);
+        });
+      return;
+    }
+
+    return denyScope(res);
   };
 }

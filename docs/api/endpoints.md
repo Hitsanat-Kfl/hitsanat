@@ -33,6 +33,7 @@
 ## 2. Granular Endpoint Catalog
 
 ### 2.1 Member Management (`/api/v1/members`)
+- All routes require an authenticated session (`requireAuth`). Authorization uses `requireScopePermission` with `resource: members` and the relevant action so BR-035 grants (e.g. `members:C`) can unblock registration when the Secretary is unavailable.
 - `GET /api/v1/members`: Query members with filters (`search`, `subDept`, `familyId`, `yearOfStudy`, `isActive`).
 - `POST /api/v1/members/stage-1`: Fast initial member creation by Secretary (`FullName`, `ChristianName`, `Phone`, `YearOfStudy`, `AcademicDepartment`, `Campus`, `Gender`).
 - `PUT /api/v1/members/:id/stage-2`: Enrich profile (Sub-department allocations, family link, photo upload, telegram handle).
@@ -105,7 +106,14 @@ Aggregated read-only view over the three approval domains (plan changes §2.22, 
 - `POST /api/v1/users/:id/reactivate`: Restore a deactivated account (FR-13.6).
 - `POST /api/v1/users/:id/revoke-sessions`: Force sign-out of live sessions (FR-13.13).
 
-### 2.7a System Metadata (`/api/v1/system-metadata`)
+### 2.7b Permission Grants (`/api/v1/permission-grants`)
+> **Authorization:** BR-035 — `SUPER_ADMIN` only (router + use-case double-check).
+
+- `POST /api/v1/permission-grants`: Issue a temporary grant `{ userId, resource, action, expiresAt, reason? }`. Expiry mandatory, future, ≤7 days. Audited as `PERMISSION_GRANT_CREATED`.
+- `GET /api/v1/permission-grants?userId=`: List grants for a user (or all).
+- `POST /api/v1/permission-grants/:id/revoke`: Early revoke an active grant. `404` unknown, `409` already revoked. Audited as `PERMISSION_GRANT_REVOKED`.
+
+### 2.7c System Metadata (`/api/v1/system-metadata`)
 > **Authorization:** `SUPER_ADMIN` only.
 
 - `GET /api/v1/system-metadata`: Key-value seed/migration status rows (`schema_tag`, `seed_status`) used by the Super Admin System Status panel (FR-13.4).

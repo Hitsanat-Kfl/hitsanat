@@ -25,3 +25,4 @@
 | [**ADR-0016**](./ADR-0016-five-contributor-lane-ownership-model.md) | Four-Contributor Multi-Lane Team Ownership Model | Accepted | Governance / Team |
 | [**ADR-0017**](./ADR-0017-free-tier-deployment-topology.md) | Resilient Cloud Deployment Topology (Vercel & Railway) | Accepted | Deployment / Cloud |
 | [**ADR-0018**](./ADR-0018-sub-chairperson-deputy-authority.md) | Sub-Chairperson Standing Deputy Authority for Executive Approvals | Accepted | Security / Governance |
+| [**ADR-0019**](./ADR-0019-temporary-permission-grants.md) | Temporary Permission Grants for Temporary Role Holder Unavailability | Accepted | Security / Auth |

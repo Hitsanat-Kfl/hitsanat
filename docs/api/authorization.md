@@ -62,3 +62,26 @@ router.post(
   timihrtController.assignTeacher
 );
 ```
+
+### 2.3 Temporary grant fallback (BR-035 / ADR-0019)
+When `resource` and `action` are both provided and role/sub-department checks fail, the middleware looks up an active `permission_grants` row for that user + resource + action (non-revoked, unexpired). On success it sets `req.permissionGrantUsed = true` and calls `next()`; on miss or DB error it returns `403 FORBIDDEN_INSUFFICIENT_SCOPE` (fail closed). Guards declared **without** `resource`/`action` remain synchronous (role-only).
+
+```typescript
+// apps/api member registration — grant fallback enables members:C when Secretary is unavailable
+memberRouter.post(
+  '/stage1',
+  requireScopePermission({
+    allowedGlobalRoles: ['CHAIRPERSON', 'SUB_CHAIRPERSON', 'SECRETARY'],
+    resource: 'members',
+    action: 'C',
+  }),
+  createStage1
+);
+```
+
+### 2.4 Permission-grant management endpoints
+| Method | Path | Access | Notes |
+| :--- | :--- | :--- | :--- |
+| `POST` | `/api/v1/permission-grants` | SUPER_ADMIN only | Body: `userId`, `resource`, `action`, `expiresAt`, optional `reason`. Validates BR-035 (future, ≤7 days). |
+| `GET` | `/api/v1/permission-grants?userId=` | SUPER_ADMIN only | List grants for a user (or all). |
+| `POST` | `/api/v1/permission-grants/:id/revoke` | SUPER_ADMIN only | Early revoke; `409` if already revoked; audited. |

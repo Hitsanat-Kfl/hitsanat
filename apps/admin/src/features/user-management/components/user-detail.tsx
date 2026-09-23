@@ -9,6 +9,7 @@ import { AlertBanner, PageShell } from "@/widgets/shell";
 import { EditUserDialog } from "./edit-user-dialog";
 import { HandoverDialog } from "./handover-dialog";
 import { ResetPasswordDialog } from "./reset-password-dialog";
+import { TemporaryGrantsSection } from "./temporary-grants";
 import {
   LEADERSHIP_ROLE_SET,
   type ManagedUser,
@@ -432,6 +433,9 @@ function UserDetail({ user }: { user: ManagedUser }) {
             </Section>
           </div>
         </div>
+
+        {/* BR-035: temporary grants — full width, Super Admin only (renders null otherwise). */}
+        <TemporaryGrantsSection userId={user.id} />
       </div>
 
       {/* Dialogs */}

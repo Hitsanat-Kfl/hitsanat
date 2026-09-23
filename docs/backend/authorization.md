@@ -20,8 +20,14 @@ flowchart TD
     CheckSec -- Yes --> Grant
     CheckSec -- No --> CheckScope{User holds Leader/Sub-Leader/Secretary in Target Sub-Dept S?}
     CheckScope -- Yes --> Grant
-    CheckScope -- No --> Deny[DENY ACCESS: HTTP 403 FORBIDDEN]
+    CheckScope -- No --> CheckGrant{Endpoint bound to resource+action and active BR-035 grant exists?}
+    CheckGrant -- Yes --> Grant
+    CheckGrant -- No --> Deny[DENY ACCESS: HTTP 403 FORBIDDEN]
 ```
+
+### 1.1 Temporary grant fallback (BR-035 / ADR-0019)
+
+When `requireScopePermission` is declared with both `resource` and `action` (e.g. `members` / `C`) and every role/sub-department check fails, the middleware performs a fail-closed DB lookup for a non-revoked, unexpired `permission_grants` row matching the user + resource + action. On success it sets `req.permissionGrantUsed = true` and continues; on lookup error or no row it returns `403 FORBIDDEN_INSUFFICIENT_SCOPE`. Middleware declared **without** `resource`/`action` keeps the synchronous role-only path (no DB hit).
 
 ---
 
@@ -34,6 +40,9 @@ export function requireScopePermission(options: {
   allowedGlobalRoles?: string[];
   requiredSubDeptCode?: string;
   allowedSubDeptRoles?: string[];
+  /** BR-035: optional resource+action pair enables the active-grant fallback. */
+  resource?: string;
+  action?: string;
 }) {
   return (req: Request, res: Response, next: NextFunction) => {
     const user = req.user;
@@ -55,16 +64,43 @@ export function requireScopePermission(options: {
       }
     }
 
-    return res.status(403).json({
-      success: false,
-      error: {
-        code: 'FORBIDDEN_INSUFFICIENT_SCOPE',
-        message: 'You do not have permission to perform this action in this sub-department scope.'
-      }
-    });
+    // 3. BR-035: consult an active temporary grant when resource+action are bound
+    if (options.resource && options.action) {
+      hasActiveGrant(user.id, options.resource, options.action)
+        .then((granted) => {
+          if (granted) {
+            req.permissionGrantUsed = true;
+            next();
+          } else {
+            denyScope(res);
+          }
+        })
+        .catch(() => denyScope(res));
+      return;
+    }
+
+    return denyScope(res);
   };
 }
 ```
+
+### 2.1 Member registration with grant fallback
+
+```typescript
+// apps/api/src/modules/member/presentation/member.router.ts
+memberRouter.use(requireAuth());
+memberRouter.post(
+  '/stage1',
+  requireScopePermission({
+    allowedGlobalRoles: ['CHAIRPERSON', 'SUB_CHAIRPERSON', 'SECRETARY'],
+    resource: 'members',
+    action: 'C',
+  }),
+  createStage1
+);
+```
+
+If the Secretary is unavailable, SUPER_ADMIN can issue `members:C` for up to 7 days to a selected user; that user then passes this guard via the grant fallback.
 
 ---
 
@@ -81,6 +117,8 @@ The RBAC system is implemented as a dedicated package:
 | `packages/permissions/src/checker.ts` | `hasGlobalPermission()`, `hasSubDeptPermission()`, `checkPermission()` functions |
 | `packages/permissions/src/leadership.ts` | BR-009 One Leadership Post Rule validation |
 | `packages/permissions/src/sub-dept-permissions.ts` | Sub-department scoped permission evaluation |
+| `packages/permissions/src/grants.ts` | BR-035 grant types, `isGrantActive`, `hasActiveGrant`, `validateGrantPayload`, `MAX_GRANT_DURATION_DAYS = 7` |
+| `packages/database/src/schema/auth.ts` | `permission_grants` table (migration `0010_permission_grants.sql`) |
 
 ### 3.2 packages/auth
 

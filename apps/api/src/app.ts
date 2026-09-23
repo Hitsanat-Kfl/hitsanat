@@ -16,6 +16,7 @@ import { childRouter } from "./modules/child/presentation/child.router.js";
 import { eventsRouter } from "./modules/events/presentation/events.router.js";
 import { familyRouter } from "./modules/family/presentation/family.router.js";
 import { memberRouter } from "./modules/member/presentation/member.router.js";
+import { permissionGrantsRouter } from "./modules/permission-grants/presentation/permission-grants.router.js";
 import { planningRouter } from "./modules/planning/presentation/planning.router.js";
 import { publicRouter } from "./modules/public/presentation/public.router.js";
 import { reportsRouter } from "./modules/reports/presentation/reports.router.js";
@@ -73,6 +74,9 @@ export function createApp(): Express {
 
   // System audit trail (SUPER_ADMIN & CHAIRPERSON only)
   app.use(`${env.API_PREFIX}/audit-logs`, auditRouter);
+
+  // Temporary permission grants (BR-035 / ADR-0019: SUPER_ADMIN only)
+  app.use(`${env.API_PREFIX}/permission-grants`, permissionGrantsRouter);
 
   // Seed / migration status for the Super Admin dashboard (FR-13.4)
   app.use(`${env.API_PREFIX}/system-metadata`, systemMetadataRouter);
