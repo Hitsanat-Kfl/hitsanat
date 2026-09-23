@@ -86,14 +86,15 @@ describe("AppSidebar", () => {
     expect(screen.getByRole("button", { name: /expand sidebar/i })).toBeDefined();
   });
 
-  it("displays the ministry motto in footer", () => {
+  it("displays the institutional quote in footer", () => {
     render(
       <ShellTestWrapper>
         <AppSidebar roles={["super-admin"]} />
       </ShellTestWrapper>
     );
 
-    expect(screen.getByText("Serving Children · Building Faith")).toBeDefined();
+    expect(screen.getByText(/Together in faith,/)).toBeDefined();
+    expect(screen.getByText(/for a better tomorrow\./)).toBeDefined();
   });
 });
 

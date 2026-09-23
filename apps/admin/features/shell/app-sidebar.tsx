@@ -16,6 +16,10 @@ import {
 } from "./admin-nav-config";
 import { useShell } from "./shell-context";
 
+/** Gold #F3C913 — used ONLY as the active-nav accent (icon/text/indicator). */
+const GOLD_ACCENT = "#F3C913";
+const GOLD_ACCENT_TEXT = "text-[#F3C913]";
+
 function BrandLogo({
   className,
   iconSize = "h-5 w-5",
@@ -73,7 +77,7 @@ export function AppSidebar({ roles = ["chairperson"], className }: AppSidebarPro
     <aside
       className={cn(
         "hidden md:flex flex-col border-r admin-sidebar transition-all duration-200 select-none",
-        sidebarCollapsed ? "w-[68px]" : "w-60",
+        sidebarCollapsed ? "w-[68px]" : "w-[244px]",
         className
       )}
       aria-label="Sidebar navigation"
@@ -128,12 +132,21 @@ export function AppSidebar({ roles = ["chairperson"], className }: AppSidebarPro
         </nav>
       </ScrollArea>
 
-      {/* Footer Area - Brand mark & Collapse */}
-      <div className="border-t admin-sidebar-border-b p-2 space-y-1.5">
+      {/* Footer Area - Institutional quote, subtle decorative pattern & collapse */}
+      <div className="admin-sidebar-border-b border-t p-2 space-y-1.5">
         {!sidebarCollapsed && (
-          <div className="px-2 py-1 text-center">
-            <p className="text-[11px] font-medium text-white/70 tracking-wide">
-              Serving Children · Building Faith
+          <div
+            className="relative overflow-hidden rounded-md px-2 pb-1 pt-2 text-center"
+            style={{
+              backgroundImage:
+                "url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='44' height='44'%3E%3Cpath d='M22 6 L22 38 M6 22 L38 22 M12 12 L32 32 M32 12 L12 32' stroke='white' stroke-width='1' fill='none' opacity='0.14'/%3E%3C/svg%3E\")",
+              backgroundSize: "44px 44px",
+            }}
+          >
+            <p className="relative text-[11px] font-medium leading-snug text-white/75">
+              Together in faith,
+              <br />
+              for a better tomorrow.
             </p>
           </div>
         )}
@@ -228,31 +241,33 @@ function NavItemElement({
       aria-disabled={item.disabled}
       tabIndex={item.disabled ? -1 : undefined}
       className={cn(
-        "flex items-center gap-3 rounded-md px-3 py-2 text-sm font-medium transition-colors",
+        "relative flex items-center gap-3 rounded-md py-2 pr-3 text-sm font-medium transition-colors",
         "min-h-[40px] h-10",
         "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/60 focus-visible:ring-offset-2",
+        // Active state: subtle lighter burgundy surface + gold left indicator
+        // (reference §6.3 — restrained highlight, not a bright pill).
         isActive
-          ? "bg-[hsl(var(--admin-sidebar-active))] text-[hsl(var(--admin-sidebar-active-text))] font-semibold hover:bg-[hsl(var(--admin-sidebar-active))]/90"
+          ? "bg-white/15 font-semibold text-white hover:bg-white/20"
           : "text-white/90 hover:bg-white/10 hover:text-white",
         item.disabled && "opacity-50 cursor-not-allowed pointer-events-none",
         collapsed && "justify-center px-0"
       )}
+      style={
+        isActive && !collapsed
+          ? { paddingLeft: "12px", boxShadow: `inset 3px 0 0 0 ${GOLD_ACCENT}` }
+          : undefined
+      }
     >
       <Icon
-        className={cn(
-          "h-4 w-4 shrink-0",
-          isActive ? "text-[hsl(var(--admin-sidebar-active-text))]" : "text-white"
-        )}
+        className={cn("h-4 w-4 shrink-0", isActive ? GOLD_ACCENT_TEXT : "text-white")}
         aria-hidden="true"
       />
-      {!collapsed && <span className="truncate">{label}</span>}
+      {!collapsed && <span className={cn("truncate", isActive && GOLD_ACCENT_TEXT)}>{label}</span>}
       {!collapsed && item.badge !== undefined && (
         <span
           className={cn(
             "ml-auto text-xs font-medium px-1.5 py-0.5 rounded-full",
-            isActive
-              ? "bg-[hsl(var(--admin-sidebar-active-text))]/15 text-[hsl(var(--admin-sidebar-active-text))]"
-              : "bg-white/10 text-white/70"
+            isActive ? "bg-white/15 text-[#F3C913]" : "bg-white/10 text-white/70"
           )}
         >
           {item.badge}

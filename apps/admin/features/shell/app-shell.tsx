@@ -30,16 +30,16 @@ export function MainContent({ children, className, ...props }: MainContentProps)
     <main
       className={cn(
         "flex-1 overflow-y-auto overflow-x-hidden focus:outline-none",
-        // Shell spec §9/§21: 16px mobile page padding, 24–32px desktop,
-        // workspace capped at ~1440px so content never over-stretches.
-        // pb-20 clears the fixed mobile bottom nav (h-16).
-        "px-4 py-4 md:px-6 md:py-5 xl:px-8 xl:py-6 pb-20 md:pb-5",
+        // Reference geometry §7/§28: ~20px content gutters at desktop, 16px
+        // on mobile, fluid width (no centered max-w container). pb-20 clears
+        // the fixed mobile bottom nav (h-16).
+        "px-4 py-4 md:px-5 md:py-5 pb-20 md:pb-5",
         className
       )}
       tabIndex={-1}
       {...props}
     >
-      <div className="mx-auto w-full max-w-[1440px]">{children}</div>
+      <div className="w-full max-w-none">{children}</div>
     </main>
   );
 }

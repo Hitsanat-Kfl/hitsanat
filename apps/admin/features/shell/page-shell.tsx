@@ -110,9 +110,7 @@ export function PageShell({
 
   return (
     <div className={cn("flex-1 overflow-auto", className)}>
-      <div
-        className={cn("mx-auto py-2 px-1 sm:px-2 lg:px-3", fullWidth ? "max-w-full" : "max-w-7xl")}
-      >
+      <div className={cn("py-5 px-5", fullWidth ? "max-w-full" : "max-w-none")}>
         {hasHeader && (
           <header className="mb-4 space-y-3">
             {(title || actions) && (

@@ -1,4 +1,4 @@
-import { render, screen, waitFor } from "@testing-library/react";
+import { render, screen, waitFor, within } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
 import { SuperAdminDashboardPage } from "../features/dashboard/components/super-admin-dashboard";
 import { I18nProvider, ShellProvider } from "../features/shell";
@@ -58,6 +58,17 @@ const fixtures = vi.hoisted(() => {
       },
     ],
   };
+  // Totals come from pagination.total — a single-row page is enough.
+  const membersPage = {
+    success: true,
+    data: [],
+    pagination: { page: 1, limit: 1, total: 5, totalPages: 5 },
+  };
+  const childrenPage = {
+    success: true,
+    data: [],
+    pagination: { page: 1, limit: 1, total: 8, totalPages: 8 },
+  };
   const healthPage = {
     status: "ok",
     timestamp: "2026-01-01T00:00:00Z",
@@ -83,6 +94,8 @@ const fixtures = vi.hoisted(() => {
   const getFixture = (endpoint: string): unknown => {
     if (endpoint.startsWith("/users")) return usersPage;
     if (endpoint === "/sub-departments") return departmentsPage;
+    if (endpoint.startsWith("/members")) return membersPage;
+    if (endpoint.startsWith("/children")) return childrenPage;
     if (endpoint === "/health") return healthPage;
     if (endpoint.startsWith("/audit-logs")) return auditPage;
     return { success: true, data: [] };
@@ -95,6 +108,7 @@ vi.mock("../lib/api-client", () => ({
     get: vi
       .fn()
       .mockImplementation((endpoint: string) => Promise.resolve(fixtures.getFixture(endpoint))),
+    post: vi.fn().mockResolvedValue({ success: true, data: {} }),
   },
 }));
 
@@ -117,145 +131,122 @@ function renderDashboard() {
 describe("Super Admin Dashboard", () => {
   it("renders the dashboard header", async () => {
     renderDashboard();
-
     await waitFor(() => {
-      expect(screen.getAllByText("Super Admin Dashboard").length).toBeGreaterThanOrEqual(1);
+      expect(screen.getAllByText("System Overview").length).toBeGreaterThanOrEqual(1);
     });
+    expect(screen.getAllByText("Super Admin").length).toBeGreaterThanOrEqual(1);
+    expect(screen.getByText("Manage the organization, users and system settings.")).toBeDefined();
   });
 
-  it("renders the reference KPI row", async () => {
+  it("renders the System Snapshot columns", async () => {
     renderDashboard();
 
-    await waitFor(() => {
-      expect(screen.getByText("User Accounts")).toBeDefined();
-      expect(screen.getByText("Active Accounts")).toBeDefined();
-      // "Sub-Departments" also appears as a quick-action tile title.
-      expect(screen.getAllByText("Sub-Departments").length).toBeGreaterThanOrEqual(1);
-      expect(screen.getByText("API Health")).toBeDefined();
-    });
+    const snapshot = await screen.findByRole("region", { name: "System Snapshot" });
+    expect(within(snapshot).getByText("User Accounts")).toBeDefined();
+    expect(within(snapshot).getByText("Members")).toBeDefined();
+    expect(within(snapshot).getByText("Children")).toBeDefined();
+    expect(within(snapshot).getByText("Sub-Departments")).toBeDefined();
   });
 
-  it("renders KPI values from real data", async () => {
+  it("renders snapshot values from real pagination totals", async () => {
     renderDashboard();
 
-    await waitFor(() => {
-      expect(screen.getAllByText("2").length).toBeGreaterThanOrEqual(1);
-      expect(screen.getByText("Healthy")).toBeDefined();
-    });
+    const snapshot = await screen.findByRole("region", { name: "System Snapshot" });
+    expect(within(snapshot).getAllByText("2").length).toBeGreaterThanOrEqual(1);
+    expect(within(snapshot).getByText("1 active · 1 deactivated")).toBeDefined();
+    expect(within(snapshot).getByText("5")).toBeDefined();
+    expect(within(snapshot).getByText("8")).toBeDefined();
   });
 
-  it("renders the deactivated accounts table with status badge", async () => {
+  it("renders the deactivated accounts table with reactivation", async () => {
     renderDashboard();
 
     await waitFor(() => {
       expect(screen.getByText("Deactivated Accounts")).toBeDefined();
-      // Visible in both Deactivated Accounts and (potentially) the roster.
       expect(screen.getAllByText("Deactivated Leader").length).toBeGreaterThanOrEqual(1);
       expect(screen.getAllByText(/deact@hitsanat\.org/).length).toBeGreaterThanOrEqual(1);
       expect(screen.getAllByText("Deactivated").length).toBeGreaterThanOrEqual(1);
+      expect(screen.getByRole("button", { name: /Reactivate Deactivated Leader/i })).toBeDefined();
     });
   });
 
-  it("renders the account status donut from lifecycle counts", async () => {
+  it("renders administrative work with the review item emphasized", async () => {
     renderDashboard();
 
-    await waitFor(() => {
-      expect(screen.getByText("Account Status")).toBeDefined();
-      // "Active" appears in the donut legend and elsewhere (status dots),
-      // so scope the assertion to the donut's figure.
-      const donut = screen.getByRole("img", { name: /Account status: 1 active, 1 deactivated/ });
-      expect(donut).toBeDefined();
-      expect(screen.getAllByText("Active").length).toBeGreaterThanOrEqual(1);
-    });
+    const work = await screen.findByRole("region", { name: "Administrative Work" });
+    expect(within(work).getByText("Accounts requiring review")).toBeDefined();
+    expect(within(work).getByText("Leadership assignments")).toBeDefined();
+    expect(within(work).getByText("Unassigned leadership post")).toBeDefined();
+    // 01 = deactivated count; 05 = unassigned canonical posts.
+    expect(within(work).getAllByText("01").length).toBeGreaterThanOrEqual(1);
+    expect(within(work).getAllByText("05").length).toBeGreaterThanOrEqual(1);
   });
 
-  it("renders recently provisioned and roles in use", async () => {
+  it("renders the leadership roster with unassigned posts", async () => {
     renderDashboard();
 
-    await waitFor(() => {
-      expect(screen.getByText("Recently Provisioned")).toBeDefined();
-      expect(screen.getByText("Roles in Use")).toBeDefined();
-    });
+    const roster = await screen.findByRole("region", { name: "Leadership Roster" });
+    expect(within(roster).getByText("Leadership Roster")).toBeDefined();
+    // Both accounts hold executive roles; the canonical departmental posts
+    // are unassigned in this fixture.
+    expect(within(roster).getAllByText(/Unassigned/).length).toBeGreaterThanOrEqual(1);
   });
 
-  it("renders role distribution with human-readable labels", async () => {
+  it("renders recent accounts with role labels", async () => {
     renderDashboard();
 
-    await waitFor(() => {
-      // Role badges render in Recently Provisioned; "Super Admin" also
-      // appears in the page title and roster, hence getAllBy.
-      expect(screen.getAllByText("Chairperson").length).toBeGreaterThanOrEqual(1);
-      expect(screen.getAllByText("Super Admin").length).toBeGreaterThanOrEqual(1);
-    });
+    const accounts = await screen.findByRole("region", { name: "Recent Accounts" });
+    expect(within(accounts).getAllByText("Chairperson").length).toBeGreaterThanOrEqual(1);
+    expect(within(accounts).getAllByText("Super Admin").length).toBeGreaterThanOrEqual(1);
   });
 
-  it("renders the leadership roster", async () => {
+  it("renders the system status panel", async () => {
     renderDashboard();
 
-    await waitFor(() => {
-      expect(screen.getByText("Leadership Roster")).toBeDefined();
-    });
+    const statusPanel = await screen.findByRole("region", { name: "System Status" });
+    expect(await within(statusPanel).findByText("Operational")).toBeDefined();
+    expect(within(statusPanel).getByText("v1.0.0")).toBeDefined();
+    expect(within(statusPanel).getByText("development")).toBeDefined();
+    expect(within(statusPanel).getByText(/Last checked/)).toBeDefined();
   });
 
-  it("renders system health with API status tile", async () => {
+  it("renders frequent administration tiles targeting existing routes", async () => {
     renderDashboard();
 
-    await waitFor(() => {
-      expect(screen.getByText("System Health")).toBeDefined();
-      expect(screen.getByText("API Status")).toBeDefined();
-      expect(screen.getByText(/Operational · v1\.0\.0 · development/)).toBeDefined();
-    });
+    const tiles = await screen.findByRole("region", { name: "Frequent Administration" });
+    expect(within(tiles).getByText("User Accounts")).toBeDefined();
+    expect(within(tiles).getByText("Members")).toBeDefined();
+    expect(within(tiles).getByText("Children")).toBeDefined();
+    expect(within(tiles).getByText("Sub-Departments")).toBeDefined();
+    expect(within(tiles).getByText("Roles & Permissions")).toBeDefined();
+    expect(within(tiles).getByText("Audit Logs")).toBeDefined();
+
+    expect(
+      within(tiles)
+        .getByRole("link", { name: /User Accounts Manage accounts/ })
+        ?.getAttribute("href")
+    ).toBe("/users");
+    expect(
+      within(tiles)
+        .getByRole("link", { name: /Audit Logs View system activity/ })
+        ?.getAttribute("href")
+    ).toBe("/audit-logs");
+    expect(
+      within(tiles)
+        .getByRole("link", { name: /Roles & Permissions Review role access/ })
+        ?.getAttribute("href")
+    ).toBe("/permissions");
   });
 
-  it("renders quick actions targeting existing routes", async () => {
+  it("renders recent activity from the audit trail", async () => {
     renderDashboard();
 
-    await waitFor(() => {
-      expect(screen.getByText("Quick Actions")).toBeDefined();
-      // The six quick-action tiles render inside both the Quick Actions
-      // widget and the System Health tile grid (per the reference layout).
-      const usersLinks = screen.getAllByRole("link", { name: /Users Manage user accounts/ });
-      expect(usersLinks.length).toBeGreaterThanOrEqual(1);
-      expect(usersLinks[0]?.getAttribute("href")).toBe("/users");
-      expect(
-        screen
-          .getAllByRole("link", { name: /Audit Logs View system activity/ })[0]
-          ?.getAttribute("href")
-      ).toBe("/audit-logs");
-      expect(
-        screen
-          .getAllByRole("link", { name: /Permissions Review role access/ })[0]
-          ?.getAttribute("href")
-      ).toBe("/permissions");
-      expect(
-        screen
-          .getAllByRole("link", { name: /Members Manage member records/ })[0]
-          ?.getAttribute("href")
-      ).toBe("/members");
-      expect(
-        screen
-          .getAllByRole("link", { name: /Sub-Departments Configure programs/ })[0]
-          ?.getAttribute("href")
-      ).toBe("/sub-departments");
-      expect(
-        screen
-          .getAllByRole("link", { name: /Reports View ministry reports/ })[0]
-          ?.getAttribute("href")
-      ).toBe("/reports");
-    });
+    const activity = await screen.findByRole("region", { name: "Recent Activity" });
+    expect(await within(activity).findByText(/created user account/)).toBeDefined();
+    expect(within(activity).getByText("leader@hitsanat.org")).toBeDefined();
   });
 
-  it("renders system activity from the audit trail", async () => {
-    renderDashboard();
-
-    await waitFor(() => {
-      expect(screen.getByText("System Activity")).toBeDefined();
-      expect(screen.getByText(/created user account/)).toBeDefined();
-      expect(screen.getByText("leader@hitsanat.org")).toBeDefined();
-    });
-  });
-
-  it("shows the API-health fallback when health is unreachable", async () => {
+  it("shows the health error in the status panel when health is unreachable", async () => {
     const { api } = await import("../lib/api-client");
     vi.mocked(api.get).mockImplementation((endpoint: string) =>
       endpoint === "/health"
