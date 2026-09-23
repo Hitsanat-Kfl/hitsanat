@@ -1,4 +1,13 @@
-import { boolean, pgTable, text, timestamp, unique, uuid, varchar } from "drizzle-orm/pg-core";
+import {
+  boolean,
+  index,
+  pgTable,
+  text,
+  timestamp,
+  unique,
+  uuid,
+  varchar,
+} from "drizzle-orm/pg-core";
 import { members } from "./identity.js";
 
 /**
@@ -108,3 +117,38 @@ export const verificationTokens = pgTable("verification_tokens", {
 
 export type VerificationToken = typeof verificationTokens.$inferSelect;
 export type NewVerificationToken = typeof verificationTokens.$inferInsert;
+
+/**
+ * Temporary permission grants (BR-035 / ADR-0019).
+ * SUPER_ADMIN grants a single resource+action to a user for a bounded
+ * window. Active grants are consulted by requireScopePermission when
+ * the caller's role/sub-dept check fails for that resource+action.
+ */
+export const permissionGrants = pgTable(
+  "permission_grants",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    userId: uuid("user_id")
+      .notNull()
+      .references(() => users.id, { onDelete: "cascade" }),
+    resource: varchar("resource", { length: 64 }).notNull(),
+    action: varchar("action", { length: 8 }).notNull(),
+    reason: text("reason"),
+    expiresAt: timestamp("expires_at", { withTimezone: true }).notNull(),
+    revokedAt: timestamp("revoked_at", { withTimezone: true }),
+    grantedBy: uuid("granted_by").references(() => users.id, { onDelete: "set null" }),
+    revokedBy: uuid("revoked_by").references(() => users.id, { onDelete: "set null" }),
+    createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
+  },
+  (table) => [
+    index("permission_grants_user_idx").on(table.userId),
+    index("permission_grants_user_resource_action_idx").on(
+      table.userId,
+      table.resource,
+      table.action
+    ),
+  ]
+);
+
+export type PermissionGrant = typeof permissionGrants.$inferSelect;
+export type NewPermissionGrant = typeof permissionGrants.$inferInsert;

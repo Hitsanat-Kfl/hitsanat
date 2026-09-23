@@ -55,3 +55,17 @@ graph TD
 - **Religious Film Library:** Manages film screenings and visual spiritual media.
 - **Yeteret Abat Programs:** Schedules moral storytelling sessions and assigns members.
 - **Puppet & Drama:** Coordinates theatrical spiritual performances during special feasts.
+
+---
+
+## 3. Leadership Posts & Scoped Permissions
+
+Each sub-department has **three leadership posts** (source of truth: `SUB_DEPT_PERMISSIONS` in `packages/permissions`):
+
+| Post | Scoped permissions |
+| :--- | :--- |
+| Leader / Sub-Leader | Full department set (C/R/U/D, Approve where defined). |
+| Secretary (sub-dept) | Create / Read / Update subset only (no Delete / Approve). |
+| Member | None (ADR-0007 / BR-033). |
+
+Rendered on the admin **Roles & Permissions** page under *Sub-Department Leadership* as a read-only reference.

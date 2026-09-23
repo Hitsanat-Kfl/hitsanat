@@ -1,7 +1,7 @@
 import PermissionsPage from "@/features/permissions/components/permissions-page";
 
 export const metadata = {
-  title: "Permissions | Hitsanat Kifl",
+  title: "Roles & Permissions | Hitsanat Kifl",
 };
 
 export default function PermissionsRoute() {

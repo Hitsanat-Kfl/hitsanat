@@ -34,3 +34,11 @@ graph TD
 3. **Child Data Exfiltration Defense:**
    - Query `/api/v1/public/stats` without credentials.
    - Assert: Response contains only aggregate numbers; zero child phone numbers or residential addresses exposed.
+4. **Temporary Permission Grant Expiry (BR-035):**
+   - Issue a grant with `expiresAt` in the past or beyond 7 days → assert `400`.
+   - Issue a valid grant, then force-expire it and call the bound endpoint → assert `403 FORBIDDEN_INSUFFICIENT_SCOPE`.
+5. **Temporary Permission Grant Revocation (BR-035):**
+   - As SUPER_ADMIN, create a grant, call `POST /api/v1/permission-grants/:id/revoke`, then call the bound endpoint as the grantee → assert `403`.
+   - Double revoke → assert `409`.
+6. **Grant Issuance Privilege (BR-035):**
+   - As `CHAIRPERSON` (or any non-SUPER_ADMIN), `POST /api/v1/permission-grants` → assert `403`.

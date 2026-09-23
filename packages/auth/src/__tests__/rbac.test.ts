@@ -21,6 +21,9 @@ describe("RBAC Middleware Structure", () => {
     expect(content).toContain("allowedGlobalRoles");
     expect(content).toContain("requiredSubDeptCode");
     expect(content).toContain("allowedSubDeptRoles");
+    expect(content).toContain("resource?: string");
+    expect(content).toContain("action?: string");
+    expect(content).toContain("permissionGrantUsed");
   });
 
   it("should return 401 when no session token is provided", () => {
@@ -172,5 +175,112 @@ describe("RBAC Middleware Behavior", () => {
 
     expect(mockRes.status).toHaveBeenCalledWith(403);
     expect(mockNext).not.toHaveBeenCalled();
+  });
+
+  it("should deny role failure without resource/action (sync path)", async () => {
+    const { requireScopePermission } = await import("../index.js");
+    const middleware = requireScopePermission({
+      allowedGlobalRoles: ["SECRETARY"],
+    });
+
+    const req = {
+      ...mockReq,
+      sessionUser: {
+        id: "u1",
+        email: "m@b.c",
+        name: "Member",
+        role: "MEMBER_REGULAR",
+        memberId: null,
+        globalRoles: [],
+        subDeptRoles: [],
+      },
+    };
+
+    middleware(req as never, mockRes as never, mockNext);
+
+    expect(mockRes.status).toHaveBeenCalledWith(403);
+    expect(mockNext).not.toHaveBeenCalled();
+  });
+
+  describe("temporary grant fallback (BR-035)", () => {
+    function scopedReq() {
+      return {
+        ...mockReq,
+        sessionUser: {
+          id: "u-grantee",
+          email: "g@b.c",
+          name: "Grantee",
+          role: "MEMBER_REGULAR",
+          memberId: null,
+          globalRoles: [],
+          subDeptRoles: [],
+        },
+      };
+    }
+
+    it("allows the request and marks permissionGrantUsed when an active grant exists", async () => {
+      const { getDb } = await import("@repo/database");
+      vi.mocked(getDb).mockReturnValue({
+        execute: vi.fn().mockResolvedValue([{ id: "g1" }]),
+      } as never);
+
+      const { requireScopePermission } = await import("../index.js");
+      const middleware = requireScopePermission({
+        allowedGlobalRoles: ["SECRETARY"],
+        resource: "members",
+        action: "C",
+      });
+
+      const req = scopedReq();
+      middleware(req as never, mockRes as never, mockNext);
+
+      await vi.waitFor(() => {
+        expect(mockNext).toHaveBeenCalled();
+      });
+      expect((req as { permissionGrantUsed?: boolean }).permissionGrantUsed).toBe(true);
+      expect(mockRes.status).not.toHaveBeenCalled();
+    });
+
+    it("denies with 403 when no active grant covers the resource+action", async () => {
+      const { getDb } = await import("@repo/database");
+      vi.mocked(getDb).mockReturnValue({
+        execute: vi.fn().mockResolvedValue([]),
+      } as never);
+
+      const { requireScopePermission } = await import("../index.js");
+      const middleware = requireScopePermission({
+        allowedGlobalRoles: ["SECRETARY"],
+        resource: "members",
+        action: "C",
+      });
+
+      middleware(scopedReq() as never, mockRes as never, mockNext);
+
+      await vi.waitFor(() => {
+        expect(mockRes.status).toHaveBeenCalledWith(403);
+      });
+      expect(mockNext).not.toHaveBeenCalled();
+    });
+
+    it("denies when the grant lookup fails (fail closed)", async () => {
+      const { getDb } = await import("@repo/database");
+      vi.mocked(getDb).mockReturnValue({
+        execute: vi.fn().mockRejectedValue(new Error("db down")),
+      } as never);
+
+      const { requireScopePermission } = await import("../index.js");
+      const middleware = requireScopePermission({
+        allowedGlobalRoles: ["SECRETARY"],
+        resource: "members",
+        action: "C",
+      });
+
+      middleware(scopedReq() as never, mockRes as never, mockNext);
+
+      await vi.waitFor(() => {
+        expect(mockRes.status).toHaveBeenCalledWith(403);
+      });
+      expect(mockNext).not.toHaveBeenCalled();
+    });
   });
 });

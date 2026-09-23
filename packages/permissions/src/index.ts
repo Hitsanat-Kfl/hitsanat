@@ -3,3 +3,4 @@ export * from "./matrix.js";
 export * from "./sub-dept-permissions.js";
 export * from "./checker.js";
 export * from "./leadership.js";
+export * from "./grants.js";

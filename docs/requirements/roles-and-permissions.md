@@ -62,6 +62,16 @@ graph TD
 | `SUB_DEPT_SECRETARY` | Sub-Department | Department Scope | Records notes, assists leader in score/attendance/progress entry. |
 | `MEMBER_REGULAR` | Member | None | **No admin portal access**. Interacts via Public Website & Telegram. |
 
+Each of the five sub-departments has **three leadership posts**:
+
+| Post | Scoped permissions |
+| :--- | :--- |
+| **Leader** | Full `SUB_DEPT_PERMISSIONS[code]` set (C/R/U/D, plus Approve where defined). |
+| **Sub-Leader** | Same as Leader (shared scoped set). |
+| **Secretary** (sub-dept) | Create / Read / Update subset of the department set only (no Delete, no Approve). |
+
+Plain sub-department `Member` posts hold **no** scoped permissions (ADR-0007 / BR-033). These posts appear on the read-only **Roles & Permissions** page under *Sub-Department Leadership*; data always comes from `packages/permissions/src/sub-dept-permissions.ts`.
+
 ---
 
 ## 3. Comprehensive Permissions Matrix
@@ -171,3 +181,15 @@ The `SUB_CHAIRPERSON` holds **standing deputy authority** over the Chairperson's
 **Explicitly excluded from deputy authority:** user account management (BR-008 remains `SUPER_ADMIN` + `CHAIRPERSON` only) and any ability to re-delegate. All deputy actions are audit-logged under the acting user's own identity, and both executive roles receive the same approval notifications.
 
 > Note: The Vice-Chairperson dashboard's read-only *oversight* view (dashboards.md §1.2) is distinct from these approval *actions*; the Sub-Chairperson can view everything read-only and additionally execute the three approval actions above.
+
+### 4.7 Temporary Permission Grants (BR-035 / ADR-0019)
+
+When a designated role holder is unavailable (for example the Secretary cannot register members), `SUPER_ADMIN` may issue a **temporary grant** of a single `resource`+`action` pair (e.g. `members:C`) to a selected user:
+
+- **Issuer:** `SUPER_ADMIN` only — create, list, and revoke endpoints reject everyone else.
+- **Scope:** one `ResourceType` × one `ActionType` (C/R/U/D/A); not a role change.
+- **Lifetime:** mandatory expiry, at most **7 days**, renewable only by issuing a new grant.
+- **Early revoke:** allowed while active; revoked/expired grants no longer authorize.
+- **Enforcement:** `requireScopePermission({ resource, action, … })` falls back to an active-grant DB lookup only after role/sub-dept checks fail; success sets `req.permissionGrantUsed` for audit visibility.
+- **Audit:** `PERMISSION_GRANT_CREATED` / `PERMISSION_GRANT_REVOKED` via `RecordAuditLogUseCase`.
+- **UI:** managed on the **User Accounts → user detail** page (Super Admin only). The Roles & Permissions page remains a read-only reference.

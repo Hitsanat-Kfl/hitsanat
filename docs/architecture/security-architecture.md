@@ -72,6 +72,9 @@ router.post(
 );
 ```
 
+### 3.3 Temporary Permission Grants (BR-035 / ADR-0019)
+When a role holder is temporarily unavailable, `SUPER_ADMIN` may issue a single `resource`+`action` grant (max 7 days, early-revocable, audited). `requireScopePermission({ resource, action, … })` consults active grants only after role/scope checks fail and marks `req.permissionGrantUsed`. Unbound guards stay synchronous; grant lookup is fail-closed.
+
 ---
 
 ## 4. Beneficiary Data Privacy & Child Protection
