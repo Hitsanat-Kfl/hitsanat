@@ -143,14 +143,67 @@ export class SupabaseAdminAuthService implements SupabaseAdminService {
   /**
    * PE-08 / FR-13.13: revoke every live session for the user (force
    * sign-out), independent of account deactivation.
+   *
+   * `auth.admin.signOut` expects a session JWT, not a user UUID — calling it
+   * with the UUID always fails. Prefer GoTrue's admin logout endpoint
+   * (POST /admin/users/:id/logout), which invalidates all refresh tokens for
+   * the user. Fall back to a short ban + unban cycle, which also kicks
+   * existing sessions when the platform does not expose the logout route.
    */
   async revokeSessions(authUserId: string): Promise<void> {
+    const url = process.env.SUPABASE_URL;
+    const serviceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
+    if (!url || !serviceRoleKey) {
+      throw new SupabaseAdminServiceUnavailableError("revoke user sessions");
+    }
+
+    const logoutUrl = `${url.replace(/\/$/, "")}/auth/v1/admin/users/${authUserId}/logout`;
+    let logoutOk = false;
+    try {
+      const response = await fetch(logoutUrl, {
+        method: "POST",
+        headers: {
+          apikey: serviceRoleKey,
+          Authorization: `Bearer ${serviceRoleKey}`,
+          "Content-Type": "application/json",
+        },
+      });
+      // 200/204 = revoked; 404 = route unavailable on this GoTrue build → fallback
+      logoutOk = response.ok || response.status === 204;
+      if (!logoutOk && response.status !== 404 && response.status !== 405) {
+        const body = await response.text().catch(() => "");
+        throw new Error(
+          `Supabase Auth session revocation failed (HTTP ${response.status})${body ? `: ${body}` : ""}`
+        );
+      }
+    } catch (error) {
+      if (error instanceof Error && error.message.startsWith("Supabase Auth session revocation")) {
+        throw error;
+      }
+      // Network/parse failure → try ban/unban fallback below
+      logoutOk = false;
+    }
+
+    if (logoutOk) return;
+
+    // Fallback: momentary ban forces re-authentication (invalidates sessions
+    // on refresh paths that reject banned users), then immediately lift it.
     const supabase = sharedAdminClient();
-
-    const { error } = await supabase.auth.admin.signOut(authUserId);
-
-    if (error) {
-      throw new Error(`Supabase Auth session revocation failed: ${supabaseErrorMessage(error)}`);
+    const ban = await supabase.auth.admin.updateUserById(authUserId, {
+      ban_duration: "10s",
+    });
+    if (ban.error) {
+      throw new Error(
+        `Supabase Auth session revocation failed: ${supabaseErrorMessage(ban.error)}`
+      );
+    }
+    const unban = await supabase.auth.admin.updateUserById(authUserId, {
+      ban_duration: "none",
+    });
+    if (unban.error) {
+      throw new Error(
+        `Supabase Auth session revocation failed while clearing ban: ${supabaseErrorMessage(unban.error)}`
+      );
     }
   }
 }

@@ -94,11 +94,12 @@ gantt
   5. ✅ **Searchable member picker** (FR-13.8) — replaced raw UUID member linking.
   6. ✅ **Session revocation** (FR-13.13) — `POST /users/:id/revoke-sessions`, audit action `SESSIONS_REVOKED`.
   7. ✅ **Break-glass action logging** (FR-13.12) — `BYPASS_ACTION` audit entries via global middleware.
-  8. ✅ **Leadership handover workflow** (FR-13.9) — guided successor-first handover on the user table and detail view.
+  8. ✅ **Leadership handover workflow** (FR-13.9) — guided three-step handover (create successor → demote outgoing → deactivate) on the user table and detail view.
+  9. ✅ **Account stats + seed status** — `GET /users/stats` powers the System Snapshot; `GET /system-metadata` surfaces seed/migration status on the System Status panel (FR-13.4).
 - **Remaining:**
-  - Seed/migration status on the Super Admin dashboard (system_metadata table exists but unused)
+  - none for this batch (seed/migration status delivered)
 - **Deferred:** dependency health checks (DB/Supabase/Telegram), data export for leadership transitions, email invitation links (see system documentation § 7.10.6 "Lower-priority candidates").
-- **Open decision:** permission overrides scope — see `docs/open-decisions.md` OD-05.
+- **Open decision:** none remaining for Super Admin review — OD-05 resolved as Option A (static matrix + bypass; see `docs/open-decisions.md`).
 - **Acceptance Criteria (all met):**
   - ✅ A deactivated account can be reactivated from `/users` and from the dashboard's deactivated-accounts widget
   - ✅ A user's role can be changed after creation without recreating the account

@@ -12,7 +12,7 @@ import {
   Spinner,
 } from "@repo/ui";
 import { useState } from "react";
-import { PageShell } from "@/features/shell";
+import { PageShell } from "@/widgets/shell";
 import { useTransport } from "@/features/transport";
 
 export default function TransportPage() {

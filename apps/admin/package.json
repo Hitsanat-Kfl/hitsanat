@@ -13,6 +13,7 @@
   "dependencies": {
     "@repo/calendar": "workspace:*",
     "@repo/config": "workspace:*",
+    "@repo/permissions": "workspace:*",
     "@repo/schemas": "workspace:*",
     "@repo/ui": "workspace:*",
     "@supabase/ssr": "^0.12.7",

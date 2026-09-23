@@ -187,7 +187,8 @@
 
 ### 5.2 `announcements` & `audit_logs`
 - `announcements`: `id`, `title`, `content`, `target_audience` (`Public`, `Members`, `Parents`), `is_published`, `publish_to_telegram`, `published_at`, `created_by`.
-- `audit_logs`: `id`, `operator_id`, `action`, `resource_type`, `resource_id`, `payload_diff` (`JSONB`), `ip_address`, `timestamp`.
+- `audit_logs`: `id`, `operator_id`, `action`, `resource_type`, `resource_id`, `payload_diff` (text, e.g. `email=…; role=…`), `ip_address`, `timestamp`.
+- `system_metadata`: `id`, `key` (unique), `value`, `updated_at` — key/value seed and migration status (e.g. `schema_tag`, `seed_status`), surfaced via `GET /api/v1/system-metadata`.
 
 ---
 

@@ -1,7 +1,7 @@
 import { render, screen, waitFor, within } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
-import { SuperAdminDashboardPage } from "../features/dashboard/components/super-admin-dashboard";
-import { I18nProvider, ShellProvider } from "../features/shell";
+import { SuperAdminDashboardPage } from "../src/widgets/dashboard/components/super-admin-dashboard";
+import { TestProviders } from "./test-providers";
 
 // Shared endpoint-keyed fixtures (hoisted so the vi.mock factory can use them).
 const fixtures = vi.hoisted(() => {
@@ -103,7 +103,7 @@ const fixtures = vi.hoisted(() => {
   return { getFixture };
 });
 
-vi.mock("../lib/api-client", () => ({
+vi.mock("../src/infrastructure/api/client", () => ({
   api: {
     get: vi
       .fn()
@@ -113,11 +113,7 @@ vi.mock("../lib/api-client", () => ({
 }));
 
 function TestWrapper({ children }: { children: React.ReactNode }) {
-  return (
-    <I18nProvider>
-      <ShellProvider>{children}</ShellProvider>
-    </I18nProvider>
-  );
+  return <TestProviders>{children}</TestProviders>;
 }
 
 function renderDashboard() {
@@ -247,7 +243,7 @@ describe("Super Admin Dashboard", () => {
   });
 
   it("shows the health error in the status panel when health is unreachable", async () => {
-    const { api } = await import("../lib/api-client");
+    const { api } = await import("../src/infrastructure/api/client");
     vi.mocked(api.get).mockImplementation((endpoint: string) =>
       endpoint === "/health"
         ? Promise.reject(new Error("network down"))
@@ -262,7 +258,7 @@ describe("Super Admin Dashboard", () => {
   });
 
   it("shows the error state when the users endpoint fails", async () => {
-    const { api } = await import("../lib/api-client");
+    const { api } = await import("../src/infrastructure/api/client");
     vi.mocked(api.get).mockImplementation((endpoint: string) =>
       endpoint.startsWith("/users")
         ? Promise.reject(new Error("unauthorized"))

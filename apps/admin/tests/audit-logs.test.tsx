@@ -1,7 +1,7 @@
-import { fireEvent, render, screen, waitFor } from "@testing-library/react";
+import { fireEvent, screen, waitFor } from "@testing-library/react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import AuditLogsPage from "../features/audit-logs/components/audit-logs-page";
-import { I18nProvider, ShellProvider } from "../features/shell";
+import AuditLogsPage from "../src/features/audit-management/components/audit-logs-page";
+import { renderWithProviders } from "./test-providers";
 
 const fixtures = vi.hoisted(() => {
   const auditPage = {
@@ -48,18 +48,12 @@ const getMock = vi.hoisted(() =>
   vi.fn().mockImplementation((endpoint: string) => Promise.resolve(fixtures.getFixture(endpoint)))
 );
 
-vi.mock("../lib/api-client", () => ({
+vi.mock("@/infrastructure/api/client", () => ({
   api: { get: getMock },
 }));
 
 function renderAuditPage() {
-  return render(
-    <I18nProvider>
-      <ShellProvider>
-        <AuditLogsPage />
-      </ShellProvider>
-    </I18nProvider>
-  );
+  return renderWithProviders(<AuditLogsPage />);
 }
 
 describe("Audit logs page", () => {
@@ -70,10 +64,12 @@ describe("Audit logs page", () => {
   it("renders entries with human-readable actions and IP addresses", async () => {
     renderAuditPage();
 
-    expect(await screen.findByText("Deactivated user account")).toBeDefined();
+    // "Deactivated user account" also exists as a filter option — wait for
+    // table-only content so we know the query has resolved.
+    expect(await screen.findByText("10.0.0.7")).toBeDefined();
+    expect(screen.getAllByText("Deactivated user account").length).toBeGreaterThanOrEqual(1);
     // The label appears both as a badge and in the filter dropdown.
     expect(screen.getAllByText("Super admin bypass action").length).toBeGreaterThanOrEqual(1);
-    expect(screen.getByText("10.0.0.7")).toBeDefined();
     expect(screen.getByText("email=leader@hitsanat.org")).toBeDefined();
   });
 

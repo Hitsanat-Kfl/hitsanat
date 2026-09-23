@@ -4,7 +4,7 @@ import { Button, Spinner } from "@repo/ui";
 import { useParams, useRouter } from "next/navigation";
 import { PlanningMatrix } from "@/features/planning";
 import { usePlanDetail } from "@/features/planning";
-import { PageShell } from "@/features/shell";
+import { PageShell } from "@/widgets/shell";
 
 export default function PlanningDetailPage() {
   const params = useParams();

@@ -3,10 +3,10 @@
 import { Button, Spinner } from "@repo/ui";
 import { useParams, useRouter } from "next/navigation";
 import { useCallback, useEffect, useState } from "react";
-import { ParentLinkingDialog } from "@/features/children";
-import { PageShell } from "@/features/shell";
-import { type ApiResponse, api } from "../../../../../lib/api-client";
-import type { Child } from "../../../../../lib/types";
+import { ParentLinkingDialog } from "@/features/child-management";
+import { PageShell } from "@/widgets/shell";
+import { type ApiResponse, api } from "@/infrastructure/api/client";
+import type { Child } from "@/domains/definitions";
 
 export default function ParentLinkingPage() {
   const params = useParams();

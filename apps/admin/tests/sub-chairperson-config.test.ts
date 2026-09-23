@@ -4,7 +4,7 @@ import {
   getDashboardConfig,
   getSectionsForRole,
   subChairpersonConfig,
-} from "../features/dashboard/config";
+} from "../src/config/dashboard";
 
 describe("sub-chairperson dashboard config (Phase 06)", () => {
   it("maps the sub-chairperson role to its own config, not the placeholder", () => {

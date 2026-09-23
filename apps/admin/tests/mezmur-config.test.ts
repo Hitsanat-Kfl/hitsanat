@@ -4,7 +4,7 @@ import {
   getDashboardConfig,
   getSectionsForRole,
   mezmurLeaderConfig,
-} from "../features/dashboard/config";
+} from "../src/config/dashboard";
 
 describe("mezmur-leader dashboard config (Phase 08)", () => {
   it("maps the mezmur-leader role to its own config, not the placeholder", () => {

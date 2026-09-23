@@ -8,6 +8,7 @@ import {
 } from "@repo/database/schema";
 import type { CreateUserInput, UpdateUserInput } from "@repo/validation";
 import type {
+  UserAccountStats,
   UserRepository,
   UserWithSubDepartments,
 } from "../../domain/repositories/user.repository.js";
@@ -65,6 +66,7 @@ export class DrizzleUserRepository implements UserRepository {
     limit?: number;
     search?: string;
     role?: string;
+    status?: "ACTIVE" | "DEACTIVATED";
   }): Promise<{ users: UserWithSubDepartments[]; total: number }> {
     const db = (await import("@repo/database")).getDb();
     const page = Math.max(params.page ?? 1, 1);
@@ -79,6 +81,9 @@ export class DrizzleUserRepository implements UserRepository {
     }
     if (params.role) {
       conditions.push(eq(users.role, params.role));
+    }
+    if (params.status) {
+      conditions.push(eq(users.status, params.status));
     }
     const whereClause = conditions.length > 0 ? and(...conditions) : undefined;
 
@@ -96,6 +101,31 @@ export class DrizzleUserRepository implements UserRepository {
     return {
       users: await Promise.all(rows.map(hydrate)),
       total: countResult[0]?.value ?? 0,
+    };
+  }
+
+  async getStats(): Promise<UserAccountStats> {
+    const db = (await import("@repo/database")).getDb();
+
+    const [statusRows, roleRows, totalRows] = await Promise.all([
+      db.select({ status: users.status, value: count() }).from(users).groupBy(users.status),
+      db.select({ role: users.role, value: count() }).from(users).groupBy(users.role),
+      db.select({ value: count() }).from(users),
+    ]);
+
+    const byStatus = new Map(statusRows.map((r) => [r.status, r.value]));
+    const active = byStatus.get("ACTIVE") ?? 0;
+    const deactivated = byStatus.get("DEACTIVATED") ?? 0;
+    const byRole: Record<string, number> = {};
+    for (const row of roleRows) {
+      byRole[row.role] = row.value;
+    }
+
+    return {
+      total: totalRows[0]?.value ?? active + deactivated,
+      active,
+      deactivated,
+      byRole,
     };
   }
 

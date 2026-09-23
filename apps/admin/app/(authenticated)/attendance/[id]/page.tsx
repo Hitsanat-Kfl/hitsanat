@@ -3,9 +3,9 @@
 import Link from "next/link";
 import { useParams } from "next/navigation";
 import { Button, Spinner } from "@repo/ui";
-import { Checksheet } from "@/features/attendance";
-import { useSessionDetail } from "@/features/attendance";
-import { PageShell } from "@/features/shell";
+import { Checksheet } from "@/features/attendance-management";
+import { useSessionDetail } from "@/features/attendance-management";
+import { PageShell } from "@/widgets/shell";
 
 export default function AttendanceSessionPage() {
   const params = useParams();

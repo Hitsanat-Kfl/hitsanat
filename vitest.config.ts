@@ -7,9 +7,9 @@ export default defineConfig({
   resolve: {
     alias: [
       {
-        // Admin app's tsconfig "@/*" mapping (scoped regex so @repo/* is untouched)
+        // Admin app's tsconfig "@/*" → src/* mapping (scoped regex so @repo/* is untouched)
         find: /^@\/(.*)$/,
-        replacement: `${path.resolve(__dirname, "./apps/admin")}/$1`,
+        replacement: `${path.resolve(__dirname, "./apps/admin/src")}/$1`,
       },
       {
         find: "@repo/ui/components",

@@ -1,7 +1,7 @@
 import { render, screen, waitFor, within } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
-import { SuperAdminDashboardPage } from "../features/dashboard/components/super-admin-dashboard";
-import { I18nProvider, ShellProvider } from "../features/shell";
+import { SuperAdminDashboardPage } from "../src/widgets/dashboard/components/super-admin-dashboard";
+import { TestProviders } from "./test-providers";
 
 const fixtures = vi.hoisted(() => {
   const usersPage = {
@@ -93,7 +93,27 @@ const fixtures = vi.hoisted(() => {
   };
 
   const getFixture = (endpoint: string): unknown => {
+    if (endpoint.startsWith("/users/stats")) {
+      return {
+        success: true,
+        data: {
+          total: 3,
+          active: 2,
+          deactivated: 1,
+          byRole: { CHAIRPERSON: 1, SECRETARY: 1, SUB_CHAIRPERSON: 1 },
+        },
+      };
+    }
     if (endpoint.startsWith("/users")) return usersPage;
+    if (endpoint.startsWith("/system-metadata")) {
+      return {
+        success: true,
+        data: [
+          { key: "schema_tag", value: "0006_user_status", updatedAt: "2026-09-20T00:00:00Z" },
+          { key: "seed_status", value: "applied", updatedAt: "2026-09-20T00:00:00Z" },
+        ],
+      };
+    }
     if (endpoint.startsWith("/sub-departments")) return { success: true, data: [] };
     if (endpoint.startsWith("/health")) return health;
     if (endpoint.startsWith("/members")) return membersPage;
@@ -104,7 +124,7 @@ const fixtures = vi.hoisted(() => {
   return { getFixture };
 });
 
-vi.mock("../lib/api-client", () => ({
+vi.mock("@/infrastructure/api/client", () => ({
   api: {
     get: vi
       .fn()
@@ -115,11 +135,9 @@ vi.mock("../lib/api-client", () => ({
 
 function renderDashboard() {
   return render(
-    <I18nProvider>
-      <ShellProvider>
-        <SuperAdminDashboardPage />
-      </ShellProvider>
-    </I18nProvider>
+    <TestProviders>
+      <SuperAdminDashboardPage />
+    </TestProviders>
   );
 }
 
@@ -192,13 +210,15 @@ describe("Super Admin dashboard", () => {
     expect(within(roster).getByText("MEZMUR Leader")).toBeDefined();
   });
 
-  it("shows system status and audit activity", async () => {
+  it("shows system status with schema/seed metadata and audit activity", async () => {
     renderDashboard();
 
     const statusPanel = await screen.findByRole("region", { name: "System Status" });
     expect(await within(statusPanel).findByText("Operational")).toBeDefined();
     expect(within(statusPanel).getByText("v1.0.0")).toBeDefined();
     expect(within(statusPanel).getByText("test")).toBeDefined();
+    expect(within(statusPanel).getByText("0006_user_status")).toBeDefined();
+    expect(within(statusPanel).getByText("applied")).toBeDefined();
     expect(within(statusPanel).getByText(/Last checked/)).toBeDefined();
 
     // The deactivated account surfaces in the audit activity feed.

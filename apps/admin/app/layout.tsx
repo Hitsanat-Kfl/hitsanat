@@ -1,4 +1,5 @@
 import type { Metadata, Viewport } from "next";
+import { QueryProvider } from "@/providers";
 import "./globals.css";
 
 export const viewport: Viewport = {
@@ -18,7 +19,9 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="am" suppressHydrationWarning>
-      <body className="min-h-screen bg-background font-sans antialiased">{children}</body>
+      <body className="min-h-screen bg-background font-sans antialiased">
+        <QueryProvider>{children}</QueryProvider>
+      </body>
     </html>
   );
 }

@@ -21,6 +21,8 @@ if (!supabaseUrl || !supabaseServiceKey) {
 
 const supabase = createClient(supabaseUrl, supabaseServiceKey);
 
+const LEADERSHIP_ROLES = ["SUPER_ADMIN", "CHAIRPERSON", "SUB_CHAIRPERSON", "SECRETARY"];
+
 const users = [
   {
     name: "Super Admin",
@@ -59,6 +61,41 @@ const users = [
     role: "MEMBER_REGULAR",
   },
 ];
+
+/**
+ * BR-007: leadership accounts require an active member link.
+ * Mirrors seeds/users.ts ensureLeaderMember — create/reuse a placeholder
+ * member when none exists, then return its id for users.member_id.
+ */
+async function ensureLeaderMember(
+  db: ReturnType<typeof drizzle>,
+  user: { name: string; email: string; role: string }
+): Promise<string> {
+  const byName = await db.execute(sql`
+    SELECT id, is_active FROM members
+    WHERE full_name = ${user.name} OR CONCAT(full_name, ' ', christian_name) = ${user.name}
+    ORDER BY created_at ASC LIMIT 1
+  `);
+  const memberRow = (byName as unknown as Array<{ id: string; is_active: boolean }>)[0];
+  if (memberRow) {
+    if (!memberRow.is_active) {
+      throw new Error(
+        `BR-007 violation: member "${user.name}" is inactive — cannot link leadership account ${user.email}`
+      );
+    }
+    return memberRow.id;
+  }
+
+  const created = await db.execute(sql`
+    INSERT INTO members (full_name, christian_name, phone_number, year_of_study,
+                         academic_department, campus, gender)
+    VALUES (${user.name}, ${user.name}, ${`SEED-${user.email}`}, 'GC', 'Leadership', 'Main Campus', 'Male')
+    RETURNING id
+  `);
+  const newMember = (created as unknown as Array<{ id: string }>)[0];
+  console.log(`  Created placeholder member for leader: ${user.name}`);
+  return newMember.id;
+}
 
 async function wipeAndSeed() {
   const client = postgres(connectionString);
@@ -114,9 +151,14 @@ async function wipeAndSeed() {
 
     const authUserId = authData.user.id;
 
+    // BR-007: leadership accounts must link to an active member.
+    const memberId = LEADERSHIP_ROLES.includes(user.role)
+      ? await ensureLeaderMember(db, user)
+      : null;
+
     await db.execute(sql`
-      INSERT INTO users (id, name, email, email_verified, role)
-      VALUES (${authUserId}, ${user.name}, ${user.email}, true, ${user.role})
+      INSERT INTO users (id, name, email, email_verified, role, member_id)
+      VALUES (${authUserId}, ${user.name}, ${user.email}, true, ${user.role}, ${memberId})
     `);
 
     console.log(`  Created: ${user.email} (${user.role}) / password: ${user.password}`);

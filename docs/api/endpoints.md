@@ -22,7 +22,8 @@
 | **Reports** | `/api/v1/reports` | Periodic reports (Weekly, Monthly, Quarterly, Half-Year, Annual) |
 | **Announcements** | `/api/v1/announcements` | Announcement publishing, public feed, Telegram triggers |
 | **Public Portfolio**| `/api/v1/public` | Public stats, event countdowns, published news (No login required) |
-| **Users** | `/api/v1/users` | Account CRUD, password reset, deactivation (BR-008) |
+| **Users** | `/api/v1/users` | Account CRUD, stats, password reset, deactivation (BR-008) |
+| **System Metadata** | `/api/v1/system-metadata` | Seed/migration status rows for the Super Admin dashboard (SUPER_ADMIN only) |
 | **Audit Logs** | `/api/v1/audit-logs` | Administrative action trail (SUPER_ADMIN/CHAIRPERSON only) |
 | **Notifications** | `/api/v1/notifications` | In-app notification feed (approval requests, meeting reminders, reactivation events) |
 | **Approvals Inbox** | `/api/v1/approvals` | Unified pending-approval feed for executive dashboards (ADR-0018) |
@@ -94,17 +95,25 @@ Aggregated read-only view over the three approval domains (plan changes §2.22, 
 ### 2.7 User Management (`/api/v1/users`)
 > **Authorization:** BR-008 — Restricted to `SUPER_ADMIN` and `CHAIRPERSON` global roles.
 
-- `POST /api/v1/users`: Create a new user account with name, email, password, and role.
-- `GET /api/v1/users`: List all user accounts with pagination, search, and role filter.
+- `POST /api/v1/users`: Create a new user account with name, email, password, and role (BR-007 member link required for leadership).
+- `GET /api/v1/users`: List user accounts with pagination and filters (`search`, `role`, `status=ACTIVE|DEACTIVATED`).
+- `GET /api/v1/users/stats`: Authoritative account lifecycle counts — `{ total, active, deactivated, byRole }` (FR-13.4).
 - `GET /api/v1/users/:id`: Get a specific user's details.
-- `PATCH /api/v1/users/:id`: Update user details (name, email, role).
+- `PATCH /api/v1/users/:id`: Update user details (name, email, role, member link); revalidates BR-007/BR-009 (FR-13.7).
 - `POST /api/v1/users/:id/reset-password`: Reset a user's password to a temporary value.
 - `POST /api/v1/users/:id/deactivate`: Deactivate a user account (bans Supabase Auth account).
+- `POST /api/v1/users/:id/reactivate`: Restore a deactivated account (FR-13.6).
+- `POST /api/v1/users/:id/revoke-sessions`: Force sign-out of live sessions (FR-13.13).
+
+### 2.7a System Metadata (`/api/v1/system-metadata`)
+> **Authorization:** `SUPER_ADMIN` only.
+
+- `GET /api/v1/system-metadata`: Key-value seed/migration status rows (`schema_tag`, `seed_status`) used by the Super Admin System Status panel (FR-13.4).
 
 ### 2.8 Audit Logs (`/api/v1/audit-logs`)
 > **Authorization:** Restricted to `SUPER_ADMIN` and `CHAIRPERSON` global roles.
 
-- `GET /api/v1/audit-logs`: List recent audit log entries with `?limit=N` query parameter. Returns entries with: id, action, resourceType, resourceId, payloadDiff, ipAddress, timestamp.
+- `GET /api/v1/audit-logs`: List recent audit log entries with `?limit=N` query parameter. Returns entries with: id, action, resourceType, resourceId, payloadDiff, ipAddress, timestamp. `payloadDiff` is a text field (`email=...; role=...`).
 
 **Logged Actions:**
 | Action | Description |

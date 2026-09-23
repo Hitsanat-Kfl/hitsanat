@@ -1,4 +1,4 @@
-import { SuperAdminDashboardPage } from "@/features/dashboard";
+import { SuperAdminDashboardPage } from "@/widgets/dashboard";
 
 export const metadata = {
   title: "Super Admin | Hitsanat Kifl",

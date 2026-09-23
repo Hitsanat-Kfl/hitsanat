@@ -1,7 +1,7 @@
 "use client";
 
-import { SubChairpersonDashboardPage } from "@/features/dashboard";
-import { PageShell } from "@/features/shell";
+import { SubChairpersonDashboardPage } from "@/widgets/dashboard";
+import { PageShell } from "@/widgets/shell";
 
 export default function SubChairpersonPage() {
   return (

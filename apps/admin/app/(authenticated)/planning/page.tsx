@@ -3,7 +3,7 @@
 import { Badge, Button, Card, CardContent, CardHeader } from "@repo/ui";
 import Link from "next/link";
 import { usePlans } from "@/features/planning";
-import { AlertBanner, PageEmpty, PageLoading, PageShell } from "@/features/shell";
+import { AlertBanner, PageEmpty, PageLoading, PageShell } from "@/widgets/shell";
 
 export default function PlanningListPage() {
   const { plans, loading, error, refresh } = usePlans();

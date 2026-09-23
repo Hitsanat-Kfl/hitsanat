@@ -1,8 +1,13 @@
 "use client";
 
 import { Button } from "@repo/ui";
-import { ChildFiltersBar, ChildList, ChildPagination, useChildren } from "@/features/children";
-import { AlertBanner, PageShell } from "@/features/shell";
+import {
+  ChildFiltersBar,
+  ChildList,
+  ChildPagination,
+  useChildren,
+} from "@/features/child-management";
+import { AlertBanner, PageShell } from "@/widgets/shell";
 
 export default function ChildListPage() {
   const { children, pagination, loading, error, filters, setFilters, refresh } = useChildren({

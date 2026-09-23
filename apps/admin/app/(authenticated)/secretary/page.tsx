@@ -1,7 +1,7 @@
 "use client";
 
-import { SecretaryDashboardPage } from "@/features/dashboard";
-import { PageShell } from "@/features/shell";
+import { SecretaryDashboardPage } from "@/widgets/dashboard";
+import { PageShell } from "@/widgets/shell";
 
 export default function SecretaryPage() {
   return (

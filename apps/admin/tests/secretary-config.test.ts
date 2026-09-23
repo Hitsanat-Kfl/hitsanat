@@ -4,7 +4,7 @@ import {
   getDashboardConfig,
   getSectionsForRole,
   secretaryConfig,
-} from "../features/dashboard/config";
+} from "../src/config/dashboard";
 
 describe("secretary dashboard config (Phase 06)", () => {
   it("maps the secretary role to its own config, not the placeholder", () => {

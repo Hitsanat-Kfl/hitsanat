@@ -1,4 +1,4 @@
-import UsersPage from "@/features/users/components/users-page";
+import UsersPage from "@/features/user-management/components/users-page";
 
 export const metadata = {
   title: "User Accounts | Hitsanat Kifl",

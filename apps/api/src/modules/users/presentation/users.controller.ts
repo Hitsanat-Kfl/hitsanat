@@ -8,6 +8,7 @@ import {
   type UserAuditSink,
   CreateUserAccountUseCase,
   DeactivateUserUseCase,
+  GetUserStatsUseCase,
   GetUserUseCase,
   ListUsersUseCase,
   ReactivateUserUseCase,
@@ -38,13 +39,18 @@ const auditSink: UserAuditSink = {
 
 /**
  * Builds the audit context from the verified session: who performed the
- * action. Returns undefined when no session user is present (use-cases
- * treat that as "skip audit", though management endpoints always have one).
+ * action and from which IP (FR-13.2). Returns undefined when no session
+ * user is present (use-cases treat that as "skip audit", though management
+ * endpoints always have one).
  */
 function auditContext(req: Request): UserAuditContext | undefined {
   const user = req.sessionUser;
   if (!user) return undefined;
-  return { auditSink, actor: { id: user.id, email: user.email } };
+  return {
+    auditSink,
+    actor: { id: user.id, email: user.email },
+    ipAddress: req.ip ?? null,
+  };
 }
 
 /**
@@ -118,6 +124,7 @@ export async function resetPassword(req: Request, res: Response) {
           resourceType: "user",
           resourceId: user.id,
           payloadDiff: `email=${user.email}`,
+          ipAddress: req.ip,
         }
       );
     }
@@ -180,12 +187,16 @@ export async function revokeUserSessions(req: Request, res: Response) {
 export async function listUsers(req: Request, res: Response) {
   try {
     assertManagementPermission(req);
+    const statusParam = req.query.status;
+    const status =
+      statusParam === "ACTIVE" || statusParam === "DEACTIVATED" ? statusParam : undefined;
     const useCase = new ListUsersUseCase(userRepository);
     const result = await useCase.execute({
       page: Number(req.query.page) || 1,
       limit: Number(req.query.limit) || 20,
       search: req.query.search as string | undefined,
       role: req.query.role as string | undefined,
+      status,
     });
     res.status(200).json({
       success: true,
@@ -197,6 +208,18 @@ export async function listUsers(req: Request, res: Response) {
         totalPages: Math.ceil(result.total / (Number(req.query.limit) || 20)),
       },
     });
+  } catch (error) {
+    handleError(res, error);
+  }
+}
+
+/** FR-13.4: authoritative account lifecycle counts for the Super Admin dashboard. */
+export async function getUserStats(req: Request, res: Response) {
+  try {
+    assertManagementPermission(req);
+    const useCase = new GetUserStatsUseCase(userRepository);
+    const stats = await useCase.execute();
+    res.status(200).json({ success: true, data: stats });
   } catch (error) {
     handleError(res, error);
   }

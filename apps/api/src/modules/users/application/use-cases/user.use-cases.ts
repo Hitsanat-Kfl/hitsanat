@@ -58,6 +58,8 @@ export interface UserAuditSink {
       resourceType: string;
       resourceId: string;
       payloadDiff?: string;
+      /** FR-13.2: client IP for administrative audit rows. */
+      ipAddress?: string;
     }
   ): Promise<void>;
 }
@@ -65,6 +67,8 @@ export interface UserAuditSink {
 export interface UserAuditContext {
   auditSink?: UserAuditSink;
   actor?: AuditActorInfo | null;
+  /** FR-13.2: forwarded into every audit record from this context. */
+  ipAddress?: string | null;
 }
 
 /**
@@ -137,6 +141,7 @@ export class CreateUserAccountUseCase {
         resourceType: "user",
         resourceId: created.id,
         payloadDiff: `email=${input.email}; role=${input.role}`,
+        ipAddress: this.audit.ipAddress ?? undefined,
       });
     }
 
@@ -234,6 +239,7 @@ export class UpdateUserAccountUseCase {
         resourceType: "user",
         resourceId: updated.id,
         payloadDiff: diffs.join("; "),
+        ipAddress: this.audit.ipAddress ?? undefined,
       });
     }
 
@@ -249,8 +255,26 @@ export class UpdateUserAccountUseCase {
 export class ListUsersUseCase {
   constructor(private readonly userRepository: UserRepository) {}
 
-  async execute(params: { page?: number; limit?: number; search?: string; role?: string }) {
+  async execute(params: {
+    page?: number;
+    limit?: number;
+    search?: string;
+    role?: string;
+    status?: "ACTIVE" | "DEACTIVATED";
+  }) {
     return this.userRepository.list(params);
+  }
+}
+
+/**
+ * FR-13.4: authoritative lifecycle counts for the Super Admin dashboard
+ * (active / deactivated / by role) — not derived from a single page of rows.
+ */
+export class GetUserStatsUseCase {
+  constructor(private readonly userRepository: UserRepository) {}
+
+  async execute() {
+    return this.userRepository.getStats();
   }
 }
 
@@ -306,6 +330,7 @@ export class DeactivateUserUseCase {
         resourceType: "user",
         resourceId: user.id,
         payloadDiff: `email=${user.email}`,
+        ipAddress: this.audit.ipAddress ?? undefined,
       });
     }
   }
@@ -338,6 +363,7 @@ export class ReactivateUserUseCase {
         resourceType: "user",
         resourceId: user.id,
         payloadDiff: `email=${user.email}`,
+        ipAddress: this.audit.ipAddress ?? undefined,
       });
     }
   }
@@ -366,6 +392,7 @@ export class RevokeUserSessionsUseCase {
         resourceType: "user",
         resourceId: user.id,
         payloadDiff: `email=${user.email}`,
+        ipAddress: this.audit.ipAddress ?? undefined,
       });
     }
   }
