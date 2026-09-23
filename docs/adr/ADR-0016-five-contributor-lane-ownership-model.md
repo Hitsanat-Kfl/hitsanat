@@ -18,7 +18,7 @@ Uncoordinated modifications across domain architecture, authentication, database
 
 ## Decision
 Formalize strict lane boundaries:
-1. **Core Lead (Abrham):** Owns overall system architecture, database schema, Better Auth, scoped RBAC, core domain calculation engines, CI/CD, and all backend code reviews.
+1. **Core Lead (Abrham):** Owns overall system architecture, database schema, Supabase Auth, scoped RBAC, core domain calculation engines, CI/CD, and all backend code reviews.
 2. **Supporting Backend (Israel):** Implements well-defined CRUD endpoints, Zod schemas, seed scripts, focused integration tests, and documentation under mandatory Core Lead review. Cannot self-merge.
 3. **Frontend Lane (2 Contributors):** Owns Next.js admin portal, portfolio site, shadcn/ui components, and TanStack Query integration against approved API contracts.
 

@@ -64,6 +64,18 @@ const fixtures = vi.hoisted(() => {
     environment: "test",
   };
 
+  const membersPage = {
+    success: true,
+    data: [],
+    pagination: { page: 1, limit: 1, total: 12, totalPages: 12 },
+  };
+
+  const childrenPage = {
+    success: true,
+    data: [],
+    pagination: { page: 1, limit: 1, total: 7, totalPages: 7 },
+  };
+
   const auditLogs = {
     success: true,
     data: [
@@ -84,6 +96,8 @@ const fixtures = vi.hoisted(() => {
     if (endpoint.startsWith("/users")) return usersPage;
     if (endpoint.startsWith("/sub-departments")) return { success: true, data: [] };
     if (endpoint.startsWith("/health")) return health;
+    if (endpoint.startsWith("/members")) return membersPage;
+    if (endpoint.startsWith("/children")) return childrenPage;
     if (endpoint.startsWith("/audit-logs")) return auditLogs;
     return { success: true, data: [] };
   };
@@ -115,7 +129,7 @@ describe("Super Admin dashboard", () => {
 
     // "Unverified But Active" (emailVerified: false, status: ACTIVE) must
     // not appear in the Deactivated Accounts widget (it may appear in
-    // Recently Provisioned / roster, which list all accounts).
+    // Recent Accounts, which lists all accounts).
     await screen.findByText("Deactivated Accounts");
     const deactivatedWidget = screen
       .getByRole("region", { name: "Deactivated Accounts" })
@@ -129,23 +143,28 @@ describe("Super Admin dashboard", () => {
 
     // Only the truly deactivated account is listed.
     await waitFor(() => {
-      expect(screen.getAllByText(/gone@hitsanat\.org/).length).toBeGreaterThanOrEqual(1);
+      expect(
+        within(deactivatedWidget as HTMLElement).getAllByText(/gone@hitsanat\.org/).length
+      ).toBeGreaterThanOrEqual(1);
     });
 
-    // Account status donut legend counts by lifecycle status (2 active, 1 deactivated).
+    // System Snapshot counts accounts by lifecycle status (2 active, 1 deactivated).
+    const snapshot = screen.getByRole("region", { name: "System Snapshot" });
     await waitFor(() => {
-      const donut = screen.getByRole("img", { name: /Account status: 2 active, 1 deactivated/ });
-      expect(donut).toBeDefined();
-      expect(within(donut.closest("figure") as HTMLElement).getByText("Deactivated")).toBeDefined();
+      expect(within(snapshot).getByText("2 active · 1 deactivated")).toBeDefined();
     });
   });
 
-  it("KPIs reflect lifecycle status counts", async () => {
+  it("System Snapshot reflects collection totals from pagination", async () => {
     renderDashboard();
 
-    await screen.findByText("Active Accounts");
-    expect(screen.getByText("Status ACTIVE")).toBeDefined();
-    expect(screen.getByText("User Accounts")).toBeDefined();
+    const snapshot = await screen.findByRole("region", { name: "System Snapshot" });
+    expect(within(snapshot).getByText("User Accounts")).toBeDefined();
+    expect(within(snapshot).getByText("3")).toBeDefined();
+    expect(within(snapshot).getByText("Members")).toBeDefined();
+    expect(within(snapshot).getByText("12")).toBeDefined();
+    expect(within(snapshot).getByText("Children")).toBeDefined();
+    expect(within(snapshot).getByText("7")).toBeDefined();
   });
 
   it("lists deactivated accounts with one-click reactivation", async () => {
@@ -154,30 +173,49 @@ describe("Super Admin dashboard", () => {
     expect(await screen.findByRole("button", { name: /Reactivate Gone Leader/i })).toBeDefined();
   });
 
-  it("renders the leadership roster with BR-009 conflict highlighting", async () => {
+  it("renders the leadership roster with BR-009 conflict highlighting and unassigned posts", async () => {
     renderDashboard();
 
-    await screen.findByText("Leadership Roster");
+    const roster = await screen.findByRole("region", { name: "Leadership Roster" });
 
     // The double-hatted member appears with the conflict marker…
     // Posts are joined with " · " so the full text contains Secretary and TIMIHRT.
-    expect(await screen.findByText(/Secretary.*TIMIHRT/)).toBeDefined();
-    // …and the BR-009 banner is shown.
-    expect(screen.getByText(/member holds more than one leadership post/)).toBeDefined();
-
+    expect(await within(roster).findByText(/Secretary.*TIMIHRT/)).toBeDefined();
     // …and the conflict row carries the warning indicator.
-    const conflictRow = screen.getByText(/Secretary.*TIMIHRT/).closest("tr");
+    const conflictRow = within(roster)
+      .getByText(/Secretary.*TIMIHRT/)
+      .closest("tr");
     expect(conflictRow?.querySelector("svg")).not.toBeNull();
+
+    // Canonical posts with no active holder render as unassigned rows.
+    expect(within(roster).getAllByText(/Unassigned/).length).toBeGreaterThanOrEqual(1);
+    expect(within(roster).getByText("MEZMUR Leader")).toBeDefined();
   });
 
-  it("shows system health and audit activity", async () => {
+  it("shows system status and audit activity", async () => {
     renderDashboard();
 
-    expect(await screen.findByText("API Status")).toBeDefined();
-    expect(await screen.findByText(/Operational · v1\.0\.0 · test/)).toBeDefined();
+    const statusPanel = await screen.findByRole("region", { name: "System Status" });
+    expect(await within(statusPanel).findByText("Operational")).toBeDefined();
+    expect(within(statusPanel).getByText("v1.0.0")).toBeDefined();
+    expect(within(statusPanel).getByText("test")).toBeDefined();
+    expect(within(statusPanel).getByText(/Last checked/)).toBeDefined();
+
     // The deactivated account surfaces in the audit activity feed.
     await waitFor(() => {
       expect(screen.getAllByText(/gone@hitsanat\.org/).length).toBeGreaterThanOrEqual(1);
     });
+  });
+
+  it("renders administrative work with counts and frequent administration tiles", async () => {
+    renderDashboard();
+
+    const work = await screen.findByRole("region", { name: "Administrative Work" });
+    expect(within(work).getByText("Accounts requiring review")).toBeDefined();
+    expect(within(work).getAllByText("01").length).toBeGreaterThanOrEqual(1);
+
+    const tiles = screen.getByRole("region", { name: "Frequent Administration" });
+    expect(within(tiles).getByText("User Accounts")).toBeDefined();
+    expect(within(tiles).getByText("Audit Logs")).toBeDefined();
   });
 });

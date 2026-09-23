@@ -11,7 +11,7 @@ These tasks involve complex business logic, domain services, and architectural p
 
 | Task ID | Task | Phase | Complexity |
 |:---|:---|:---|:---|
-| AUTH-001 | Better Auth Configuration | Phase 2 | High |
+| AUTH-001 | Supabase Auth Configuration | Phase 2 | High |
 | AUTH-003 | Scoped RBAC Middleware | Phase 2 | High |
 | AUTH-004 | Auth API Endpoints | Phase 2 | High |
 | ORG-001 | Member API: Stage 1 Registration | Phase 3 | High |

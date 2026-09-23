@@ -37,7 +37,7 @@ The repository foundation is complete:
 |:---:|:---|:---|
 | 0 | Architecture & Planning | Schema contracts, API contracts, shared packages |
 | 1 | Engineering Foundation | Auth, RBAC, database schemas, shared infrastructure |
-| 2 | Authentication & Authorization | Better Auth, scoped guards, login flows |
+| 2 | Authentication & Authorization | Supabase Auth, scoped guards, login flows |
 | 3 | Organization Structure | Members, families, sub-departments |
 | 4 | Member Management | Registration, allocation, profiles |
 | 5 | Planning | Annual master plan, distribution, weekly execution |

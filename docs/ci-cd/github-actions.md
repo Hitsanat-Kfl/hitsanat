@@ -1,7 +1,7 @@
 # CI/CD: GitHub Actions Workflow Specification
 
 ## Hitsanat Kifl Children's Ministry Management System
-**Document Version:** 2.1  
+**Document Version:** 2.2  
 **Workflow File:** `.github/workflows/ci.yml`  
 
 ---
@@ -10,50 +10,49 @@
 
 ```mermaid
 graph TD
-    Trigger[Push / Pull Request to main] --> Checkout[1. Checkout Repository]
-    Checkout --> SetupNode[2. Setup Node.js 24 & pnpm 9]
-    SetupNode --> InstallDeps[3. pnpm install --frozen-lockfile]
-    InstallDeps --> BiomeLint[4. Biome Lint & Format Check]
-    BiomeLint --> Typecheck[5. TypeScript Typecheck turbo run typecheck]
-    Typecheck --> UnitTests[6. Unit Tests Vitest]
-    UnitTests --> ComponentTests[7. Component Tests React Testing Library]
-    ComponentTests --> SpinDB[8. Docker Spin-Up PostgreSQL Test DB]
-    SpinDB --> Migrations[9. Apply Drizzle Migrations]
-    Migrations --> IntegrationTests[10. Integration & Contract Tests]
-    IntegrationTests --> SecurityTests[11. RBAC & Security Tests]
-    SecurityTests --> TurboBuild[12. Production Build turbo run build]
-    TurboBuild --> PlaywrightE2E[13. Playwright E2E & a11y Tests]
-    PlaywrightE2E --> Pass[PASS - PR Mergeable]
+    Trigger[Push / PR to main, develop, release, feature, fix, chore] --> Checkout[1. Checkout Repository]
+    Checkout --> SetupTooling[2. Setup pnpm 9.15.9 & Node.js 22]
+    SetupTooling --> InstallDeps[3. pnpm install --frozen-lockfile]
+    InstallDeps --> Playwright[4. Install Playwright Chromium]
+    Playwright --> BiomeLint[5. Biome Lint & Format Check]
+    BiomeLint --> Typecheck[6. TypeScript Typecheck]
+    Typecheck --> UnitTests[7. Unit Tests]
+    UnitTests --> Migrations[8. Apply Drizzle Migrations]
+    Migrations --> IntegrationTests[9. PostgreSQL Integration Tests]
+    IntegrationTests --> TurboBuild[10. Production Build]
+    TurboBuild --> Pass[PASS - PR Mergeable]
 ```
+
+PostgreSQL 16 is provided as a GitHub Actions **service container** (`postgres:16-alpine`) — no separate Docker spin-up step.
 
 ---
 
-## 2. `.github/workflows/ci.yml` Configuration
+## 2. `.github/workflows/ci.yml` Configuration (actual)
 
 ```yaml
 name: CI Pipeline
 
 on:
   push:
-    branches: [main]
+    branches: ["main", "master", "develop", "release/**", "feature/**", "fix/**", "chore/**"]
   pull_request:
-    branches: [main]
+    branches: ["main", "master", "develop"]
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
 
 jobs:
-  verify:
-    name: Lint, Typecheck & Test Suite
+  quality-gate:
+    name: Code Quality, Tests & Build
     runs-on: ubuntu-latest
 
     services:
       postgres:
-        image: postgres:15-alpine
+        image: postgres:16-alpine
         env:
-          POSTGRES_USER: test_user
-          POSTGRES_PASSWORD: test_password
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgrespassword
           POSTGRES_DB: hitsanat_test
         ports:
           - 5432:5432
@@ -63,53 +62,52 @@ jobs:
           --health-timeout 5s
           --health-retries 5
 
+    env:
+      DATABASE_URL: postgresql://postgres:postgrespassword@localhost:5432/hitsanat_test
+      TEST_DATABASE_URL: postgresql://postgres:postgrespassword@localhost:5432/hitsanat_test
+      SUPABASE_URL: http://localhost:54321
+      SUPABASE_ANON_KEY: ci-anon-key
+      NEXT_PUBLIC_SUPABASE_URL: http://localhost:54321
+      NEXT_PUBLIC_SUPABASE_ANON_KEY: ci-anon-key
+
     steps:
-      - name: Checkout Code
+      - name: Checkout Repository
         uses: actions/checkout@v4
 
-      - name: Setup Node.js 24
+      - name: Install pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 9.15.9
+
+      - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: 24
-
-      - name: Setup pnpm
-        uses: pnpm/action-setup@v3
-        with:
-          version: 9
+          node-version: 22
+          cache: "pnpm"
 
       - name: Install Dependencies
-        run: pnpm install --frozen-lockfile
+        run: pnpm install --frozen-lockfile --ignore-scripts || pnpm install --ignore-scripts
 
-      - name: Biome Lint & Format Check
-        run: pnpm lint
+      - name: Install Playwright Browsers
+        run: pnpm exec playwright install chromium
+
+      - name: Biome Format & Lint Check
+        run: |
+          pnpm format:check
+          pnpm lint
 
       - name: TypeScript Typecheck
         run: pnpm typecheck
 
-      - name: Unit & Calculation Engine Tests
+      - name: Run Unit Tests
         run: pnpm test:unit
 
-      - name: Component Tests
-        run: pnpm test:component
-
       - name: Run Database Migrations
-        env:
-          DATABASE_URL: postgresql://test_user:test_password@localhost:5432/hitsanat_test
-        run: pnpm db:migrate
+        run: pnpm --filter @repo/database db:migrate
 
-      - name: Integration & RBAC Security Tests
-        env:
-          DATABASE_URL: postgresql://test_user:test_password@localhost:5432/hitsanat_test
+      - name: Run PostgreSQL Integration Tests
         run: pnpm test:integration
+```
 
-      - name: Production Build
-        run: pnpm build
-
-      - name: Install Playwright Browsers
-        run: pnpm exec playwright install --with-deps chromium
-
-      - name: Playwright E2E & Accessibility Tests
-        env:
-          DATABASE_URL: postgresql://test_user:test_password@localhost:5432/hitsanat_test
-        run: pnpm test:e2e
+> Note: CI uses placeholder `SUPABASE_*` values so admin middleware (`createServerClient`) can boot. Real deployments override them with live Supabase project credentials.
 ```

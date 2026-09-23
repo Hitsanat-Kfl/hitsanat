@@ -2,7 +2,7 @@
 
 ## Hitsanat Kifl Children's Ministry Management System
 **Document Version:** 2.1  
-**Target Database:** PostgreSQL 15+  
+**Target Database:** PostgreSQL 16+  
 
 ---
 

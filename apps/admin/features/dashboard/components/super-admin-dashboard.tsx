@@ -5,21 +5,17 @@ import { api } from "@/lib/api-client";
 import { Skeleton } from "@repo/ui";
 import {
   AlertTriangle,
-  ArrowUpRight,
-  BarChart3,
-  Building2,
+  Baby,
   ChevronRight,
   FileText,
-  HeartPulse,
   KeyRound,
   Layers,
-  UserCheck,
   UserCog,
   Users,
   type LucideIcon,
 } from "lucide-react";
 import Link from "next/link";
-import { useState, type CSSProperties, type ReactNode } from "react";
+import { useEffect, useState, type ReactNode } from "react";
 import { useAuditLogs } from "../hooks/use-audit-logs";
 import {
   type AdminUserRow,
@@ -30,38 +26,20 @@ import {
 } from "../hooks/use-super-admin-dashboard";
 
 // ============================================================
-// Presentational helpers — formatting only, no business rules.
-// ============================================================
-
-function formatDate(value: string | null): string {
-  if (!value) return "—";
-  const parsed = new Date(value);
-  if (Number.isNaN(parsed.getTime())) return "—";
-  return parsed.toLocaleDateString("en-ET", { month: "short", day: "numeric", year: "numeric" });
-}
-
-// ============================================================
-// Design tokens — Phase 01 semantic tokens where available;
-// the rest are local to this dashboard page.
+// Design tokens — Design System v1.0 brand values (exact).
 // ============================================================
 
 const T = {
   burgundy: "#5F0113",
-  burgundyLight: "#F8EEF2",
+  burgundyPale: "#F8EEF2",
   gold: "#F3C913",
-  goldLight: "#F9EEDB",
   foreground: "#182235",
-  muted: "#718096",
-  border: "#E7EBEF",
-  borderLight: "#F3F5F7",
-  track: "#E9EDF1",
-  success: "#159A70",
-  successLight: "#E8F7F1",
-  warning: "#D99127",
-  warningLight: "#FFF3DF",
-  destructive: "#C94B55",
-  destructiveLight: "#F8E8EA",
-  conflictBg: "#FFF8EC",
+  secondary: "#667085",
+  border: "#E5E7EB",
+  mutedSurface: "#F7F8F9",
+  success: "#16834A",
+  warning: "#B7791F",
+  destructive: "#B42318",
 } as const;
 
 const QUICK_ACTION_ICONS: Record<QuickActionIconKey, LucideIcon> = {
@@ -69,14 +47,14 @@ const QUICK_ACTION_ICONS: Record<QuickActionIconKey, LucideIcon> = {
   "audit-logs": FileText,
   permissions: KeyRound,
   members: Users,
-  "sub-departments": Building2,
-  reports: BarChart3,
+  children: Baby,
+  "sub-departments": Layers,
 };
 
 const ROLE_BADGE_LABELS: Record<string, string> = {
   SUPER_ADMIN: "Super Admin",
   CHAIRPERSON: "Chairperson",
-  SUB_CHAIRPERSON: "Vice Chairperson",
+  SUB_CHAIRPERSON: "Sub-Chairperson",
   SECRETARY: "Secretary",
 };
 
@@ -84,9 +62,70 @@ function roleBadgeLabel(role: string): string {
   return ROLE_BADGE_LABELS[role] ?? role;
 }
 
+function initialsOf(name: string): string {
+  return name
+    .split(/\s+/)
+    .filter(Boolean)
+    .slice(0, 2)
+    .map((part) => part[0]?.toUpperCase() ?? "")
+    .join("");
+}
+
+/** Compact relative time for the Recent Accounts list. */
+function relativeTime(value: string | null): string {
+  if (!value) return "—";
+  const parsed = new Date(value);
+  if (Number.isNaN(parsed.getTime())) return "—";
+  const diffMs = Date.now() - parsed.getTime();
+  const minutes = Math.floor(diffMs / 60000);
+  if (minutes < 1) return "Just now";
+  if (minutes < 60) return `${minutes}m ago`;
+  const hours = Math.floor(minutes / 60);
+  if (hours < 24) return `${hours}h ago`;
+  const days = Math.floor(hours / 24);
+  if (days === 1) return "Yesterday";
+  if (days < 7) return `${days} days ago`;
+  return parsed.toLocaleDateString("en-ET", { month: "short", day: "numeric" });
+}
+
+/** Human-readable verb per audit action code (mirrors audit-logs feature display). */
+const AUDIT_ACTION_LABELS: Record<string, string> = {
+  USER_CREATED: "created user account",
+  USER_UPDATED: "updated user account",
+  USER_DEACTIVATED: "deactivated user account",
+  USER_REACTIVATED: "reactivated user account",
+  SESSIONS_REVOKED: "revoked sessions for",
+  BYPASS_ACTION: "performed bypass action on",
+  PASSWORD_RESET: "reset password for",
+};
+
+function auditActionLabel(action: string): string {
+  return AUDIT_ACTION_LABELS[action] ?? action.toLowerCase().replaceAll("_", " ");
+}
+
+/** payloadDiff carries "email=...; role=..." — extract the email for the details column. */
+function auditEntityLabel(entry: { payloadDiff: string | null; resourceId: string }): string {
+  const emailMatch = entry.payloadDiff?.match(/email=([^;]+)/);
+  return emailMatch?.[1] ?? entry.resourceId;
+}
+
+/** Time-of-day label for audit entries (e.g. "10:42 AM", "Yesterday", "Sep 20, 2026"). */
+function auditTimeLabel(value: string): string {
+  const parsed = new Date(value);
+  if (Number.isNaN(parsed.getTime())) return "—";
+  const now = new Date();
+  const startOfToday = new Date(now.getFullYear(), now.getMonth(), now.getDate()).getTime();
+  if (parsed.getTime() >= startOfToday) {
+    return parsed.toLocaleTimeString("en-US", { hour: "numeric", minute: "2-digit" });
+  }
+  const startOfYesterday = startOfToday - 86400000;
+  if (parsed.getTime() >= startOfYesterday) return "Yesterday";
+  return parsed.toLocaleDateString("en-ET", { month: "short", day: "numeric", year: "numeric" });
+}
+
 // ============================================================
-// Widget primitives — white surface, hairline border, 6px radius,
-// minimal shadow. Consistent 12px internal padding.
+// Shared primitives — white surface, hairline #E5E7EB border,
+// 8px radius, no shadows (borders over elevation).
 // ============================================================
 
 function Widget({
@@ -94,23 +133,26 @@ function Widget({
   action,
   children,
   className = "",
+  id,
 }: {
   title: string;
   action?: ReactNode;
   children: ReactNode;
   className?: string;
+  id?: string;
 }) {
   return (
     <section
-      className={`flex flex-col overflow-hidden rounded-md border bg-card ${className}`}
+      id={id}
+      className={`flex flex-col overflow-hidden rounded-lg border bg-card ${className}`}
       style={{ borderColor: T.border }}
       aria-label={title}
     >
       <header
-        className="flex min-h-[44px] items-center justify-between gap-2 border-b px-4 py-2.5"
+        className="flex min-h-[48px] items-center justify-between gap-2 border-b px-5 py-3"
         style={{ borderColor: T.border }}
       >
-        <h2 className="text-[13px] font-semibold" style={{ color: T.foreground }}>
+        <h2 className="text-[15px] font-semibold" style={{ color: T.foreground }}>
           {title}
         </h2>
         {action}
@@ -124,79 +166,21 @@ function ViewAll({ href, label = "View all" }: { href: string; label?: string })
   return (
     <Link
       href={href}
-      className="text-[11px] font-medium text-muted-foreground underline-offset-2 hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+      className="inline-flex items-center gap-1 text-[12px] font-medium underline-offset-2 hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+      style={{ color: T.secondary }}
     >
       {label}
+      <ChevronRight className="h-3.5 w-3.5" aria-hidden="true" />
     </Link>
   );
 }
-
-// ============================================================
-// KPI Card — compact, value-dominant, no decorative excess.
-// ============================================================
-
-function KpiCard({
-  label,
-  value,
-  supporting,
-  icon: Icon,
-  iconStyle,
-  href,
-}: {
-  label: string;
-  value: string;
-  supporting: string;
-  icon: LucideIcon;
-  iconStyle: CSSProperties;
-  href: string;
-}) {
-  return (
-    <Link
-      href={href}
-      className="group flex items-start justify-between gap-3 rounded-md border bg-card p-4 transition-colors hover:bg-muted/30 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
-      style={{ borderColor: T.border }}
-    >
-      <div className="min-w-0 flex-1">
-        <p className="text-[11px] font-medium uppercase tracking-wide" style={{ color: T.muted }}>
-          {label}
-        </p>
-        <p
-          className="mt-1.5 text-[28px] font-bold tabular-nums leading-none tracking-tight"
-          style={{ color: T.foreground }}
-        >
-          {value}
-        </p>
-        <p className="mt-1.5 text-[11px]" style={{ color: T.muted }}>
-          {supporting}
-        </p>
-      </div>
-      <div className="flex items-start gap-2">
-        <span
-          className="flex h-8 w-8 shrink-0 items-center justify-center rounded-md"
-          style={iconStyle}
-        >
-          <Icon className="h-4 w-4" aria-hidden="true" />
-        </span>
-        <ArrowUpRight
-          className="h-3.5 w-3.5 shrink-0 opacity-0 transition-all group-hover:opacity-100 group-hover:-translate-y-0.5 group-hover:translate-x-0.5"
-          style={{ color: T.muted }}
-          aria-hidden="true"
-        />
-      </div>
-    </Link>
-  );
-}
-
-// ============================================================
-// Table primitives — compact, scannable, consistent density.
-// ============================================================
 
 function Th({ children, className = "" }: { children: ReactNode; className?: string }) {
   return (
     <th
       scope="col"
-      className={`whitespace-nowrap px-3 py-2 text-left text-[11px] font-medium uppercase tracking-wider ${className}`}
-      style={{ color: T.muted }}
+      className={`whitespace-nowrap px-5 py-2.5 text-left text-[11px] font-semibold uppercase tracking-wider ${className}`}
+      style={{ color: T.secondary }}
     >
       {children}
     </th>
@@ -206,22 +190,11 @@ function Th({ children, className = "" }: { children: ReactNode; className?: str
 function Td({ children, className = "" }: { children: ReactNode; className?: string }) {
   return (
     <td
-      className={`whitespace-nowrap px-3 py-2 text-[13px] ${className}`}
+      className={`whitespace-nowrap px-5 py-2.5 text-[13px] ${className}`}
       style={{ color: T.foreground }}
     >
       {children}
     </td>
-  );
-}
-
-function Pill({ children, style }: { children: ReactNode; style: CSSProperties }) {
-  return (
-    <span
-      className="inline-flex items-center rounded px-1.5 py-0.5 text-[11px] font-medium leading-4"
-      style={style}
-    >
-      {children}
-    </span>
   );
 }
 
@@ -238,12 +211,27 @@ function StatusDot({ color, children }: { color: string; children: ReactNode }) 
   );
 }
 
+function RolePill({ role }: { role: string }) {
+  return (
+    <span
+      className="inline-flex items-center rounded-full px-2 py-0.5 text-[11px] font-medium leading-4"
+      style={{
+        backgroundColor: T.mutedSurface,
+        border: `1px solid ${T.border}`,
+        color: T.secondary,
+      }}
+    >
+      {roleBadgeLabel(role)}
+    </span>
+  );
+}
+
 function TableSkeleton({ rows = 4 }: { rows?: number }) {
   return (
-    <div className="space-y-2 px-4 py-3" aria-busy="true">
+    <div className="space-y-2 px-5 py-3" aria-busy="true">
       {Array.from({ length: rows }).map((_, i) => (
         // biome-ignore lint/suspicious/noArrayIndexKey: static skeleton list
-        <Skeleton key={`row-${i}`} className="h-9 w-full" />
+        <Skeleton key={`row-${i}`} className="h-8 w-full" />
       ))}
     </div>
   );
@@ -251,8 +239,8 @@ function TableSkeleton({ rows = 4 }: { rows?: number }) {
 
 function EmptyHint({ children }: { children: ReactNode }) {
   return (
-    <div className="flex flex-col items-center gap-1 px-4 py-6 text-center">
-      <p className="text-[13px]" style={{ color: T.muted }}>
+    <div className="flex flex-col items-center gap-1 px-5 py-6 text-center">
+      <p className="text-[13px]" style={{ color: T.secondary }}>
         {children}
       </p>
     </div>
@@ -261,7 +249,7 @@ function EmptyHint({ children }: { children: ReactNode }) {
 
 function WidgetErrorState({ message, onRetry }: { message: string; onRetry?: () => void }) {
   return (
-    <div role="alert" className="flex flex-col items-center gap-2 px-4 py-5 text-center">
+    <div role="alert" className="flex flex-col items-center gap-2 px-5 py-5 text-center">
       <p className="text-[13px]" style={{ color: T.destructive }}>
         {message}
       </p>
@@ -269,7 +257,8 @@ function WidgetErrorState({ message, onRetry }: { message: string; onRetry?: () 
         <button
           type="button"
           onClick={onRetry}
-          className="text-[11px] font-medium text-muted-foreground underline underline-offset-2 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+          className="text-[11px] font-medium underline underline-offset-2 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+          style={{ color: T.secondary }}
         >
           Retry
         </button>
@@ -278,140 +267,528 @@ function WidgetErrorState({ message, onRetry }: { message: string; onRetry?: () 
   );
 }
 
-// ============================================================
-// Account Status — accessible donut (SVG, two lifecycle segments).
-// Reduced size for tighter 4-col layout.
-// ============================================================
-
-function AccountStatusDonut({
-  active,
-  deactivated,
-}: {
-  active: number;
-  deactivated: number;
-}) {
-  const total = active + deactivated;
-  const size = 120;
-  const stroke = 14;
-  const radius = (size - stroke) / 2;
-  const circumference = 2 * Math.PI * radius;
-  const activeFraction = total > 0 ? active / total : 0;
-  const activeLength = circumference * activeFraction;
-
+function ListSkeleton({ rows = 3 }: { rows?: number }) {
   return (
-    <figure className="flex flex-col items-center gap-4 px-4 py-3">
-      <div className="relative" style={{ width: size, height: size }}>
-        <svg
-          width={size}
-          height={size}
-          viewBox={`0 0 ${size} ${size}`}
-          role="img"
-          aria-label={`Account status: ${active} active, ${deactivated} deactivated, ${total} total accounts`}
-          className="-rotate-90"
-        >
-          <circle
-            cx={size / 2}
-            cy={size / 2}
-            r={radius}
-            fill="none"
-            stroke={T.track}
-            strokeWidth={stroke}
-          />
-          <circle
-            cx={size / 2}
-            cy={size / 2}
-            r={radius}
-            fill="none"
-            stroke={T.success}
-            strokeWidth={stroke}
-            strokeDasharray={`${activeLength} ${circumference - activeLength}`}
-          />
-          <circle
-            cx={size / 2}
-            cy={size / 2}
-            r={radius}
-            fill="none"
-            stroke={T.gold}
-            strokeWidth={stroke}
-            strokeDasharray={`${circumference - activeLength} ${activeLength}`}
-            strokeDashoffset={-activeLength}
-          />
-        </svg>
-        <div className="absolute inset-0 flex flex-col items-center justify-center">
-          <span
-            className="text-2xl font-bold tabular-nums leading-none"
-            style={{ color: T.foreground }}
-          >
-            {total}
-          </span>
-          <span className="mt-1 text-[10px]" style={{ color: T.muted }}>
-            Total
-          </span>
-        </div>
-      </div>
-      <figcaption className="w-full space-y-1.5">
-        {[
-          { label: "Active", value: active, color: T.success },
-          { label: "Deactivated", value: deactivated, color: T.gold },
-        ].map((legend) => (
-          <div key={legend.label} className="flex items-center justify-between text-[12px]">
-            <span className="inline-flex items-center gap-1.5">
-              <span
-                className="h-2 w-2 rounded-full"
-                style={{ backgroundColor: legend.color }}
-                aria-hidden="true"
-              />
-              <span style={{ color: T.foreground }}>{legend.label}</span>
-            </span>
-            <span className="font-semibold tabular-nums" style={{ color: T.foreground }}>
-              {legend.value}
-            </span>
-          </div>
-        ))}
-      </figcaption>
-    </figure>
+    <div className="space-y-2 px-5 py-3" aria-busy="true">
+      {Array.from({ length: rows }).map((_, i) => (
+        // biome-ignore lint/suspicious/noArrayIndexKey: static skeleton list
+        <Skeleton key={`li-${i}`} className="h-6 w-full" />
+      ))}
+    </div>
   );
 }
 
 // ============================================================
-// Roles in Use — burgundy horizontal bars, tighter spacing.
+// Page header — eyebrow + title + description (§4).
 // ============================================================
 
-function RoleBar({
-  role,
-  count,
-  percentage,
+function PageHeader() {
+  return (
+    <header className="mb-5">
+      <p
+        className="text-[11px] font-semibold uppercase tracking-wider"
+        style={{ color: T.secondary }}
+      >
+        Super Admin
+      </p>
+      <h1
+        className="mt-1 text-[24px] font-bold leading-tight tracking-tight sm:text-[26px]"
+        style={{ color: T.foreground }}
+      >
+        System Overview
+      </h1>
+      <p className="mt-0.5 text-[13px]" style={{ color: T.secondary }}>
+        Manage the organization, users and system settings.
+      </p>
+    </header>
+  );
+}
+
+// ============================================================
+// Hero banner — muted community photograph + institutional
+// motto with gold accent (§5). 110–130px tall, never a hero.
+// ============================================================
+
+function HeroBanner() {
+  return (
+    <div
+      className="relative mb-4 h-[120px] overflow-hidden rounded-lg border"
+      style={{ borderColor: T.border }}
+      role="img"
+      aria-label="Community gathering at the ministry hall"
+    >
+      {/* Photo: muted community hall scene (local SVG asset). */}
+      <img
+        src="/hero-banner.svg"
+        alt=""
+        aria-hidden="true"
+        className="absolute inset-0 h-full w-full object-cover"
+      />
+      {/* Institutional motto with gold accent under the primary phrase. */}
+      <div className="absolute inset-0 flex items-center px-5 sm:px-6">
+        <div>
+          <p className="text-[13px] font-medium tracking-wide text-white/90 sm:text-[14px]">
+            Faith&ensp;&middot;&ensp;Service&ensp;&middot;&ensp;Community
+          </p>
+          <span
+            className="mt-1.5 block h-[2px] w-16 rounded-full"
+            style={{ backgroundColor: T.gold }}
+            aria-hidden="true"
+          />
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// ============================================================
+// System snapshot — ONE administrative surface, four columns
+// with vertical dividers (§7). No floating metric cards.
+// ============================================================
+
+function SnapshotColumn({
+  value,
+  label,
+  supporting,
+  icon: Icon,
+  loading,
+  unavailable,
 }: {
-  role: string;
-  count: number;
-  percentage: number;
+  value: string;
+  label: string;
+  supporting: string;
+  icon: LucideIcon;
+  loading?: boolean;
+  unavailable?: boolean;
 }) {
   return (
-    <li>
-      <div className="mb-1 flex items-center justify-between gap-2">
-        <span className="truncate text-[12px] font-medium" style={{ color: T.foreground }}>
-          {roleBadgeLabel(role)}
+    <div className="flex min-w-0 flex-1 flex-col items-start gap-1.5 px-5 py-4 first:pl-0 last:pr-0 sm:px-6">
+      <Icon className="h-4 w-4 shrink-0" style={{ color: T.secondary }} aria-hidden="true" />
+      {loading ? (
+        <Skeleton className="h-8 w-16" />
+      ) : (
+        <span
+          className="text-[30px] font-bold leading-none tracking-tight tabular-nums"
+          style={{ color: T.foreground }}
+        >
+          {value}
         </span>
-        <span className="shrink-0 text-[11px] tabular-nums" style={{ color: T.muted }}>
-          {count} ({percentage}%)
-        </span>
+      )}
+      <span className="text-[13px] font-medium" style={{ color: T.foreground }}>
+        {label}
+      </span>
+      <span className="text-[12px]" style={{ color: T.secondary }}>
+        {supporting}
+      </span>
+    </div>
+  );
+}
+
+function SystemSnapshot({
+  totalAccounts,
+  activeAccounts,
+  deactivatedCount,
+  memberTotal,
+  childrenTotal,
+  subDepartmentCount,
+  loading,
+  membersUnavailable,
+  childrenUnavailable,
+}: {
+  totalAccounts: number;
+  activeAccounts: number;
+  deactivatedCount: number;
+  memberTotal: number | null;
+  childrenTotal: number | null;
+  subDepartmentCount: number;
+  loading: boolean;
+  membersUnavailable: boolean;
+  childrenUnavailable: boolean;
+}) {
+  return (
+    <section
+      className="mb-4 rounded-lg border bg-card"
+      style={{ borderColor: T.border }}
+      aria-label="System Snapshot"
+      aria-busy={loading}
+    >
+      <div className="border-b px-5 py-3" style={{ borderColor: T.border }}>
+        <div className="flex items-center gap-2.5">
+          <h2
+            className="text-[11px] font-semibold uppercase tracking-wider"
+            style={{ color: T.secondary }}
+          >
+            System Snapshot
+          </h2>
+          <span
+            className="h-[2px] w-6 rounded-full"
+            style={{ backgroundColor: T.gold }}
+            aria-hidden="true"
+          />
+        </div>
       </div>
-      <div
-        className="h-1.5 w-full overflow-hidden rounded-full"
-        style={{ backgroundColor: T.track }}
-        aria-hidden="true"
+      <div className="flex flex-col sm:flex-row sm:items-stretch">
+        <div className="contents sm:grid sm:grid-cols-4" style={{ borderColor: T.border }}>
+          <div className="sm:border-r sm:border-b-0" style={{ borderColor: T.border }}>
+            <SnapshotColumn
+              value={String(totalAccounts)}
+              label="User Accounts"
+              supporting={`${activeAccounts} active · ${deactivatedCount} deactivated`}
+              icon={UserCog}
+              loading={loading}
+            />
+          </div>
+          <div className="sm:border-r" style={{ borderColor: T.border }}>
+            <SnapshotColumn
+              value={memberTotal === null ? "—" : String(memberTotal)}
+              label="Members"
+              supporting={membersUnavailable ? "Unavailable" : "registered"}
+              icon={Users}
+              loading={loading}
+            />
+          </div>
+          <div className="sm:border-r" style={{ borderColor: T.border }}>
+            <SnapshotColumn
+              value={childrenTotal === null ? "—" : String(childrenTotal)}
+              label="Children"
+              supporting={childrenUnavailable ? "Unavailable" : "registered"}
+              icon={Baby}
+              loading={loading}
+            />
+          </div>
+          <div>
+            <SnapshotColumn
+              value={String(subDepartmentCount)}
+              label="Sub-Departments"
+              supporting="active"
+              icon={Layers}
+              loading={loading}
+            />
+          </div>
+        </div>
+      </div>
+    </section>
+  );
+}
+
+// ============================================================
+// Administrative work — 3 rows, first row emphasized with a
+// pale burgundy wash and burgundy indicator (§9).
+// ============================================================
+
+function AdminWorkRow({
+  count,
+  title,
+  explanation,
+  href,
+  emphasized = false,
+}: {
+  count: number;
+  title: string;
+  explanation: string;
+  href: string;
+  emphasized?: boolean;
+}) {
+  return (
+    <li className="border-b last:border-b-0" style={{ borderColor: T.border }}>
+      <Link
+        href={href}
+        className="group flex items-center gap-4 px-5 py-3.5 transition-colors hover:bg-muted/40 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-ring"
+        style={emphasized ? { backgroundColor: T.burgundyPale } : undefined}
       >
-        <div
-          className="h-full rounded-full"
-          style={{ width: `${Math.max(percentage, 2)}%`, backgroundColor: T.burgundy }}
+        <span
+          className="w-[3px] shrink-0 self-stretch rounded-full"
+          style={{ backgroundColor: emphasized ? T.burgundy : "transparent" }}
+          aria-hidden="true"
         />
-      </div>
+        <span
+          className="w-9 shrink-0 text-[22px] font-semibold tabular-nums leading-none"
+          style={{ color: emphasized ? T.burgundy : T.foreground }}
+        >
+          {String(count).padStart(2, "0")}
+        </span>
+        <span className="min-w-0 flex-1">
+          <span className="block text-[13px] font-semibold" style={{ color: T.foreground }}>
+            {title}
+          </span>
+          <span className="block truncate text-[12px]" style={{ color: T.secondary }}>
+            {explanation}
+          </span>
+        </span>
+        <ChevronRight
+          className="h-4 w-4 shrink-0 transition-transform group-hover:translate-x-0.5"
+          style={{ color: T.secondary }}
+          aria-hidden="true"
+        />
+      </Link>
     </li>
   );
 }
 
+function AdministrativeWork({
+  deactivatedCount,
+  conflictCount,
+  unassignedCount,
+  unassignedLabel,
+}: {
+  deactivatedCount: number;
+  conflictCount: number;
+  unassignedCount: number;
+  unassignedLabel: string;
+}) {
+  return (
+    <Widget title="Administrative Work" action={<ViewAll href="/users" />} id="administrative-work">
+      <ul aria-label="Administrative work items">
+        <AdminWorkRow
+          count={deactivatedCount}
+          title="Accounts requiring review"
+          explanation="Deactivated accounts awaiting review"
+          href="/users"
+          emphasized
+        />
+        <AdminWorkRow
+          count={conflictCount}
+          title="Leadership assignments"
+          explanation="Require administrative attention"
+          href="/permissions"
+        />
+        <AdminWorkRow
+          count={unassignedCount}
+          title="Unassigned leadership post"
+          explanation={unassignedLabel}
+          href="/sub-departments"
+        />
+      </ul>
+    </Widget>
+  );
+}
+
 // ============================================================
-// Quick action tile — compact, scannable.
+// Leadership roster — compact table, text indicators (§10).
+// ============================================================
+
+function LeadershipRoster({ roster, loading }: { roster: RosterEntry[]; loading: boolean }) {
+  return (
+    <Widget title="Leadership Roster" id="leadership-roster">
+      {loading ? (
+        <TableSkeleton rows={5} />
+      ) : roster.length === 0 ? (
+        <EmptyHint>No leadership posts configured yet.</EmptyHint>
+      ) : (
+        <div className="overflow-x-auto">
+          <table className="w-full text-left">
+            <thead>
+              <tr style={{ backgroundColor: T.mutedSurface }}>
+                <Th>Post</Th>
+                <Th>Holder</Th>
+                <Th>Status</Th>
+              </tr>
+            </thead>
+            <tbody>
+              {roster.map((entry) => (
+                <tr key={entry.userId} className="border-t" style={{ borderColor: T.border }}>
+                  <Td>
+                    <span className="inline-flex items-center gap-1.5">
+                      {entry.conflict && (
+                        <AlertTriangle
+                          className="h-3 w-3 shrink-0"
+                          style={{ color: T.warning }}
+                          aria-label="BR-009 conflict"
+                        />
+                      )}
+                      {entry.posts.join(" · ")}
+                    </span>
+                  </Td>
+                  <Td>
+                    {entry.status === "UNASSIGNED" ? (
+                      <span style={{ color: T.secondary }}>—</span>
+                    ) : (
+                      <span className="font-medium">{entry.name}</span>
+                    )}
+                  </Td>
+                  <Td>
+                    {entry.status === "UNASSIGNED" ? (
+                      <StatusDot color={T.secondary}>Unassigned</StatusDot>
+                    ) : entry.status === "ACTIVE" ? (
+                      <StatusDot color={T.success}>Active</StatusDot>
+                    ) : (
+                      <StatusDot color={T.destructive}>Deactivated</StatusDot>
+                    )}
+                  </Td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      )}
+    </Widget>
+  );
+}
+
+// ============================================================
+// Recent accounts — vertical list with subtle initials
+// avatars, role badges, relative time (§11).
+// ============================================================
+
+function RecentAccounts({
+  accounts,
+  loading,
+  error,
+  onRetry,
+}: {
+  accounts: AdminUserRow[];
+  loading: boolean;
+  error: string | null;
+  onRetry: () => void;
+}) {
+  return (
+    <Widget title="Recent Accounts" action={<ViewAll href="/users" />} id="recent-accounts">
+      {loading ? (
+        <ListSkeleton rows={5} />
+      ) : error ? (
+        <WidgetErrorState message={error} onRetry={onRetry} />
+      ) : accounts.length === 0 ? (
+        <EmptyHint>No accounts provisioned yet.</EmptyHint>
+      ) : (
+        <ul className="divide-y" style={{ borderColor: T.border }}>
+          {accounts.map((user) => (
+            <li key={user.id}>
+              <Link
+                href={`/users/${user.id}`}
+                className="flex items-center gap-3 px-5 py-3 transition-colors hover:bg-muted/40 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-ring"
+              >
+                <span
+                  className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full text-[12px] font-semibold"
+                  style={{
+                    backgroundColor: T.mutedSurface,
+                    border: `1px solid ${T.border}`,
+                    color: T.foreground,
+                  }}
+                  aria-hidden="true"
+                >
+                  {initialsOf(user.name)}
+                </span>
+                <span className="min-w-0 flex-1">
+                  <span
+                    className="block truncate text-[13px] font-medium"
+                    style={{ color: T.foreground }}
+                  >
+                    {user.name}
+                  </span>
+                  <span className="block truncate text-[12px]" style={{ color: T.secondary }}>
+                    {user.email}
+                  </span>
+                </span>
+                <span className="flex shrink-0 flex-col items-end gap-1 sm:flex-row sm:items-center sm:gap-2">
+                  <RolePill role={user.role} />
+                  <span className="text-[11px]" style={{ color: T.secondary }}>
+                    {relativeTime(user.createdAt)}
+                  </span>
+                </span>
+              </Link>
+            </li>
+          ))}
+        </ul>
+      )}
+    </Widget>
+  );
+}
+
+// ============================================================
+// Recent activity — dense TIME / EVENT / USER / DETAILS table
+// with small status dots (§12).
+// ============================================================
+
+function RecentActivity({
+  entries,
+  loading,
+  error,
+  onRetry,
+  userNameById,
+}: {
+  entries: Array<{
+    id: string;
+    operatorId: string;
+    action: string;
+    resourceType: string;
+    resourceId: string;
+    payloadDiff: string | null;
+    ipAddress: string | null;
+    timestamp: string;
+  }>;
+  loading: boolean;
+  error: string | null;
+  onRetry: () => void;
+  userNameById: Record<string, string>;
+}) {
+  return (
+    <Widget
+      title="Recent Activity"
+      action={<ViewAll href="/audit-logs" label="View audit log" />}
+      id="recent-activity"
+    >
+      {loading ? (
+        <TableSkeleton rows={5} />
+      ) : error ? (
+        <WidgetErrorState message={error} onRetry={onRetry} />
+      ) : entries.length === 0 ? (
+        <EmptyHint>Nothing to report yet.</EmptyHint>
+      ) : (
+        <div className="overflow-x-auto">
+          <table className="w-full text-left">
+            <thead>
+              <tr style={{ backgroundColor: T.mutedSurface }}>
+                <Th className="w-[120px]">Time</Th>
+                <Th>Event</Th>
+                <Th>User</Th>
+                <Th>Details</Th>
+              </tr>
+            </thead>
+            <tbody>
+              {" "}
+              {entries.slice(0, 6).map((item) => {
+                const isWarning =
+                  item.action === "USER_DEACTIVATED" || item.action === "BYPASS_ACTION";
+                return (
+                  <tr
+                    key={item.id}
+                    className="border-t transition-colors hover:bg-muted/30"
+                    style={{ borderColor: T.border }}
+                  >
+                    <Td className="tabular-nums">
+                      <Link
+                        href="/audit-logs"
+                        className="focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-ring"
+                      >
+                        {auditTimeLabel(item.timestamp)}
+                      </Link>
+                    </Td>
+                    <Td>
+                      <span className="inline-flex items-center gap-1.5">
+                        <span
+                          className="h-1.5 w-1.5 shrink-0 rounded-full"
+                          style={{ backgroundColor: isWarning ? T.destructive : T.success }}
+                          aria-hidden="true"
+                        />
+                        {auditActionLabel(item.action)}
+                      </span>
+                    </Td>
+                    <Td>{userNameById[item.operatorId] ?? item.operatorId}</Td>
+                    <Td>{auditEntityLabel(item)}</Td>
+                  </tr>
+                );
+              })}
+            </tbody>
+          </table>
+        </div>
+      )}
+    </Widget>
+  );
+}
+
+// ============================================================
+// Frequent administration — 2x3 grid of small navigation
+// tiles (§13).
 // ============================================================
 
 function QuickActionTile({ action }: { action: SuperAdminQuickAction }) {
@@ -419,76 +796,113 @@ function QuickActionTile({ action }: { action: SuperAdminQuickAction }) {
   return (
     <Link
       href={action.href}
-      className="group flex items-center gap-2.5 rounded-md border bg-card px-3 py-2.5 transition-colors hover:bg-muted/30 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+      className="group flex flex-col items-start gap-2 rounded-lg border bg-card p-3.5 transition-colors hover:bg-muted/40 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
       style={{ borderColor: T.border }}
     >
-      <span
-        className="flex h-8 w-8 shrink-0 items-center justify-center rounded-md"
-        style={{ backgroundColor: T.burgundyLight, color: T.burgundy }}
-        aria-hidden="true"
-      >
-        <Icon className="h-4 w-4" />
+      <Icon className="h-4 w-4" style={{ color: T.secondary }} aria-hidden="true" />
+      <span className="text-[12px] font-semibold" style={{ color: T.foreground }}>
+        {action.title}
       </span>
-      <span className="min-w-0 flex-1">
-        <span className="block truncate text-[12px] font-semibold" style={{ color: T.foreground }}>
-          {action.title}
-        </span>
-        <span className="block truncate text-[11px]" style={{ color: T.muted }}>
-          {action.description}
-        </span>
+      <span className="hidden text-[11px] sm:block" style={{ color: T.secondary }}>
+        {action.description}
       </span>
-      <ChevronRight
-        className="h-3.5 w-3.5 shrink-0 opacity-0 transition-all group-hover:opacity-100 group-hover:translate-x-0.5"
-        style={{ color: T.muted }}
-        aria-hidden="true"
-      />
     </Link>
   );
 }
 
-// ============================================================
-// System Health tile — compact, status-focused.
-// ============================================================
-
-function SystemHealthTile({
-  health,
-  healthError,
-}: {
-  health: { status: string; version: string; environment: string } | null;
-  healthError: string | null;
-}) {
+function FrequentAdministration({ quickActions }: { quickActions: SuperAdminQuickAction[] }) {
   return (
-    <div
-      className="flex items-start gap-3 rounded-md border bg-card p-3"
-      style={{ borderColor: T.border }}
-      data-testid="api-status-tile"
-    >
-      <span
-        className="flex h-8 w-8 shrink-0 items-center justify-center rounded-md"
-        style={{
-          backgroundColor: health ? T.successLight : T.destructiveLight,
-          color: health ? T.success : T.destructive,
-        }}
-        aria-hidden="true"
-      >
-        <HeartPulse className="h-4 w-4" />
-      </span>
-      <div className="min-w-0">
-        <p className="text-[12px] font-semibold" style={{ color: T.foreground }}>
-          API Status
-        </p>
-        <p className="mt-0.5 text-[11px]" style={{ color: T.muted }}>
-          {health
-            ? `Operational · v${health.version} · ${health.environment}`
-            : (healthError ?? "Unreachable")}
-        </p>
+    <Widget title="Frequent Administration" id="frequent-administration">
+      <div className="grid grid-cols-2 gap-2.5 p-4 sm:grid-cols-3">
+        {quickActions.map((action) => (
+          <QuickActionTile key={action.id} action={action} />
+        ))}
       </div>
-    </div>
+    </Widget>
   );
 }
 
 // ============================================================
-// Super Admin Dashboard — visual refinement pass.
+// System status panel — right rail, informational (§6).
+// ============================================================
+
+function SystemStatusPanel({
+  health,
+  healthError,
+  checkedAt,
+}: {
+  health: { status: string; version: string; environment: string } | null;
+  healthError: string | null;
+  checkedAt: string | null;
+}) {
+  const operational = health !== null;
+  const lastChecked = checkedAt ? relativeTime(checkedAt) : operational ? "just now" : "—";
+
+  return (
+    <section
+      className="h-fit rounded-lg border bg-card"
+      style={{ borderColor: T.border }}
+      aria-label="System Status"
+      data-testid="api-status-tile"
+    >
+      <header className="border-b px-5 py-3" style={{ borderColor: T.border }}>
+        <h2
+          className="text-[11px] font-semibold uppercase tracking-wider"
+          style={{ color: T.secondary }}
+        >
+          System Status
+        </h2>
+      </header>
+      <div className="px-5 py-4">
+        {healthError && !operational ? (
+          <p className="text-[12px]" style={{ color: T.destructive }} role="alert">
+            {healthError}
+          </p>
+        ) : !operational ? (
+          <div className="space-y-3" aria-busy="true" data-testid="system-status-skeleton">
+            <Skeleton className="h-5 w-28" />
+            <Skeleton className="h-4 w-full" />
+            <Skeleton className="h-4 w-3/4" />
+          </div>
+        ) : (
+          <>
+            <StatusDot color={T.success}>Operational</StatusDot>
+            <dl className="mt-3">
+              {[
+                { term: "API", detail: "Available" },
+                { term: "Environment", detail: health.environment },
+                { term: "Version", detail: `v${health.version}` },
+              ].map((row) => (
+                <div
+                  key={row.term}
+                  className="flex items-center justify-between gap-2 border-t py-2 text-[12px] first:border-t-0"
+                  style={{ borderColor: T.border }}
+                >
+                  <dt
+                    className="font-medium uppercase tracking-wide"
+                    style={{ color: T.secondary }}
+                  >
+                    {row.term}
+                  </dt>
+                  <dd style={{ color: T.foreground }}>{row.detail}</dd>
+                </div>
+              ))}
+            </dl>
+            <p
+              className="border-t pt-2 text-[11px]"
+              style={{ borderColor: T.border, color: T.secondary }}
+            >
+              Last checked {lastChecked}
+            </p>
+          </>
+        )}
+      </div>
+    </section>
+  );
+}
+
+// ============================================================
+// Super Admin Dashboard — reference layout.
 // ============================================================
 
 export function SuperAdminDashboardPage() {
@@ -498,12 +912,18 @@ export function SuperAdminDashboardPage() {
     loadedAccounts,
     deactivatedAccounts,
     recentAccounts,
-    roleCounts,
     leadershipRoster,
+    rosterConflicts,
+    unassignedPosts,
+    memberTotal,
+    childrenTotal,
     subDepartmentCount,
     userNameById,
     health,
     healthError,
+    healthCheckedAt,
+    membersError,
+    childrenError,
     quickActions,
     loading,
     error,
@@ -511,7 +931,7 @@ export function SuperAdminDashboardPage() {
   } = useSuperAdminDashboard();
 
   const {
-    activity,
+    entries: auditEntries,
     loading: auditLoading,
     error: auditError,
     refresh: refreshAudit,
@@ -519,6 +939,12 @@ export function SuperAdminDashboardPage() {
 
   const [reactivatingId, setReactivatingId] = useState<string | null>(null);
   const [reactivateNotice, setReactivateNotice] = useState<string | null>(null);
+  // Re-render once after mount so "Last checked" relative time stays honest.
+  const [, setTick] = useState(0);
+  useEffect(() => {
+    const timer = window.setInterval(() => setTick((t) => t + 1), 60000);
+    return () => window.clearInterval(timer);
+  }, []);
 
   const handleReactivate = async (user: AdminUserRow) => {
     setReactivatingId(user.id);
@@ -537,56 +963,61 @@ export function SuperAdminDashboardPage() {
     }
   };
 
-  const rosterConflicts = leadershipRoster.filter((entry) => entry.conflict).length;
+  const unassignedLabel =
+    unassignedPosts.length > 0
+      ? `${unassignedPosts[0].posts[0]} position currently unassigned`
+      : "All leadership posts are assigned";
 
-  // ─── Loading state ───
+  // ─── Loading state — layout-preserving skeleton ───
   if (loading) {
     return (
       <PageShell>
-        <div className="mx-auto w-full max-w-[1400px]" aria-busy="true">
+        <div className="mx-auto w-full" aria-busy="true">
           <div className="mb-5 space-y-2">
-            <Skeleton className="h-7 w-64" />
-            <Skeleton className="h-4 w-96 max-w-full" />
+            <Skeleton className="h-4 w-24" />
+            <Skeleton className="h-7 w-56" />
+            <Skeleton className="h-4 w-80 max-w-full" />
           </div>
-          <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
-            {Array.from({ length: 4 }).map((_, i) => (
-              // biome-ignore lint/suspicious/noArrayIndexKey: static skeleton list
-              <Skeleton key={`kpi-${i}`} className="h-24 rounded-md" />
-            ))}
-          </div>
-          <div className="mt-5 grid grid-cols-1 gap-3 lg:grid-cols-12">
-            <Skeleton className="h-56 rounded-md lg:col-span-8" />
-            <Skeleton className="h-56 rounded-md lg:col-span-4" />
-            <Skeleton className="h-48 rounded-md lg:col-span-8" />
-            <Skeleton className="h-48 rounded-md lg:col-span-4" />
-            <Skeleton className="h-44 rounded-md lg:col-span-12" />
+          <Skeleton className="mb-4 h-[120px] rounded-lg" />
+          <div className="grid grid-cols-1 gap-4 lg:grid-cols-12">
+            <div className="lg:col-span-9">
+              <Skeleton className="h-[136px] rounded-lg" />
+            </div>
+            <div className="lg:col-span-3">
+              <Skeleton className="h-[136px] rounded-lg" />
+            </div>
+            <Skeleton className="h-44 rounded-lg lg:col-span-4" />
+            <Skeleton className="h-64 rounded-lg lg:col-span-5" />
+            <Skeleton className="h-64 rounded-lg lg:col-span-3" />
+            <Skeleton className="h-56 rounded-lg lg:col-span-8" />
+            <Skeleton className="h-56 rounded-lg lg:col-span-4" />
           </div>
         </div>
       </PageShell>
     );
   }
 
-  // ─── Error state ───
+  // ─── Error state — /users is the core dataset ───
   if (error) {
     return (
       <PageShell>
-        <div className="mx-auto w-full max-w-[1400px]">
-          <div
-            role="alert"
-            className="rounded-md border p-4"
-            style={{ borderColor: T.border, backgroundColor: T.destructiveLight }}
+        <PageHeader />
+        <div
+          role="alert"
+          className="rounded-lg border p-4"
+          style={{ borderColor: T.border, backgroundColor: T.mutedSurface }}
+        >
+          <p className="text-[13px] font-medium" style={{ color: T.destructive }}>
+            {error}
+          </p>
+          <button
+            type="button"
+            onClick={refresh}
+            className="mt-2 text-[12px] font-medium underline underline-offset-2 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+            style={{ color: T.secondary }}
           >
-            <p className="text-[13px] font-medium" style={{ color: T.destructive }}>
-              {error}
-            </p>
-            <button
-              type="button"
-              onClick={refresh}
-              className="mt-2 text-[12px] font-medium text-muted-foreground underline underline-offset-2 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
-            >
-              Retry
-            </button>
-          </div>
+            Retry
+          </button>
         </div>
       </PageShell>
     );
@@ -595,94 +1026,94 @@ export function SuperAdminDashboardPage() {
   // ─── Dashboard ───
   return (
     <PageShell>
-      <div className="mx-auto w-full max-w-[1400px]">
-        {/* ─── Page Header ─── */}
-        <header className="mb-5">
-          <h1
-            className="text-[22px] font-semibold leading-tight tracking-tight sm:text-[24px]"
-            style={{ color: T.burgundy }}
-          >
-            Super Admin Dashboard
-          </h1>
-          <p className="mt-0.5 text-[12px]" style={{ color: T.muted }}>
-            System administration, user management, and platform oversight.
-          </p>
-        </header>
+      <div className="mx-auto w-full">
+        <PageHeader />
+        <HeroBanner />
 
         {reactivateNotice && (
           <output
-            className="mb-3 block rounded-md border px-3 py-2 text-[12px]"
-            style={{ borderColor: T.border, backgroundColor: T.goldLight, color: T.burgundy }}
+            className="mb-3 block rounded-lg border px-4 py-2 text-[12px]"
+            style={{ borderColor: T.border, backgroundColor: T.burgundyPale, color: T.burgundy }}
           >
             {reactivateNotice}
           </output>
         )}
 
-        <div className="grid grid-cols-1 gap-3 lg:grid-cols-12">
-          {/* ─── Row 1: KPI Row — 4 equal cards (3 cols each) ─── */}
-          <div className="grid grid-cols-2 gap-3 lg:col-span-12 lg:grid-cols-4">
-            <KpiCard
-              label="User Accounts"
-              value={String(totalAccounts)}
-              supporting="All provisioned accounts"
-              icon={UserCog}
-              iconStyle={{ backgroundColor: T.burgundyLight, color: T.burgundy }}
-              href="/users"
+        <div className="grid grid-cols-1 gap-4 lg:grid-cols-12">
+          {/* ─── Banner row: System Snapshot (9) + System Status (3) ─── */}
+          <div className="lg:col-span-9">
+            <SystemSnapshot
+              totalAccounts={totalAccounts}
+              activeAccounts={activeAccounts}
+              deactivatedCount={deactivatedAccounts.length}
+              memberTotal={memberTotal}
+              childrenTotal={childrenTotal}
+              subDepartmentCount={subDepartmentCount}
+              loading={false}
+              membersUnavailable={membersError}
+              childrenUnavailable={childrenError}
             />
-            <KpiCard
-              label="Active Accounts"
-              value={String(activeAccounts)}
-              supporting={
-                loadedAccounts < totalAccounts
-                  ? `Active (of ${loadedAccounts} loaded)`
-                  : "Status ACTIVE"
-              }
-              icon={UserCheck}
-              iconStyle={{ backgroundColor: T.successLight, color: T.success }}
-              href="/users"
-            />
-            <KpiCard
-              label="Sub-Departments"
-              value={String(subDepartmentCount)}
-              supporting="Configured programs"
-              icon={Layers}
-              iconStyle={{ backgroundColor: T.goldLight, color: T.warning }}
-              href="/sub-departments"
-            />
-            <KpiCard
-              label="API Health"
-              value={health ? "Healthy" : "Down"}
-              supporting={
-                health
-                  ? `v${health.version} · ${health.environment}`
-                  : "Health endpoint not responding"
-              }
-              icon={HeartPulse}
-              iconStyle={{
-                backgroundColor: health ? T.successLight : T.destructiveLight,
-                color: health ? T.success : T.destructive,
-              }}
-              href="/reports"
+          </div>
+          <div className="lg:col-span-3">
+            <SystemStatusPanel
+              health={health}
+              healthError={healthError}
+              checkedAt={healthCheckedAt}
             />
           </div>
 
-          {/* ─── Row 2: Deactivated Accounts (8) + Account Status (4) ─── */}
-          <Widget
-            title="Deactivated Accounts"
-            className="lg:col-span-8"
-            action={<ViewAll href="/users" />}
-          >
-            {deactivatedAccounts.length === 0 ? (
-              <EmptyHint>No deactivated accounts — all accounts are active.</EmptyHint>
-            ) : (
+          {/* ─── Main grid: Administrative Work (4) + Leadership (5) + Accounts (3) ─── */}
+          <div className="lg:col-span-4">
+            <AdministrativeWork
+              deactivatedCount={deactivatedAccounts.length}
+              conflictCount={rosterConflicts.length}
+              unassignedCount={unassignedPosts.length}
+              unassignedLabel={unassignedLabel}
+            />
+          </div>
+          <div className="lg:col-span-5">
+            <LeadershipRoster roster={leadershipRoster} loading={false} />
+          </div>
+          <div className="lg:col-span-3">
+            <RecentAccounts
+              accounts={recentAccounts}
+              loading={false}
+              error={null}
+              onRetry={refresh}
+            />
+          </div>
+
+          {/* ─── Bottom row: Recent Activity (8) + Frequent Administration (4) ─── */}
+          <div className="lg:col-span-8">
+            <RecentActivity
+              entries={auditEntries}
+              loading={auditLoading}
+              error={auditError}
+              onRetry={refreshAudit}
+              userNameById={userNameById}
+            />
+          </div>
+          <div className="lg:col-span-4">
+            <FrequentAdministration quickActions={quickActions} />
+          </div>
+        </div>
+
+        {/* Deactivated accounts table — preserved interactive capability,
+            moved below the reference grid to keep the composition intact. */}
+        {deactivatedAccounts.length > 0 && (
+          <div className="mt-4">
+            <Widget
+              title="Deactivated Accounts"
+              action={<ViewAll href="/users" />}
+              id="deactivated-accounts"
+            >
               <div className="overflow-x-auto">
                 <table className="w-full text-left">
                   <thead>
-                    <tr style={{ backgroundColor: T.borderLight }}>
+                    <tr style={{ backgroundColor: T.mutedSurface }}>
                       <Th>Account</Th>
                       <Th>Role</Th>
                       <Th>Deactivated</Th>
-                      <Th>Status</Th>
                       <Th>
                         <span className="sr-only">Actions</span>
                       </Th>
@@ -693,16 +1124,21 @@ export function SuperAdminDashboardPage() {
                       <tr key={user.id} className="border-t" style={{ borderColor: T.border }}>
                         <Td>
                           <span className="font-medium">{user.name}</span>
-                          <span className="block text-[11px]" style={{ color: T.muted }}>
+                          <span className="block text-[11px]" style={{ color: T.secondary }}>
                             {user.email}
                           </span>
                         </Td>
-                        <Td>{roleBadgeLabel(user.role)}</Td>
-                        <Td className="tabular-nums">{formatDate(user.deactivatedAt)}</Td>
                         <Td>
-                          <Pill style={{ backgroundColor: T.goldLight, color: T.warning }}>
-                            Deactivated
-                          </Pill>
+                          <RolePill role={user.role} />
+                        </Td>
+                        <Td className="tabular-nums">
+                          {user.deactivatedAt
+                            ? new Date(user.deactivatedAt).toLocaleDateString("en-ET", {
+                                month: "short",
+                                day: "numeric",
+                                year: "numeric",
+                              })
+                            : "—"}
                         </Td>
                         <Td>
                           <button
@@ -710,7 +1146,7 @@ export function SuperAdminDashboardPage() {
                             disabled={reactivatingId === user.id}
                             onClick={() => handleReactivate(user)}
                             aria-label={`Reactivate ${user.name}`}
-                            className="text-[11px] font-medium text-muted-foreground underline-offset-2 hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:opacity-50"
+                            className="text-[11px] font-medium underline-offset-2 hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:opacity-50"
                             style={{ color: T.burgundy }}
                           >
                             {reactivatingId === user.id ? "Reactivating…" : "Reactivate"}
@@ -721,222 +1157,16 @@ export function SuperAdminDashboardPage() {
                   </tbody>
                 </table>
               </div>
-            )}
-          </Widget>
+            </Widget>
+          </div>
+        )}
 
-          <Widget
-            title="Account Status"
-            className="lg:col-span-4"
-            aria-label="Account status summary"
-          >
-            <AccountStatusDonut active={activeAccounts} deactivated={deactivatedAccounts.length} />
-          </Widget>
-
-          {/* ─── Row 3: Recently Provisioned (8) + Roles in Use (4) ─── */}
-          <Widget
-            title="Recently Provisioned"
-            className="lg:col-span-8"
-            action={<ViewAll href="/users" />}
-          >
-            {recentAccounts.length === 0 ? (
-              <EmptyHint>No accounts provisioned yet.</EmptyHint>
-            ) : (
-              <div className="overflow-x-auto">
-                <table className="w-full text-left">
-                  <thead>
-                    <tr style={{ backgroundColor: T.borderLight }}>
-                      <Th>Name</Th>
-                      <Th>Role</Th>
-                      <Th>Created</Th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {recentAccounts.map((user) => (
-                      <tr key={user.id} className="border-t" style={{ borderColor: T.border }}>
-                        <Td>
-                          <span className="font-medium">{user.name}</span>
-                          <span className="block text-[11px]" style={{ color: T.muted }}>
-                            {user.email}
-                          </span>
-                        </Td>
-                        <Td>
-                          <Pill style={{ backgroundColor: T.burgundyLight, color: T.burgundy }}>
-                            {roleBadgeLabel(user.role)}
-                          </Pill>
-                        </Td>
-                        <Td className="tabular-nums">{formatDate(user.createdAt)}</Td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
-            )}
-          </Widget>
-
-          <Widget
-            title="Roles in Use"
-            className="lg:col-span-4"
-            action={<ViewAll href="/permissions" />}
-          >
-            {roleCounts.length === 0 ? (
-              <EmptyHint>No roles assigned yet.</EmptyHint>
-            ) : (
-              <ul className="space-y-3 px-4 py-3">
-                {roleCounts.map(({ role, count }) => {
-                  const totalRoleAccounts = roleCounts.reduce((sum, r) => sum + r.count, 0);
-                  const percentage =
-                    totalRoleAccounts > 0 ? Math.round((count / totalRoleAccounts) * 100) : 0;
-                  return <RoleBar key={role} role={role} count={count} percentage={percentage} />;
-                })}
-              </ul>
-            )}
-          </Widget>
-
-          {/* ─── Row 4: Leadership Roster (12 — full width) ─── */}
-          <Widget
-            title="Leadership Roster"
-            className="lg:col-span-12"
-            action={<ViewAll href="/users" />}
-          >
-            {leadershipRoster.length === 0 ? (
-              <EmptyHint>No leadership posts assigned yet.</EmptyHint>
-            ) : (
-              <div className="overflow-x-auto">
-                {rosterConflicts > 0 && (
-                  <div
-                    className="mx-4 mt-3 flex items-center gap-2 rounded-md border px-3 py-2 text-[12px]"
-                    style={{
-                      borderColor: T.gold,
-                      backgroundColor: T.conflictBg,
-                      color: T.burgundy,
-                    }}
-                  >
-                    <AlertTriangle className="h-3.5 w-3.5 shrink-0" style={{ color: T.warning }} />
-                    <span>
-                      <strong>{rosterConflicts}</strong> member{rosterConflicts === 1 ? "" : "s"}{" "}
-                      {rosterConflicts === 1 ? "holds" : "hold"} more than one leadership post
-                      (BR-009).
-                    </span>
-                  </div>
-                )}
-                <table className="w-full text-left">
-                  <thead>
-                    <tr style={{ backgroundColor: T.borderLight }}>
-                      <Th>Post</Th>
-                      <Th>Name</Th>
-                      <Th>Department</Th>
-                      <Th>Status</Th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {leadershipRoster.map((entry: RosterEntry) => (
-                      <tr
-                        key={entry.userId}
-                        className="border-t"
-                        style={
-                          entry.conflict
-                            ? { borderColor: T.border, backgroundColor: T.conflictBg }
-                            : { borderColor: T.border }
-                        }
-                      >
-                        <Td>
-                          <span className="inline-flex items-center gap-1 whitespace-nowrap">
-                            {entry.conflict && (
-                              <AlertTriangle
-                                className="h-3 w-3 shrink-0"
-                                style={{ color: T.warning }}
-                                aria-label="BR-009 conflict"
-                              />
-                            )}
-                            {entry.posts.join(" · ")}
-                          </span>
-                        </Td>
-                        <Td>
-                          <span className="font-medium">{entry.name}</span>
-                          <span className="block text-[11px]" style={{ color: T.muted }}>
-                            {entry.email}
-                          </span>
-                        </Td>
-                        <Td>{entry.department ?? "Executive"}</Td>
-                        <Td>
-                          {entry.status === "ACTIVE" ? (
-                            <StatusDot color={T.success}>Active</StatusDot>
-                          ) : (
-                            <StatusDot color={T.destructive}>Deactivated</StatusDot>
-                          )}
-                        </Td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
-            )}
-          </Widget>
-
-          {/* ─── Row 5: System Activity (12 — full width) ─── */}
-          <Widget
-            title="System Activity"
-            className="lg:col-span-12"
-            action={<ViewAll href="/audit-logs" />}
-          >
-            {auditLoading ? (
-              <TableSkeleton rows={4} />
-            ) : auditError ? (
-              <WidgetErrorState message={auditError} onRetry={refreshAudit} />
-            ) : activity.length === 0 ? (
-              <EmptyHint>No system activity recorded yet.</EmptyHint>
-            ) : (
-              <div className="overflow-x-auto">
-                <table className="w-full text-left">
-                  <thead>
-                    <tr style={{ backgroundColor: T.borderLight }}>
-                      <Th>Time</Th>
-                      <Th>Actor</Th>
-                      <Th>Action</Th>
-                      <Th>Target</Th>
-                      <Th>Status</Th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {activity.slice(0, 8).map((item) => {
-                      const isDestructive = item.status === "destructive";
-                      return (
-                        <tr key={item.id} className="border-t" style={{ borderColor: T.border }}>
-                          <Td className="tabular-nums">{item.timestamp}</Td>
-                          <Td>{userNameById[item.actor] ?? item.actor}</Td>
-                          <Td>{item.action}</Td>
-                          <Td>{item.entity}</Td>
-                          <Td>
-                            {isDestructive ? (
-                              <StatusDot color={T.warning}>Warning</StatusDot>
-                            ) : (
-                              <StatusDot color={T.success}>Success</StatusDot>
-                            )}
-                          </Td>
-                        </tr>
-                      );
-                    })}
-                  </tbody>
-                </table>
-              </div>
-            )}
-          </Widget>
-
-          {/* ─── Row 6: System Health (5) + Quick Actions (7) ─── */}
-          <Widget title="System Health" className="lg:col-span-5">
-            <div className="p-3">
-              <SystemHealthTile health={health} healthError={healthError} />
-            </div>
-          </Widget>
-
-          <Widget title="Quick Actions" className="lg:col-span-7">
-            <div className="grid grid-cols-2 gap-2 p-3">
-              {quickActions.map((action) => (
-                <QuickActionTile key={action.id} action={action} />
-              ))}
-            </div>
-          </Widget>
-        </div>
+        {/* Supporting note when the users page cap truncates the dataset. */}
+        {loadedAccounts < totalAccounts && (
+          <p className="mt-3 px-1 text-[11px]" style={{ color: T.secondary }}>
+            Showing the {loadedAccounts} most recent of {totalAccounts} accounts.
+          </p>
+        )}
       </div>
     </PageShell>
   );

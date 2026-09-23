@@ -36,7 +36,7 @@ graph TD
 - **Direct Ownership:**
   - System and module architecture, Clean Architecture enforcement.
   - PostgreSQL schema design, migrations, and Drizzle configurations.
-  - Better Auth authentication, session handling, and scoped RBAC.
+  - Supabase Auth authentication, session handling, and scoped RBAC.
   - Core domain models, calculation engines (Weight formulas, Progress roll-ups).
   - Shared infrastructure packages (`packages/domain`, `packages/database`, `packages/permissions`, `packages/calendar`).
   - Code reviews for all backend PRs and cross-lane contracts.

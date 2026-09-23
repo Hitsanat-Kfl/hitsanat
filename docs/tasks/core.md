@@ -760,7 +760,7 @@ Create the directory structure and placeholder files for all 11 API modules.
 
 ---
 
-## CORE-019 — Better Auth Configuration
+## CORE-019 — Supabase Auth Configuration
 
 ### 1. Phase
 Phase 2 — Authentication & Authorization
@@ -773,14 +773,14 @@ Phase 2 — Authentication & Authorization
 - **Lane:** Core
 
 ### 4. Task Objective
-Configure Better Auth in `packages/auth` with PostgreSQL adapter, session cookies, and email/password provider.
+Configure Supabase Auth in `packages/auth` (Supabase JS client), session cookies, and JWT verification middleware.
 
 ### 5. Why This Task Exists
 Authentication is the gateway to all protected features. This must be implemented before any admin functionality.
 
 ### 6. Documentation References
 - `docs/architecture/security-architecture.md` — Auth design
-- `docs/backend/authentication.md` — Better Auth setup
+- `docs/backend/authentication.md` — Supabase Auth setup
 - `docs/api/authentication.md` — Auth endpoints
 - `docs/adr/ADR-0007.md` — Regular Members Restricted
 
@@ -791,17 +791,17 @@ Authentication is the gateway to all protected features. This must be implemente
 - `apps/api/src/config/env.ts` — READ (environment vars)
 
 ### 8. Acceptance Criteria
-- [ ] Better Auth configured with PostgreSQL adapter
+- [ ] Supabase client configured (`SUPABASE_URL`, `SUPABASE_ANON_KEY`)
 - [ ] Session cookies configured (httpOnly, secure, sameSite)
-- [ ] Auth tables created (users, sessions, accounts)
+- [ ] Application user tables aligned with Supabase auth user IDs (see CORE-020)
 - [ ] Unit tests pass
 
 ### 9. Git Branch
-`feature/core-019-better-auth-configuration`
+`feature/core-019-supabase-auth-configuration`
 
 ---
 
-## CORE-020 — Auth Database Tables
+## CORE-020 — Application User Tables
 
 ### 1. Phase
 Phase 2 — Authentication & Authorization
@@ -814,23 +814,23 @@ Phase 2 — Authentication & Authorization
 - **Lane:** Core
 
 ### 4. Task Objective
-Create Drizzle schemas and migrations for Better Auth tables: `users`, `sessions`, `accounts`, `verification_tokens`.
+Create Drizzle schemas and migrations for application `users` (role/UUID aligned with Supabase `auth.users` id). Session/account state lives in Supabase Auth, not custom tables.
 
 ### 5. Documentation References
 - `docs/backend/authentication.md` — Auth table requirements
 
 ### 6. Repository References
-- `packages/database/src/schema/index.ts` — MODIFY (add auth tables)
+- `packages/database/src/schema/index.ts` — MODIFY (export users schema)
 - `packages/database/src/migrations/` — CREATE
 
 ### 7. Acceptance Criteria
-- [ ] Auth tables created in migration
+- [ ] Application users table created in migration
 - [ ] Role field included on users table
-- [ ] Session table has proper indexes
+- [ ] User UUID aligns with Supabase auth user id
 - [ ] Migration runs cleanly
 
 ### 8. Git Branch
-`feature/core-020-auth-database-tables`
+`feature/core-020-application-user-tables`
 
 ---
 
@@ -1864,7 +1864,7 @@ Configure Railway-managed PostgreSQL.
 - `packages/database/drizzle.config.ts` — READ
 
 ### 7. Acceptance Criteria
-- [ ] PostgreSQL 15 running on Railway
+- [ ] PostgreSQL 16 running on Railway
 - [ ] Connection via internal hostname
 - [ ] TLS enabled
 - [ ] All migrations applied

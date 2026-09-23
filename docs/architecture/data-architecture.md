@@ -2,7 +2,7 @@
 
 ## Hitsanat Kifl Children's Ministry Management System
 **Document Version:** 2.1  
-**Database Engine:** PostgreSQL 15+ (Hosted on Supabase)  
+**Database Engine:** PostgreSQL 16+ (Hosted on Supabase)  
 **ORM & Query Builder:** Drizzle ORM  
 
 ---

@@ -11,29 +11,49 @@
 Docker is utilized for local development and running isolated PostgreSQL integration tests:
 
 ```yaml
-version: '3.8'
-
 services:
   postgres:
-    image: postgres:15-alpine
-    container_name: hitsanat_postgres
-    restart: always
+    image: postgres:16-alpine
+    container_name: hitsanat-postgres
+    restart: unless-stopped
     environment:
-      POSTGRES_USER: hitsanat_user
-      POSTGRES_PASSWORD: hitsanat_password
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgrespassword
       POSTGRES_DB: hitsanat_dev
     ports:
-      - '5432:5432'
+      - '5434:5432'
     volumes:
       - postgres_data:/var/lib/postgresql/data
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U hitsanat_user -d hitsanat_dev"]
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  postgres_test:
+    image: postgres:16-alpine
+    container_name: hitsanat-postgres-test
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgrespassword
+      POSTGRES_DB: hitsanat_test
+    ports:
+      - '5433:5432'
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
       interval: 5s
       timeout: 5s
       retries: 5
 
 volumes:
   postgres_data:
+    driver: local
+```
+
+Host connection string (local development):
+```
+postgresql://postgres:postgrespassword@localhost:5434/hitsanat_dev
 ```
 
 ### Starting the Local Database:

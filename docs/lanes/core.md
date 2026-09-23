@@ -32,7 +32,7 @@ Simple and well-defined backend work is delegated to Israel (Backend Support) wh
 - Data architecture decisions (Gregorian storage, audit logs)
 
 ### 2.3 Security & Authentication
-- Better Auth integration and session management
+- Supabase Auth integration and session management
 - Scoped RBAC implementation (ADR-0005)
 - Authorization guards (`requireAuth`, `requireScopePermission`)
 - PII protection and data privacy
@@ -159,7 +159,7 @@ None — Abrham is the final technical authority. All architectural decisions ar
 | Migration | Generate Drizzle migration, write seed scripts |
 | API contract | Design `/api/v1/members` endpoint contract |
 | Domain logic | Implement planning weight calculation engine |
-| Auth/RBAC | Configure Better Auth, add scoped permission guard |
+| Auth/RBAC | Configure Supabase Auth, add scoped permission guard |
 | CI/CD | Add Playwright E2E job to GitHub Actions |
 | Backend | Implement complex API endpoints, domain services |
 | Review | Review Israel's CRUD endpoint PR |

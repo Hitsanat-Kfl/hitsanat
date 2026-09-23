@@ -46,7 +46,7 @@ export interface RequestUser {
 Enforces fine-grained permission guards:
 ```typescript
 import { Router } from 'express';
-import { requireAuth, requireScopePermission } from '@hitsanat/auth';
+import { requireAuth, requireScopePermission } from '@repo/auth';
 
 const router = Router();
 

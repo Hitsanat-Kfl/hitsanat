@@ -30,8 +30,8 @@
 - [ ] Non-leadership users cannot access management routes (ADR-0007).
 
 ### 2.2 Frontend Review Checklist
-- [ ] Components compose shared `@hitsanat/ui` primitives.
+- [ ] Components compose shared `@repo/ui` primitives.
 - [ ] Layout is responsive down to $360\text{ px}$ mobile viewport.
-- [ ] Dates render via `@hitsanat/calendar` Ethiopian date utilities.
-- [ ] React Hook Form validates against shared `@hitsanat/validation` Zod schemas.
+- [ ] Dates render via `@repo/calendar` Ethiopian date utilities.
+- [ ] React Hook Form validates against shared `@repo/validation` Zod schemas.
 - [ ] Accessibility checks pass (no missing form labels or ARIA tags).

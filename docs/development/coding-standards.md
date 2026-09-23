@@ -29,4 +29,4 @@
 
 - Never swallow exceptions with empty `catch {}` blocks.
 - Throw typed domain errors inheriting from `DomainError` (e.g. `ParentCardinalityViolationError`, `InvalidEthiopianDateError`).
-- Log structured error objects using `@hitsanat/logger` with correlation metadata (`userId`, `path`, `method`).
+- Log structured error objects (structured `console.error` JSON with correlation metadata: `userId`, `path`, `method`).

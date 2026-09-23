@@ -7,7 +7,7 @@
 ---
 
 ## Context
-The project requires a mature, robust, and universally understood HTTP backend framework in TypeScript that seamlessly integrates with Better Auth, Drizzle ORM, Zod validation, and Swagger OpenAPI documentation, while supporting Clean Architecture and Modular Monolith structuring. Earlier drafts suggested Fastify, but the team's familiarity and existing tooling aligned strongly with Express.js.
+The project requires a mature, robust, and universally understood HTTP backend framework in TypeScript that seamlessly integrates with Supabase Auth, Drizzle ORM, Zod validation, and Swagger OpenAPI documentation, while supporting Clean Architecture and Modular Monolith structuring. Earlier drafts suggested Fastify, but the team's familiarity and existing tooling aligned strongly with Express.js.
 
 ---
 
@@ -20,8 +20,8 @@ Express is restricted to the Presentation layer (Routing, Middleware, Controller
 ## Consequences
 ### Positive:
 - High team familiarity and zero learning curve for supporting backend contributors.
-- Direct ecosystem compatibility with Better Auth, Swagger UI Express, Pino HTTP, and CORS/Helmet.
+- Direct ecosystem compatibility with Supabase Auth, Swagger UI Express, Pino HTTP, and CORS/Helmet.
 - Clean Architecture ensures that migrating HTTP transport in the future would require changing only the presentation adapter.
 
 ### Negative:
-- Slightly higher memory footprint than Fastify, easily mitigated on Render standard instances.
+- Slightly higher memory footprint than Fastify, easily mitigated on Railway standard instances.

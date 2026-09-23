@@ -44,8 +44,7 @@ graph TD
 ```typescript
 import { Request, Response, NextFunction } from 'express';
 import { ZodError } from 'zod';
-import { DomainError } from '@hitsanat/domain';
-import { logger } from '@hitsanat/logger';
+import { DomainError } from '@repo/domain';
 
 export function globalErrorHandler(
   err: Error,
@@ -53,7 +52,16 @@ export function globalErrorHandler(
   res: Response,
   next: NextFunction
 ) {
-  logger.error({ err, path: req.path, method: req.method }, 'Unhandled error occurred');
+  console.error(
+    JSON.stringify({
+      level: 'error',
+      message: 'Unhandled error occurred',
+      path: req.path,
+      method: req.method,
+      error: err.message,
+      stack: err.stack,
+    })
+  );
 
   if (err instanceof ZodError) {
     return res.status(400).json({

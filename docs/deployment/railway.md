@@ -17,7 +17,7 @@ graph TD
         subgraph Private Internal Network
             RailwayAPI[apps/api<br/>Express.js REST API<br/>Private: api.railway.internal<br/>Public: api.hitsanat.org]
             RailwayWorker[apps/telegram<br/>Telegram Bot Worker<br/>Private: telegram.railway.internal]
-            RailwayDB[(PostgreSQL 15 Database<br/>Private: postgres.railway.internal:5432)]
+            RailwayDB[(PostgreSQL 16 Database<br/>Private: postgres.railway.internal:5432)]
         end
     end
 
@@ -35,13 +35,13 @@ graph TD
 - **Builder:** Nixpacks
 - **Build Command:**
   ```bash
-  pnpm install --frozen-lockfile && pnpm --filter @hitsanat/database db:migrate && pnpm --filter @hitsanat/api build
+  pnpm install --frozen-lockfile && pnpm --filter @repo/database db:migrate && pnpm --filter @repo/api build
   ```
 - **Start Command:**
   ```bash
   node apps/api/dist/server.js
   ```
-- **Port:** Configured via `PORT` env var (defaults to `4000` or Railway auto-assigned `$PORT`).
+- **Port:** Configured via `PORT` env var (defaults to `3001`; Railway may auto-assign `$PORT`).
 - **Health Check Path:** `/health`
 - **Public Domain:** `api.hitsanat.org` or `hitsanat-api.up.railway.app`
 - **Restart Policy:** `ON_FAILURE` (Max 10 retries)
@@ -49,11 +49,12 @@ graph TD
 ### 2.2 Required Environment Variables
 ```ini
 NODE_ENV=production
-PORT=4000
+PORT=3001
+API_PREFIX=/api/v1
 DATABASE_URL=postgresql://${PGUSER}:${PGPASSWORD}@postgres.railway.internal:5432/${PGDATABASE}
-DIRECT_URL=postgresql://${PGUSER}:${PGPASSWORD}@postgres.railway.internal:5432/${PGDATABASE}
-BETTER_AUTH_SECRET=your_super_secret_key_here
-BETTER_AUTH_URL=https://api.hitsanat.org
+SUPABASE_URL=https://your-project.supabase.co
+SUPABASE_ANON_KEY=your-anon-key
+SUPABASE_SERVICE_ROLE_KEY=your-service-role-key
 CORS_ORIGIN=https://admin.hitsanat.org,https://hitsanat.org
 ```
 
@@ -66,7 +67,7 @@ CORS_ORIGIN=https://admin.hitsanat.org,https://hitsanat.org
 - **Builder:** Nixpacks
 - **Build Command:**
   ```bash
-  pnpm install --frozen-lockfile && pnpm --filter @hitsanat/telegram build
+  pnpm install --frozen-lockfile && pnpm --filter @repo/telegram build
   ```
 - **Start Command:**
   ```bash
@@ -80,7 +81,7 @@ CORS_ORIGIN=https://admin.hitsanat.org,https://hitsanat.org
 NODE_ENV=production
 DATABASE_URL=postgresql://${PGUSER}:${PGPASSWORD}@postgres.railway.internal:5432/${PGDATABASE}
 TELEGRAM_BOT_TOKEN=your_bot_token_from_botfather
-TELEGRAM_CHANNEL_ID=@hitsanat_kifl_official
+TELEGRAM_CHAT_ID=@hitsanat_kifl_official
 ```
 
 ---

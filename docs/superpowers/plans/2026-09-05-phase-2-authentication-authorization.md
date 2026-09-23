@@ -2,14 +2,14 @@
 
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 
-**Goal:** Implement Better Auth with scoped RBAC middleware and auth API endpoints for leadership-only access to the admin portal.
+**Goal:** Implement Supabase Auth with scoped RBAC middleware and auth API endpoints for leadership-only access to the admin portal.
 
-**Architecture:** Create `packages/auth` with Better Auth configured against PostgreSQL via Drizzle adapter. Add auth tables (users, sessions, accounts, verification_tokens) to the database schema. Implement `requireAuth()` and `requireScopePermission()` middleware. Mount Better Auth handlers on Express for sign-in, sign-out, and session endpoints.
+**Architecture:** Create `packages/auth` with Supabase Auth (`@supabase/supabase-js`) for session management. Keep application user roles on the `users` table (aligned with Supabase `auth.users` UUIDs). Implement `requireAuth()` (Supabase JWT verification) and `requireScopePermission()` middleware. Mount session/sign-out endpoints on Express; sign-in happens client-side via `supabase.auth.signInWithPassword()`.
 
-**Tech Stack:** Better Auth, Drizzle ORM, PostgreSQL, Express, TypeScript, Vitest
+**Tech Stack:** Supabase Auth, Drizzle ORM, PostgreSQL, Express, TypeScript, Vitest
 
 **Specs:**
-- `docs/backend/authentication.md` — Better Auth initialization & Express integration
+- `docs/backend/authentication.md` — Supabase Auth initialization & Express integration
 - `docs/backend/authorization.md` — Scoped RBAC guard middleware
 - `docs/architecture/security-architecture.md` — Security architecture & threat model
 - `docs/requirements/roles-and-permissions.md` — Roles & permissions matrix
@@ -22,7 +22,7 @@
 - TypeScript strict mode, ESM modules (`"type": "module"`)
 - Biome for formatting/linting, Vitest for testing
 - PostgreSQL via `postgres` driver, Drizzle ORM for schema/query
-- Better Auth for session management, argon2id/bcrypt for password hashing
+- Supabase Auth (`@supabase/supabase-js`, `@supabase/ssr`) for auth/session management
 - Cookie: `httpOnly`, `secure`, `sameSite: strict`, 7-day rolling expiration
 - Regular members (`MEMBER_REGULAR`) have NO admin portal access (ADR-0007)
 - Scoped permissions: global roles first, then sub-department scoped roles
@@ -35,17 +35,17 @@
 |------|---------|
 | `packages/auth/package.json` | New package config for @repo/auth |
 | `packages/auth/tsconfig.json` | TypeScript config extending base |
-| `packages/auth/src/index.ts` | Better Auth instance initialization |
+| `packages/auth/src/index.ts` | Supabase client initialization & helpers |
 | `packages/auth/src/middleware.ts` | requireAuth() and requireScopePermission() middleware |
 | `packages/auth/src/types.ts` | Extended session/user types |
 | `packages/auth/src/__tests__/auth.test.ts` | Unit tests for auth configuration |
 | `packages/auth/src/__tests__/middleware.test.ts` | Unit tests for RBAC middleware |
-| `packages/database/src/schema/auth.ts` | NEW: Drizzle schema for auth tables |
-| `packages/database/src/schema/index.ts` | MODIFY: Export auth schema |
-| `packages/database/src/migrations/0002_add_auth_tables.sql` | NEW: Migration for auth tables |
+| `packages/database/src/schema/users.ts` | Application users table (role field; UUID = Supabase auth id) |
+| `packages/database/src/schema/index.ts` | MODIFY: Export user schema |
+| `packages/database/src/migrations/000X_add_users.sql` | NEW: Migration for application users tables |
 | `packages/database/src/migrations/meta/_journal.json` | MODIFY: Add migration entry |
-| `apps/api/src/app.ts` | MODIFY: Mount auth handlers |
-| `apps/api/src/config/env.ts` | MODIFY: Add AUTH_SECRET env var |
+| `apps/api/src/app.ts` | MODIFY: Mount auth routes |
+| `apps/api/src/config/env.ts` | MODIFY: Require SUPABASE_URL / SUPABASE_ANON_KEY |
 | `apps/api/package.json` | MODIFY: Add @repo/auth dependency |
 | `pnpm-workspace.yaml` | VERIFY: Already includes packages/* |
 | `vitest.config.ts` | MODIFY: Add auth workspace |
@@ -59,7 +59,7 @@
 - Create: `packages/auth/tsconfig.json`
 
 **Interfaces:**
-- Produces: @repo/auth package structure ready for Better Auth
+- Produces: @repo/auth package structure ready for Supabase Auth
 
 - [ ] **Step 1: Create package.json**
 
@@ -88,7 +88,8 @@
   "dependencies": {
     "@repo/database": "workspace:*",
     "@repo/permissions": "workspace:*",
-    "better-auth": "^1.2.8"
+    "@supabase/supabase-js": "^2.45.0",
+    "@supabase/ssr": "^0.5.0"
   },
   "devDependencies": {
     "@repo/typescript-config": "workspace:*",
@@ -128,27 +129,29 @@ git commit -m "feat(auth): create packages/auth scaffold"
 
 ---
 
-### Task 2: Add auth tables to database schema
+### Task 2: Add application users to database schema
 
 **Files:**
-- Create: `packages/database/src/schema/auth.ts`
-- Modify: `packages/database/src/schema/index.ts` — Add `export * from "./auth"`
+- Create: `packages/database/src/schema/users.ts`
+- Modify: `packages/database/src/schema/index.ts` — Add `export * from "./users"`
 
 **Interfaces:**
-- Produces: `users`, `sessions`, `accounts`, `verificationTokens` Drizzle tables
+- Produces: `users` Drizzle table (application profile/role; UUID aligns with Supabase `auth.users.id`). Session/account state lives in Supabase Auth, not custom tables.
 
-- [ ] **Step 1: Create auth schema**
+- [ ] **Step 1: Create users schema**
 
 ```typescript
-// packages/database/src/schema/auth.ts
-import { pgTable, text, timestamp, uuid, varchar, boolean, integer, primaryKey } from "drizzle-orm/pg-core";
+// packages/database/src/schema/users.ts
+import { pgTable, text, timestamp, uuid, varchar, boolean } from "drizzle-orm/pg-core";
 
 /**
- * Users table for Better Auth
- * Stores leadership accounts only (ADR-0007: regular members have no accounts)
+ * Application users (leadership profiles & roles).
+ * Primary key UUID aligns with Supabase auth.users.id.
+ * Session storage is managed by Supabase Auth — no custom sessions/accounts tables.
+ * ADR-0007: regular members have no admin portal accounts.
  */
 export const users = pgTable("users", {
-  id: uuid("id").primaryKey().defaultRandom(),
+  id: uuid("id").primaryKey(), // references Supabase auth.users.id
   name: varchar("name", { length: 255 }).notNull(),
   email: varchar("email", { length: 255 }).notNull().unique(),
   emailVerified: boolean("email_verified").default(false).notNull(),
@@ -160,65 +163,14 @@ export const users = pgTable("users", {
 
 export type User = typeof users.$inferSelect;
 export type NewUser = typeof users.$inferInsert;
-
-/**
- * Sessions table for Better Auth
- */
-export const sessions = pgTable("sessions", {
-  id: uuid("id").primaryKey().defaultRandom(),
-  expiresAt: timestamp("expires_at", { withTimezone: true }).notNull(),
-  token: varchar("token", { length: 255 }).notNull().unique(),
-  ipAddress: varchar("ip_address", { length: 45 }),
-  userAgent: text("user_agent"),
-  userId: uuid("user_id")
-    .notNull()
-    .references(() => users.id, { onDelete: "cascade" }),
-  createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
-  updatedAt: timestamp("updated_at", { withTimezone: true }).defaultNow().notNull(),
-});
-
-export type Session = typeof sessions.$inferSelect;
-export type NewSession = typeof sessions.$inferInsert;
-
-/**
- * Accounts table for Better Auth (OAuth providers)
- */
-export const accounts = pgTable("accounts", {
-  id: uuid("id").primaryKey().defaultRandom(),
-  accountId: varchar("account_id", { length: 255 }).notNull(),
-  providerId: varchar("provider_id", { length: 255 }).notNull(),
-  userId: uuid("user_id")
-    .notNull()
-    .references(() => users.id, { onDelete: "cascade" }),
-  password: varchar("password", { length: 255 }),
-  createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
-  updatedAt: timestamp("updated_at", { withTimezone: true }).defaultNow().notNull(),
-});
-
-export type Account = typeof accounts.$inferSelect;
-export type NewAccount = typeof accounts.$inferInsert;
-
-/**
- * Verification tokens for Better Auth
- */
-export const verificationTokens = pgTable("verification_tokens", {
-  id: uuid("id").primaryKey().defaultRandom(),
-  identifier: varchar("identifier", { length: 255 }).notNull(),
-  token: varchar("token", { length: 255 }).notNull().unique(),
-  expiresAt: timestamp("expires_at", { withTimezone: true }).notNull(),
-  createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
-});
-
-export type VerificationToken = typeof verificationTokens.$inferSelect;
-export type NewVerificationToken = typeof verificationTokens.$inferInsert;
 ```
 
 - [ ] **Step 2: Add export to schema index**
 
 Add to `packages/database/src/schema/index.ts`:
 ```typescript
-// Auth & Session Management
-export * from "./auth";
+// Application users (Supabase auth profile/role)
+export * from "./users";
 ```
 
 - [ ] **Step 3: Verify typecheck**
@@ -228,27 +180,27 @@ Run: `pnpm --filter @repo/database typecheck`
 - [ ] **Step 4: Commit**
 
 ```bash
-git add packages/database/src/schema/auth.ts packages/database/src/schema/index.ts
-git commit -m "feat(db): add auth tables schema for Better Auth"
+git add packages/database/src/schema/users.ts packages/database/src/schema/index.ts
+git commit -m "feat(db): add application users schema (Supabase-aligned)"
 ```
 
 ---
 
-### Task 3: Create auth migration SQL
+### Task 3: Create application users migration SQL
 
 **Files:**
-- Create: `packages/database/src/migrations/0002_add_auth_tables.sql`
+- Create: `packages/database/src/migrations/0002_add_users.sql`
 - Modify: `packages/database/src/migrations/meta/_journal.json`
 
 **Interfaces:**
-- Produces: Migration SQL that creates auth tables with proper indexes
+- Produces: Migration SQL that creates the application `users` table (Supabase sessions live on Supabase Auth side)
 
 - [ ] **Step 1: Create migration SQL**
 
 ```sql
--- packages/database/src/migrations/0002_add_auth_tables.sql
+-- packages/database/src/migrations/0002_add_users.sql
 CREATE TABLE IF NOT EXISTS "users" (
-  "id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
+  "id" uuid PRIMARY KEY NOT NULL,
   "name" varchar(255) NOT NULL,
   "email" varchar(255) NOT NULL,
   "email_verified" boolean DEFAULT false NOT NULL,
@@ -258,47 +210,6 @@ CREATE TABLE IF NOT EXISTS "users" (
   "updated_at" timestamp with time zone DEFAULT now() NOT NULL,
   CONSTRAINT "users_email_unique" UNIQUE ("email")
 );
---> statement-breakpoint
-
-CREATE TABLE IF NOT EXISTS "sessions" (
-  "id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
-  "expires_at" timestamp with time zone NOT NULL,
-  "token" varchar(255) NOT NULL,
-  "ip_address" varchar(45),
-  "user_agent" text,
-  "user_id" uuid NOT NULL,
-  "created_at" timestamp with time zone DEFAULT now() NOT NULL,
-  "updated_at" timestamp with time zone DEFAULT now() NOT NULL,
-  CONSTRAINT "sessions_token_unique" UNIQUE ("token"),
-  CONSTRAINT "sessions_user_id_fk" FOREIGN KEY ("user_id") REFERENCES "users"("id") ON DELETE cascade ON UPDATE no action
-);
---> statement-breakpoint
-
-CREATE TABLE IF NOT EXISTS "accounts" (
-  "id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
-  "account_id" varchar(255) NOT NULL,
-  "provider_id" varchar(255) NOT NULL,
-  "user_id" uuid NOT NULL,
-  "password" varchar(255),
-  "created_at" timestamp with time zone DEFAULT now() NOT NULL,
-  "updated_at" timestamp with time zone DEFAULT now() NOT NULL,
-  CONSTRAINT "accounts_user_id_fk" FOREIGN KEY ("user_id") REFERENCES "users"("id") ON DELETE cascade ON UPDATE no action
-);
---> statement-breakpoint
-
-CREATE TABLE IF NOT EXISTS "verification_tokens" (
-  "id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
-  "identifier" varchar(255) NOT NULL,
-  "token" varchar(255) NOT NULL,
-  "expires_at" timestamp with time zone NOT NULL,
-  "created_at" timestamp with time zone DEFAULT now() NOT NULL,
-  CONSTRAINT "verification_tokens_token_unique" UNIQUE ("token")
-);
---> statement-breakpoint
-
-CREATE INDEX IF NOT EXISTS "sessions_user_id_idx" ON "sessions" ("user_id");
-CREATE INDEX IF NOT EXISTS "sessions_expires_at_idx" ON "sessions" ("expires_at");
-CREATE INDEX IF NOT EXISTS "accounts_user_id_idx" ON "accounts" ("user_id");
 ```
 
 - [ ] **Step 2: Add journal entry**
@@ -309,7 +220,7 @@ Update `packages/database/src/migrations/meta/_journal.json` — add entry:
   "idx": 2,
   "version": "7",
   "when": 1788700000000,
-  "tag": "0002_add_auth_tables",
+  "tag": "0002_add_users",
   "breakpoints": true
 }
 ```
@@ -318,12 +229,12 @@ Update `packages/database/src/migrations/meta/_journal.json` — add entry:
 
 ```bash
 git add packages/database/src/migrations/
-git commit -m "feat(db): add auth tables migration"
+git commit -m "feat(db): add application users migration"
 ```
 
 ---
 
-### Task 4: Initialize Better Auth instance
+### Task 4: Initialize Supabase Auth instance
 
 **Files:**
 - Create: `packages/auth/src/types.ts`
@@ -359,51 +270,37 @@ export interface AuthContext {
 }
 ```
 
-- [ ] **Step 2: Create index.ts with Better Auth**
+- [ ] **Step 2: Create index.ts with Supabase Auth**
 
 ```typescript
 // packages/auth/src/index.ts
-import { betterAuth } from "better-auth";
-import { drizzleAdapter } from "better-auth/adapters/drizzle";
-import { db } from "@repo/database";
-import * as schema from "@repo/database/schema";
+import { createClient } from "@supabase/supabase-js";
+import { env } from "../env.js"; // or process.env
 
-export const auth = betterAuth({
-  database: drizzleAdapter(db, {
-    provider: "pg",
-    schema: {
-      user: schema.users,
-      session: schema.sessions,
-      account: schema.accounts,
-      verification: schema.verificationTokens,
+export const supabase = createClient(
+  env.SUPABASE_URL,
+  env.SUPABASE_ANON_KEY,
+  {
+    auth: {
+      persistSession: false,
+      autoRefreshToken: false,
     },
-  }),
-  emailAndPassword: {
-    enabled: true,
-    requireEmailVerification: false,
-  },
-  session: {
-    expiresIn: 60 * 60 * 24 * 7, // 7 days rolling
-    updateAge: 60 * 60 * 24, // Update every 24 hours
-    cookie: {
-      name: "better-auth.session_token",
-      httpOnly: true,
-      secure: process.env.NODE_ENV === "production",
-      sameSite: "strict",
-    },
-  },
-  user: {
-    additionalFields: {
-      role: {
-        type: "string",
-        required: false,
-        defaultValue: "MEMBER_REGULAR",
-      },
-    },
-  },
-});
+  }
+);
 
-export type Session = typeof auth.$Infer.Session;
+/**
+ * Verify a Supabase access token (JWT) and return the authenticated user.
+ * Used by requireAuth() middleware on the Express API.
+ */
+export async function verifySupabaseToken(token: string) {
+  const { data, error } = await supabase.auth.getUser(token);
+  if (error || !data.user) {
+    return null;
+  }
+  return data.user;
+}
+
+export type AuthUser = Awaited<ReturnType<typeof supabase.auth.getUser>>["data"]["user"];
 ```
 
 - [ ] **Step 3: Verify typecheck**
@@ -414,7 +311,7 @@ Run: `pnpm --filter @repo/auth typecheck`
 
 ```bash
 git add packages/auth/src/
-git commit -m "feat(auth): initialize Better Auth with PostgreSQL adapter"
+git commit -m "feat(auth): initialize Supabase Auth client"
 ```
 
 ---
@@ -434,7 +331,7 @@ git commit -m "feat(auth): initialize Better Auth with PostgreSQL adapter"
 ```typescript
 // packages/auth/src/middleware.ts
 import type { Request, Response, NextFunction } from "express";
-import { auth } from "./index.js";
+import { verifySupabaseToken } from "./index.js";
 import { db } from "@repo/database";
 import { subDepartmentMembers, subDepartments } from "@repo/database/schema";
 import { eq } from "drizzle-orm";
@@ -452,11 +349,11 @@ declare global {
  * Resolve session token from cookie or Authorization header
  */
 function extractToken(req: Request): string | undefined {
-  // Check cookie first
+  // Supabase SSR auth cookie (or Authorization: Bearer <access_token>)
   const cookieHeader = req.headers.cookie;
   if (cookieHeader) {
-    const match = cookieHeader.match(/better-auth\.session_token=([^;]+)/);
-    if (match) return match[1];
+    const match = cookieHeader.match(/sb-[^=]+-auth-token=([^;]+)/);
+    if (match) return decodeURIComponent(match[1]);
   }
   // Fallback to Authorization header
   const authHeader = req.headers.authorization;
@@ -524,13 +421,9 @@ export function requireAuth() {
     }
 
     try {
-      const session = await auth.api.getSession({
-        headers: new Headers({
-          cookie: `better-auth.session_token=${token}`,
-        }),
-      });
+      const user = await verifySupabaseToken(token);
 
-      if (!session || !session.user) {
+      if (!user) {
         return res.status(401).json({
           success: false,
           error: {
@@ -540,7 +433,7 @@ export function requireAuth() {
         });
       }
 
-      const sessionUser = await resolveUserScopes(session.user.id);
+      const sessionUser = await resolveUserScopes(user.id);
       req.sessionUser = sessionUser;
       next();
     } catch {
@@ -633,7 +526,7 @@ git commit -m "feat(auth): implement requireAuth and requireScopePermission midd
 
 **Files:**
 - Modify: `apps/api/package.json` — Add `"@repo/auth": "workspace:*"` to dependencies
-- Modify: `apps/api/src/config/env.ts` — Add `AUTH_SECRET` env var
+- Modify: `apps/api/src/config/env.ts` — Require `SUPABASE_URL` and `SUPABASE_ANON_KEY` env vars
 
 **Interfaces:**
 - Consumes: @repo/auth package
@@ -646,11 +539,12 @@ Add to `dependencies`:
 "@repo/auth": "workspace:*",
 ```
 
-- [ ] **Step 2: Add AUTH_SECRET to env config**
+- [ ] **Step 2: Add Supabase env vars to env config**
 
-Add to `apps/api/src/config/env.ts`:
+Add to `apps/api/src/config/env.ts` (Zod schema / env object):
 ```typescript
-AUTH_SECRET: process.env.AUTH_SECRET || "dev-secret-change-in-production",
+SUPABASE_URL: process.env.SUPABASE_URL,
+SUPABASE_ANON_KEY: process.env.SUPABASE_ANON_KEY,
 ```
 
 - [ ] **Step 3: Install dependencies**
@@ -661,7 +555,7 @@ Run: `pnpm install`
 
 ```bash
 git add apps/api/package.json apps/api/src/config/env.ts pnpm-lock.yaml
-git commit -m "feat(api): add @repo/auth dependency and AUTH_SECRET env var"
+git commit -m "feat(api): add @repo/auth dependency and Supabase env vars"
 ```
 
 ---
@@ -669,48 +563,22 @@ git commit -m "feat(api): add @repo/auth dependency and AUTH_SECRET env var"
 ### Task 7: Mount auth handlers on Express
 
 **Files:**
-- Modify: `apps/api/src/app.ts` — Mount Better Auth handlers
+- Modify: `apps/api/src/app.ts` — Mount auth session/sign-out routes
 
 **Interfaces:**
-- Consumes: `auth` from `@repo/auth`
+- Consumes: `verifySupabaseToken` from `@repo/auth`
 - Produces: Auth routes at `/api/v1/auth/*`
 
-- [ ] **Step 1: Add auth handler to app.ts**
+- [ ] **Step 1: Mount auth routes on app.ts**
 
-Add to `apps/api/src/app.ts`:
+Add to `apps/api/src/app.ts` (matches existing `authRouter` mount):
 
 ```typescript
-import { auth } from "@repo/auth";
-
-// Add after global middleware, before health check:
-// Better Auth handlers
-app.all("/api/v1/auth/*", async (req, res) => {
-  const url = new URL(req.url, `http://${req.headers.host}`);
-  const headers = new Headers();
-  for (const [key, value] of Object.entries(req.headers)) {
-    if (value) headers.set(key, Array.isArray(value) ? value[0] : value);
-  }
-
-  try {
-    const response = await auth.handler({
-      method: req.method,
-      headers,
-      url: url.toString(),
-      body: req.body,
-    });
-
-    res.status(response.status);
-    for (const [key, value] of response.headers.entries()) {
-      res.setHeader(key, value);
-    }
-
-    const body = await response.text();
-    res.send(body);
-  } catch (error) {
-    console.error("Auth handler error:", error);
-    res.status(500).json({ error: "Internal Server Error" });
-  }
-});
+// Auth session endpoint (Supabase JWT verification)
+app.use(`${env.API_PREFIX}/auth`, authRouter);
+// authRouter implements:
+//   GET  /api/v1/auth/session  → verifySupabaseToken + return user
+//   POST /api/v1/auth/sign-out → clear session cookie / no-op JWT
 ```
 
 - [ ] **Step 2: Verify typecheck**
@@ -721,7 +589,7 @@ Run: `pnpm --filter @repo/api typecheck`
 
 ```bash
 git add apps/api/src/app.ts
-git commit -m "feat(api): mount Better Auth handlers on Express"
+git commit -m "feat(api): mount auth routes on Express"
 ```
 
 ---
@@ -732,26 +600,24 @@ git commit -m "feat(api): mount Better Auth handlers on Express"
 - Create: `packages/auth/src/__tests__/auth.test.ts`
 
 **Interfaces:**
-- Consumes: `auth` instance
-- Produces: Tests verifying Better Auth is configured correctly
+- Consumes: `supabase` / `verifySupabaseToken` from `../index.js`
+- Produces: Tests verifying Supabase Auth client is configured correctly
 
 - [ ] **Step 1: Create auth test**
 
 ```typescript
 // packages/auth/src/__tests__/auth.test.ts
 import { describe, it, expect } from "vitest";
-import { auth } from "../index.js";
+import { supabase, verifySupabaseToken } from "../index.js";
 
-describe("Better Auth Configuration", () => {
-  it("should export an auth instance", () => {
-    expect(auth).toBeDefined();
-    expect(auth.handler).toBeDefined();
+describe("Supabase Auth Configuration", () => {
+  it("should export a Supabase client", () => {
+    expect(supabase).toBeDefined();
+    expect(typeof verifySupabaseToken).toBe("function");
   });
 
-  it("should have session configuration", () => {
-    expect(auth).toBeDefined();
-    // Better Auth instance should be ready to handle requests
-    expect(typeof auth.handler).toBe("function");
+  it("should expose verifySupabaseToken for JWT verification", () => {
+    expect(typeof verifySupabaseToken).toBe("function");
   });
 });
 ```
@@ -764,7 +630,7 @@ Run: `cd packages/auth && npx vitest run`
 
 ```bash
 git add packages/auth/src/__tests__/
-git commit -m "test(auth): add unit tests for Better Auth configuration"
+git commit -m "test(auth): add unit tests for Supabase Auth configuration"
 ```
 
 ---
@@ -982,15 +848,17 @@ git commit -m "fix: resolve CI issues for Phase 2 auth implementation"
 ## Self-Review
 
 **1. Spec coverage:**
-- ✅ Better Auth configured with PostgreSQL adapter (Task 4)
+- ✅ Supabase Auth client configured (Task 4)
+- ✅ Application users table created (roles/UUID = Supabase auth id) (Task 2, 3)
 - ✅ Session cookies configured (httpOnly, secure, sameSite) (Task 4)
-- ✅ Auth tables created: users, sessions, accounts, verification_tokens (Task 2, 3)
+- ✅ Supabase Auth client configured (Task 4)
+- ✅ Application users table created (roles/UUID = Supabase auth id) (Task 2, 3)
 - ✅ requireAuth() validates session cookies (Task 5)
 - ✅ requireScopePermission() checks global roles first, then sub-dept (Task 5)
 - ✅ Returns HTTP 403 with FORBIDDEN_INSUFFICIENT_SCOPE (Task 5)
 - ✅ Non-leadership members denied access (ADR-0007) (Task 5 middleware resolves roles)
 - ✅ Unit tests cover all permission scenarios (Task 9)
-- ✅ Auth API endpoints via Better Auth handlers (Task 7)
+- ✅ Auth API endpoints via Supabase Auth handlers (Task 7)
 
 **2. Placeholder scan:** No placeholders found. All code blocks are complete.
 

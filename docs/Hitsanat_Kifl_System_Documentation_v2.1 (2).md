@@ -982,7 +982,7 @@ The technology stack is confirmed as follows (v1.0 listed this section as recomm
 ### 11.2 Backend
 
 - Express.js (TypeScript)
-- Better Auth for authentication
+- Supabase Auth for authentication
 - Drizzle ORM
 
 ### 11.3 Database

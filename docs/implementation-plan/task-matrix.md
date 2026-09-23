@@ -44,7 +44,7 @@
 
 | Task ID | Source Plan Item | Primary Owner | Lane | Repository Area | Dependencies | Tests | Documentation | Git Branch | Status |
 |:---|:---|:---|:---|:---|:---|:---|:---|:---|:---|
-| AUTH-001 | Better Auth Configuration | Abrham | Core | `packages/auth/` | FND-001 | Unit | `docs/architecture/system-architecture.md` | `feature/auth-001-better-auth-config` | NOT_STARTED |
+| AUTH-001 | Supabase Auth Configuration | Abrham | Core | `packages/auth/` | FND-001 | Unit | `docs/architecture/system-architecture.md` | `feature/auth-001-supabase-auth-config` | NOT_STARTED |
 | AUTH-002 | Auth Database Tables | Abrham | Core | `packages/database/` | FND-001 | Integration | `docs/database/entities.md` | `feature/auth-002-auth-tables` | NOT_STARTED |
 | AUTH-003 | Scoped RBAC Middleware | Abrham | Core | `apps/api/src/shared/middleware/` | FND-008, AUTH-001 | Unit + Integration | `docs/requirements/roles-and-permissions.md` | `feature/auth-003-rbac-middleware` | NOT_STARTED |
 | AUTH-004 | Auth API Endpoints | Abrham | Core | `apps/api/src/modules/auth/` | AUTH-001, AUTH-003 | Integration | `docs/api/endpoints.md` | `feature/auth-004-auth-endpoints` | NOT_STARTED |

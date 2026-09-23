@@ -1,4 +1,4 @@
-# ADR-0009: shadcn/ui Component Foundation with Shared `@hitsanat/ui` Package
+# ADR-0009: shadcn/ui Component Foundation with Shared `@repo/ui` Package
 
 **Status:** Accepted  
 **Deciders:** Frontend Team, Abrham (Core Lead)  
@@ -17,7 +17,7 @@ The project requires an accessible, responsive, modern component library for the
    pnpm dlx shadcn@latest init --preset b1D0f7S7 --template next
    ```
 2. Maintain all shared UI components, design tokens, and custom composite components inside `packages/ui`.
-3. Applications import UI primitives from `@hitsanat/ui` rather than duplicating component code.
+3. Applications import UI primitives from `@repo/ui` rather than duplicating component code.
 
 ---
 

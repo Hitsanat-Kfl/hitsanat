@@ -15,8 +15,8 @@ However, relational database engines (PostgreSQL), ORMs (Drizzle), third-party a
 
 ## Decision
 1. **Canonical Database Storage:** All dates and timestamps are stored in PostgreSQL using native Gregorian `DATE` and `TIMESTAMPTZ` data types in UTC.
-2. **Boundary Conversion:** The shared package `@hitsanat/calendar` (wrapping `ethiopian-calendar-new`) translates Gregorian dates to/from Ethiopian calendar representations at the application boundary (API presentation and UI layers).
-3. **No Inline Date Math:** Application and UI layers must never perform custom Ethiopian date math inline; all conversions must use `@hitsanat/calendar`.
+2. **Boundary Conversion:** The shared package `@repo/calendar` (wrapping `ethiopian-calendar-new`) translates Gregorian dates to/from Ethiopian calendar representations at the application boundary (API presentation and UI layers).
+3. **No Inline Date Math:** Application and UI layers must never perform custom Ethiopian date math inline; all conversions must use `@repo/calendar`.
 
 ---
 
