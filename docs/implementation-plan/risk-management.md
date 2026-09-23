@@ -21,11 +21,10 @@
 
 ### RISK-002: Open Decision Delays
 
-- **Risk:** 10 open decisions (DEC-001 through DEC-010) remain unresolved. Some block specific phases (DEC-007 blocks Phase 2, DEC-001 blocks Phase 5).
+- **Risk:** Open decisions (DEC-001 through DEC-010) remain unresolved. Some block specific phases (DEC-001 blocks Phase 5). DEC-007 (auth package) is resolved (Supabase Auth).
 - **Impact:** High
 - **Probability:** Medium
 - **Mitigation:**
-  - Resolve DEC-007 (Auth Package) before Phase 2 starts
   - Resolve DEC-001 (Org Hierarchy) before Phase 5 starts
   - Set deadlines for each decision
   - Escalate unresolved decisions to project owner
@@ -69,16 +68,13 @@
   - Clear CODEOWNERS enforcement
 - **Owner:** All lanes
 
-### RISK-006: Authentication Package Risk
+### RISK-006: Authentication Package Risk — RESOLVED
 
-- **Risk:** Better Auth is referenced in ADRs but not yet installed or configured. It may have compatibility issues with Next.js 15 or PostgreSQL.
-- **Impact:** High
-- **Probability:** Medium
-- **Mitigation:**
-  - Evaluate Better Auth compatibility before Phase 2
-  - Have fallback options: NextAuth.js, Lucia Auth, custom sessions
-  - DEC-007 tracks this decision
-  - Install and test in a spike before committing
+- **Risk (historical):** Auth package choice was open (Better Auth vs alternatives) with possible Next.js/PostgreSQL compatibility issues.
+- **Impact:** High (when open)
+- **Probability:** Medium (when open)
+- **Resolution:** **Supabase Auth** selected and implemented (`packages/auth`, `apps/admin` middleware). DEC-007 closed.
+- **Residual Mitigation:** Keep Supabase auth server available in production; monitor JWT verification latency.
 - **Owner:** Core (Abrham)
 
 ### RISK-007: Attendance Auto-Seeding Complexity
@@ -154,12 +150,12 @@
 ## 3. Mitigation Summary
 
 ### Immediate Actions (Before Phase 1)
-1. Resolve DEC-007 (Auth Package) — evaluate Better Auth compatibility
+1. ~~Resolve DEC-007 (Auth Package)~~ — DONE: Supabase Auth selected (RISK-006 resolved)
 2. Resolve DEC-009 (Date Input) — define Ethiopian calendar input UX
 3. Resolve DEC-010 (Soft Delete) — define delete behavior
 
 ### Before Phase 2
-4. Install and validate Better Auth package
+4. Supabase Auth package installed and validated (`packages/auth`, `apps/admin`)
 5. Set up auth integration test environment
 
 ### Before Phase 5

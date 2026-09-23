@@ -27,7 +27,7 @@ To change it:
 
 ## 2. Authentication Flow
 
-The API uses cookie-based sessions (Better Auth). To authenticate:
+The API uses cookie-based sessions (Supabase Auth). To authenticate:
 
 1. Open **Authentication → POST /auth/sign-in/email**
 2. Set your credentials in the request body:

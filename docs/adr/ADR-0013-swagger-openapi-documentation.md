@@ -14,14 +14,14 @@ Manually writing separate Swagger/OpenAPI YAML specifications alongside TypeScri
 ## Decision
 1. **Single Source of Truth:** All API request/response contracts are defined as Zod schemas in `packages/validation`.
 2. **Automated OpenAPI Generation:** OpenAPI 3.1 metadata is registered using `@asteasolutions/zod-to-openapi` directly from the Zod schemas.
-3. **Swagger UI Hosting:** The Express backend serves interactive API documentation at `/api/docs` and exposes raw JSON at `/api/docs/openapi.json`.
+3. **Swagger UI Hosting:** The Express backend serves interactive API documentation at `/docs` and exposes raw JSON at `/docs.json`.
 
 ---
 
 ## Consequences
 ### Positive:
 - API documentation is guaranteed to match runtime validation and TypeScript types.
-- Frontend developers have an interactive sandbox at `/api/docs` to test endpoints during development.
+- Frontend developers have an interactive sandbox at `/docs` to test endpoints during development.
 
 ### Negative:
 - Requires minor boilerplate to attach OpenAPI metadata to Zod schemas.

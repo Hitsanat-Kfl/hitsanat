@@ -12,7 +12,7 @@ Developers working on Windows, macOS, or Linux need a consistent, zero-configura
 ---
 
 ## Decision
-Use **Docker Compose** (`docker-compose.yml`) to provision the local PostgreSQL 15 database instance and ephemeral test databases for CI and local development. Docker is used strictly for development and testing infrastructure, not as a mandatory production runtime constraint.
+Use **Docker Compose** (`docker-compose.yml`) to provision the local PostgreSQL 16 database instance and ephemeral test databases for CI and local development. Docker is used strictly for development and testing infrastructure, not as a mandatory production runtime constraint.
 
 ---
 

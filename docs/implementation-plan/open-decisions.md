@@ -69,13 +69,14 @@ These decisions are carried forward from `docs/open-decisions.md` and are alread
 - **Required By:** Phase 5 (Planning)
 - **Status:** OPEN — BR-032 defines roll-up hierarchy but not completion definition
 
-### DEC-007: Better Auth vs Custom Auth
+### DEC-007: Auth Package Selection
 
-- **Question:** The architecture docs mention "Better Auth" but this package is not yet installed. Should we use Better Auth, or consider NextAuth.js / Lucia Auth / custom session management?
+- **Question:** Should authentication use Better Auth, Supabase Auth, NextAuth.js, Lucia Auth, or custom session management?
 - **Owner:** Core (Abrham)
 - **Impact:** Affects authentication implementation complexity and session management
 - **Required By:** Phase 2 (Authentication)
-- **Status:** OPEN — ADR references Better Auth but no implementation exists
+- **Resolution:** **Supabase Auth (GoTrue)** — implemented in `packages/auth` and `apps/admin` (`@supabase/supabase-js`, `@supabase/ssr`). Sign-in is client-side; the Express API verifies Supabase JWTs.
+- **Status:** RESOLVED — Supabase Auth is the active provider (see `docs/backend/authentication.md`)
 
 ### DEC-008: Photo Storage Implementation
 
@@ -119,7 +120,6 @@ The following decisions block specific phases:
 
 | Decision | Blocks Phase | Impact if Delayed |
 |:---|:---|:---|
-| DEC-007 (Auth Package) | Phase 2 | Cannot implement authentication |
 | DEC-001 (Org Hierarchy) | Phase 5 | Cannot design planning distribution |
 | DEC-003 (Plan Modification) | Phase 5 | Cannot design distribution API |
 | DEC-004 (Approval Workflow) | Phase 5 | Cannot implement plan lifecycle |

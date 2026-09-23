@@ -224,8 +224,8 @@ apps/api        ───►  @repo/database, @repo/schemas, @repo/config, @repo
 ## 7. Docker Infrastructure
 
 - `docker-compose.yml` provides:
-  - `postgres`: Primary development PostgreSQL database on port `5432`
-  - `postgres_test`: Dedicated integration test database on port `5433`
+  - `postgres`: Primary development PostgreSQL database on host port `5434` (container `5432`)
+  - `postgres_test`: Dedicated integration test database on host port `5433` (container `5432`)
   - `api`: Containerized Express backend on port `3001`
   - `portfolio`: Containerized public Next.js app on port `3000`
   - `admin`: Containerized admin Next.js app on port `3002`

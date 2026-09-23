@@ -13,8 +13,8 @@ Docker runs the **entire project stack** — database, API, admin panel, and por
 
 | Service | Container | Port | URL | Description |
 |:--------|:----------|:-----|:----|:------------|
-| `postgres` | hitsanat-postgres | 5432 | — | PostgreSQL 16 dev database (`hitsanat_dev`) |
-| `postgres_test` | hitsanat-postgres-test | 5433 | — | PostgreSQL 16 test database (`hitsanat_test`) |
+| `postgres` | hitsanat-postgres | **5434** (host) → 5432 (container) | — | PostgreSQL 16 dev database (`hitsanat_dev`) |
+| `postgres_test` | hitsanat-postgres-test | 5433 (host) → 5432 (container) | — | PostgreSQL 16 test database (`hitsanat_test`) |
 | `api` | hitsanat-api | 3001 | http://localhost:3001 | Express.js API backend |
 | `admin` | hitsanat-admin | 3002 | http://localhost:3002 | Next.js admin panel |
 | `portfolio` | hitsanat-portfolio | 3000 | http://localhost:3000 | Next.js public website |
@@ -59,7 +59,7 @@ docker compose ps
 Expected output — all should show `Up`:
 ```
 NAME                 STATUS       PORTS
-hitsanat-postgres    Up (healthy) 0.0.0.0:5432->5432/tcp
+hitsanat-postgres    Up (healthy) 0.0.0.0:5434->5432/tcp
 hitsanat-postgres-test Up (healthy) 0.0.0.0:5433->5432/tcp
 hitsanat-api         Up           0.0.0.0:3001->3001/tcp
 hitsanat-admin       Up           0.0.0.0:3002->3002/tcp

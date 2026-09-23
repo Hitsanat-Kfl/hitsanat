@@ -68,7 +68,7 @@ Deploy the complete system to production infrastructure: Railway (API + Database
 - **Dependencies:** None
 - **Deliverable:** Production PostgreSQL on Railway
 - **Acceptance Criteria:**
-  - PostgreSQL 15 running on Railway
+  - PostgreSQL 16 running on Railway
   - Connection via `postgres.railway.internal:5432`
   - TLS enabled
   - All migrations applied

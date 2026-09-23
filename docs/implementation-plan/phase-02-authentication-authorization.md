@@ -2,12 +2,12 @@
 
 ## Objective
 
-Implement complete authentication and authorization infrastructure: Better Auth integration, scoped RBAC guards, login flows, session management, and role-based access control. This phase gates all subsequent protected features.
+Implement complete authentication and authorization infrastructure: Supabase Auth integration, scoped RBAC guards, login flows, session management, and role-based access control. This phase gates all subsequent protected features.
 
 ## Scope
 
 ### Included
-- Better Auth configuration and integration
+- Supabase Auth configuration and integration
 - Session management (cookies, tokens)
 - Scoped RBAC middleware (`requireAuth`, `requireScopePermission`)
 - Login page (Admin app)
@@ -42,32 +42,32 @@ Implement complete authentication and authorization infrastructure: Better Auth 
 ## Tasks
 
 ### AUTH-001
-**Better Auth Configuration**
+**Supabase Auth Configuration**
 
-- **Description:** Configure Better Auth in `packages/auth`. Set up auth adapter for PostgreSQL, session cookie configuration, and provider setup (email/password).
+- **Description:** Configure Supabase Auth in `packages/auth` (Supabase JS client), session cookie handling, and email/password sign-in against the Supabase auth server.
 - **Lane:** Core
 - **Priority:** Critical
 - **Dependencies:** FND-001
 - **Deliverable:** `packages/auth` with working auth configuration
 - **Acceptance Criteria:**
-  - Better Auth configured with PostgreSQL adapter
+  - Supabase client configured (`SUPABASE_URL`, `SUPABASE_ANON_KEY`)
   - Session cookies configured (httpOnly, secure, sameSite)
-  - Auth tables created (users, sessions, accounts)
+  - JWT verification middleware ready (`requireAuth`)
   - Unit tests pass
 - **Reviewer:** Core
 
 ### AUTH-002
-**Auth Database Tables**
+**Application User Tables**
 
-- **Description:** Create Drizzle schemas and migrations for Better Auth tables: `users`, `sessions`, `accounts`, `verification_tokens`. Include role field on `users` table.
+- **Description:** Create Drizzle schemas and migrations for application `users` (and related) tables aligned with Supabase `auth.users` UUIDs. Include role field on application `users` table. Session/account state lives in Supabase Auth, not custom tables.
 - **Lane:** Core
 - **Priority:** Critical
 - **Dependencies:** FND-001
-- **Deliverable:** Auth table migrations + integration test
+- **Deliverable:** User table migrations + integration test
 - **Acceptance Criteria:**
-  - Auth tables created in migration
+  - Application user tables created in migration
   - Role field included on users table
-  - Session table has proper indexes
+  - User UUID aligns with Supabase auth user id
   - Migration runs cleanly
 - **Reviewer:** Core
 
@@ -91,16 +91,15 @@ Implement complete authentication and authorization infrastructure: Better Auth 
 ### AUTH-004
 **Auth API Endpoints**
 
-- **Description:** Implement auth endpoints: `POST /api/v1/auth/sign-in/email`, `POST /api/v1/auth/sign-up/email`, `POST /api/v1/auth/sign-out`, `GET /api/v1/auth/session`.
+- **Description:** Implement auth endpoints: client-side `supabase.auth.signInWithPassword()` for sign-in, plus API `GET /api/v1/auth/session` (JWT verify) and `POST /api/v1/auth/sign-out` compatibility endpoints.
 - **Lane:** Backend
 - **Priority:** Critical
 - **Dependencies:** AUTH-001, AUTH-003
 - **Deliverable:** Auth endpoints + integration tests
 - **Acceptance Criteria:**
-  - Sign-in creates session cookie
-  - Sign-up creates user account
-  - Sign-out invalidates session
+  - Sign-in creates Supabase session cookie
   - Session endpoint returns current user with roles
+  - Sign-out clears the session cookie
   - Integration tests verify all flows
 - **Reviewer:** Core
 
@@ -186,8 +185,8 @@ Implement complete authentication and authorization infrastructure: Better Auth 
 
 ## Deliverables
 
-1. Better Auth configuration
-2. Auth database tables
+1. Supabase Auth configuration
+2. Application user tables
 3. Scoped RBAC middleware
 4. Auth API endpoints
 5. Admin login page
@@ -199,8 +198,8 @@ Implement complete authentication and authorization infrastructure: Better Auth 
 
 ## Exit Criteria
 
-- [ ] Better Auth configured and functional
-- [ ] Auth tables migrated
+- [ ] Supabase Auth configured and functional
+- [ ] Application user tables migrated
 - [ ] RBAC middleware enforces scoped permissions
 - [ ] Login endpoint works end-to-end
 - [ ] Admin login page functional

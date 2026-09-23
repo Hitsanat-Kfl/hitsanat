@@ -15,7 +15,7 @@
 | [**ADR-0006**](./ADR-0006-telegram-bot-standalone-service.md) | Decoupled Telegram Bot as a Standalone Service | Accepted | Architecture / Messaging |
 | [**ADR-0007**](./ADR-0007-regular-members-no-dashboard-access.md) | Regular Members Restricted to Public Portfolio Website (Zero Admin Access) | Accepted | Security / Permissions |
 | [**ADR-0008**](./ADR-0008-express-js-backend-framework.md) | Express.js with TypeScript as Backend Framework | Accepted | Backend / Framework |
-| [**ADR-0009**](./ADR-0009-shadcn-ui-shared-package.md) | shadcn/ui Component Foundation with Shared `@hitsanat/ui` Package | Accepted | Frontend / UI |
+| [**ADR-0009**](./ADR-0009-shadcn-ui-shared-package.md) | shadcn/ui Component Foundation with Shared `@repo/ui` Package | Accepted | Frontend / UI |
 | [**ADR-0010**](./ADR-0010-layered-testing-strategy.md) | Layered Testing Strategy with Real PostgreSQL Integration Testing | Accepted | Quality / Testing |
 | [**ADR-0011**](./ADR-0011-ethiopian-calendar-new-library.md) | Ethiopian Calendar Implementation via `ethiopian-calendar-new` | Accepted | Shared / Calendar |
 | [**ADR-0012**](./ADR-0012-docker-development-testing-infrastructure.md) | Docker for Reproducible Development & Test Infrastructure | Accepted | DevOps / Testing |

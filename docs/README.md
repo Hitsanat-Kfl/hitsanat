@@ -55,7 +55,7 @@ docs/
 │   ├── authorization.md                       # Scoped RBAC guards (requireScopePermission)
 │   ├── endpoints.md                           # Exhaustive endpoint catalog across all 11 modules
 │   ├── openapi.md                             # Zod-to-OpenAPI generation pipeline
-│   ├── swagger.md                             # Interactive Swagger UI (/api/docs) setup
+│   ├── swagger.md                             # Interactive Swagger UI (/docs) setup
 │   └── error-handling.md                      # RFC 7807 error taxonomy & Express error handler
 │
 ├── modules/                                   # Feature-by-Feature Deep Dives
@@ -176,7 +176,7 @@ graph TD
     end
 
     subgraph Infrastructure & Quality
-        Supabase[(Supabase PostgreSQL 15)]
+        Supabase[(Supabase PostgreSQL 16)]
         Docker[Docker Compose]
         Biome[Biome Linter & Formatter]
         Vitest[Vitest Unit/Integration]
@@ -200,6 +200,6 @@ graph TD
 3. **Attendance Auto-Seeding (ADR-0002):**
    - Session scheduling automatically seeds `Expected` attendance rosters; Kutitr leaders verify `Present`/`Absent` with quick-confirm checksheets on mobile.
 4. **Canonical Gregorian Storage with Ethiopian Presentation (ADR-0004):**
-   - Dates persist as UTC `TIMESTAMPTZ` in PostgreSQL while the UI displays Ethiopian Calendar dates via `@hitsanat/calendar`.
+   - Dates persist as UTC `TIMESTAMPTZ` in PostgreSQL while the UI displays Ethiopian Calendar dates via `@repo/calendar`.
 5. **Local Quality Gate Contract (ADR-0015):**
    - Contributors must run `pnpm prepare` locally before pushing to remote feature branches.

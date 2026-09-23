@@ -18,7 +18,7 @@ graph TD
     
     subgraph apps/admin [1. Management Portal - Leadership Only]
         AdminApp[Next.js 15 App Router]
-        AuthGate[Better Auth Session Validator]
+        AuthGate[Supabase Auth Session Validator]
         RoleRouter[Role-Scoped Dashboard Router]
         TanStackAdmin[TanStack Query Data Layer]
     end

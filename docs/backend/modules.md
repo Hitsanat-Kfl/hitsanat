@@ -27,4 +27,4 @@ apps/api/src/modules/
 ## 2. Module Decoupling Guidelines
 
 1. **Explicit Public Interface:** A module exposes only its `index.ts` export containing public Use Cases and DTOs. Internal entity implementations and Drizzle repositories remain private to the module.
-2. **Database Schema Colocation in `packages/database`:** While table definitions are authored in `@hitsanat/database`, each backend module owns queries and mutations strictly pertaining to its domain entities.
+2. **Database Schema Colocation in `packages/database`:** While table definitions are authored in `@repo/database`, each backend module owns queries and mutations strictly pertaining to its domain entities.

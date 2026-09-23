@@ -86,7 +86,7 @@ This report summarizes the lane task documentation created for the Hitsanat Kifl
 |:---|:---:|:---|
 | Phase 0 | ARCH-001 through ARCH-010 | Schema contracts, API contracts, module templates |
 | Phase 1 | FND-001 through FND-010 | DB migrations, shared packages, module skeletons |
-| Phase 2 | AUTH-001 through AUTH-004 | Better Auth, RBAC middleware, auth endpoints |
+| Phase 2 | AUTH-001 through AUTH-004 | Supabase Auth, RBAC middleware, auth endpoints |
 | Phase 3 | ORG-001, ORG-002, ORG-004 | Member Stage 1/2, Family CRUD |
 | Phase 4 | MBR-001, MBR-003 | Child CRUD, Child-Parent linking |
 | Phase 5 | PLN-001 through PLN-005 | Weight engine, roll-up engine, planning APIs |

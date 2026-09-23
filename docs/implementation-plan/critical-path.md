@@ -24,7 +24,7 @@ Phase 1: Engineering Foundation
       │                                                   │
       ▼                                                   │
 Phase 2: Authentication                                    │
-  AUTH-001 (Better Auth) ← FND-001 ──────────────────────┤
+  AUTH-001 (Supabase Auth) ← FND-001 ──────────────────────┤
   AUTH-003 (RBAC Middleware) ← FND-008, AUTH-001 ────────┤
   AUTH-004 (Auth Endpoints) ← AUTH-001, AUTH-003 ────────┘
       │
@@ -86,7 +86,7 @@ The longest dependency chain through the project:
 |:---:|:---|:---|:---|
 | 1 | ARCH-001 | Phase 0 | Database Schema Contract: Identity |
 | 2 | FND-001 | Phase 1 | Database Migration: Identity Tables |
-| 3 | AUTH-001 | Phase 2 | Better Auth Configuration |
+| 3 | AUTH-001 | Phase 2 | Supabase Auth Configuration |
 | 4 | AUTH-003 | Phase 2 | Scoped RBAC Middleware |
 | 5 | AUTH-004 | Phase 2 | Auth API Endpoints |
 | 6 | ORG-001 | Phase 3 | Member API: Stage 1 Registration |
