@@ -4,6 +4,7 @@ import {
   createUser,
   deactivateUser,
   getUser,
+  getUserStats,
   listUsers,
   reactivateUser,
   resetPassword,
@@ -26,6 +27,8 @@ usersRouter.use(
 
 usersRouter.post("/", createUser);
 usersRouter.get("/", listUsers);
+// FR-13.4: lifecycle counts independent of list page size
+usersRouter.get("/stats", getUserStats);
 usersRouter.get("/:id", getUser);
 usersRouter.patch("/:id", updateUser);
 usersRouter.post("/:id/reset-password", resetPassword);

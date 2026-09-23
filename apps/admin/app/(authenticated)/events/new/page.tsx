@@ -1,8 +1,8 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { EventForm } from "@/features/events";
-import { PageShell } from "@/features/shell";
+import { EventForm } from "@/features/event-management";
+import { PageShell } from "@/widgets/shell";
 
 export default function NewEventPage() {
   const router = useRouter();

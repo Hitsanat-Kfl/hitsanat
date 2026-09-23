@@ -11,9 +11,9 @@ import {
   TabsTrigger,
 } from "@repo/ui";
 import { useState } from "react";
-import { ReportGenerationForm, useReports } from "@/features/reports";
-import { AlertBanner, PageEmpty, PageLoading, PageShell } from "@/features/shell";
-import type { ReportStatus, SubmissionStatus } from "../../../lib/types";
+import { ReportGenerationForm, useReports } from "@/features/report-generation";
+import { AlertBanner, PageEmpty, PageLoading, PageShell } from "@/widgets/shell";
+import type { ReportStatus, SubmissionStatus } from "@/domains/definitions";
 
 const reportStatusVariant: Record<
   ReportStatus,

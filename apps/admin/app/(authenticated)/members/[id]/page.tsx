@@ -3,10 +3,10 @@
 import { Button, Card, CardContent, CardHeader, Spinner } from "@repo/ui";
 import { useParams, useRouter } from "next/navigation";
 import { useCallback, useEffect, useState } from "react";
-import { MemberProfileCard } from "@/features/members";
-import { PageShell } from "@/features/shell";
-import { type ApiResponse, api } from "../../../../lib/api-client";
-import type { Member } from "../../../../lib/types";
+import { MemberProfileCard } from "@/features/member-management";
+import { PageShell } from "@/widgets/shell";
+import { type ApiResponse, api } from "@/infrastructure/api/client";
+import type { Member } from "@/domains/definitions";
 
 export default function MemberDetailPage() {
   const params = useParams();

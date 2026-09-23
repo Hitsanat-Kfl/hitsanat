@@ -4,6 +4,14 @@ export type CreateUserWithMemberInput = Omit<CreateUserInput, "memberId"> & {
   memberId: string | null;
 };
 
+/** FR-13.4 lifecycle + role distribution for the Super Admin dashboard. */
+export interface UserAccountStats {
+  total: number;
+  active: number;
+  deactivated: number;
+  byRole: Record<string, number>;
+}
+
 export interface UserWithSubDepartments {
   id: string;
   name: string;
@@ -34,10 +42,21 @@ export interface UserWithSubDepartments {
 export interface UserRepository {
   findById(id: string): Promise<UserWithSubDepartments | null>;
   findByEmail(email: string): Promise<UserWithSubDepartments | null>;
-  list(params: { page?: number; limit?: number; search?: string; role?: string }): Promise<{
+  list(params: {
+    page?: number;
+    limit?: number;
+    search?: string;
+    role?: string;
+    status?: "ACTIVE" | "DEACTIVATED";
+  }): Promise<{
     users: UserWithSubDepartments[];
     total: number;
   }>;
+  /**
+   * FR-13.4: authoritative lifecycle counts across all accounts
+   * (not limited to a single list page).
+   */
+  getStats(): Promise<UserAccountStats>;
   /**
    * Persists the local user row linked to a Supabase auth user id.
    * `memberId` must be non-null for leadership roles (BR-007, also DB-enforced).

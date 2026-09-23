@@ -2,9 +2,9 @@
 
 import { useRouter } from "next/navigation";
 import type * as React from "react";
-import { RouteGuard, useAuthUser } from "@/features/auth";
-import { AppShell, mapSessionRolesToAdminNavRoles } from "@/features/shell";
-import { createClient } from "@/lib/supabase/client";
+import { RouteGuard, useAuthUser } from "@/features/authentication";
+import { AppShell, mapSessionRolesToAdminNavRoles } from "@/widgets/shell";
+import { createClient } from "@/infrastructure/auth/supabase-client";
 
 function AuthenticatedShell({ children }: { children: React.ReactNode }) {
   const router = useRouter();

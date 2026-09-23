@@ -507,8 +507,8 @@ The capabilities below were proposed in the September 2026 review session and ar
 - Audit action `SESSIONS_REVOKED` recorded
 
 **Remaining (not yet implemented):**
-- Seed/migration status on the dashboard (the `system_metadata` table exists but is unused; only the API `/health` ping is shown)
-- OD-05 permission-overrides scope decision (see `open-decisions.md`)
+- Seed/migration status on the dashboard is now shown from `GET /api/v1/system-metadata` (schema_tag, seed_status) alongside the API `/health` ping
+- OD-05 permission-overrides scope decision is RESOLVED as Option A (static matrix + SUPER_ADMIN bypass; see `open-decisions.md`)
 
 **Lower-priority candidates (deferred):**
 - Dependency health checks (DB, Supabase, Telegram worker) beyond the current API `/health` ping

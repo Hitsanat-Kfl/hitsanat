@@ -1,4 +1,4 @@
-import { ExecutiveDashboardPage } from "@/features/dashboard";
+import { ExecutiveDashboardPage } from "@/widgets/dashboard";
 
 export const metadata = {
   title: "Executive Dashboard | Hitsanat Kifl",

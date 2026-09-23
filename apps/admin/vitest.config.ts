@@ -7,7 +7,7 @@ export default defineConfig({
   resolve: {
     alias: {
       // Mirrors the tsconfig "@/*" path mapping for tests.
-      "@": path.resolve(__dirname, "."),
+      "@": path.resolve(__dirname, "src"),
     },
   },
   test: {

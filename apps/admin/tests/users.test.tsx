@@ -1,7 +1,7 @@
-import { fireEvent, render, screen, waitFor, within } from "@testing-library/react";
+import { fireEvent, screen, waitFor, within } from "@testing-library/react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import UsersPage from "../features/users/components/users-page";
-import { I18nProvider, ShellProvider } from "../features/shell";
+import UsersPage from "../src/features/user-management/components/users-page";
+import { renderWithProviders } from "./test-providers";
 
 const mockPush = vi.fn();
 
@@ -76,7 +76,7 @@ const fixtures = vi.hoisted(() => {
 const postMock = vi.hoisted(() => vi.fn().mockResolvedValue({ success: true, data: {} }));
 const patchMock = vi.hoisted(() => vi.fn().mockResolvedValue({ success: true, data: {} }));
 
-vi.mock("../lib/api-client", () => ({
+vi.mock("@/infrastructure/api/client", () => ({
   api: {
     get: vi
       .fn()
@@ -87,13 +87,7 @@ vi.mock("../lib/api-client", () => ({
 }));
 
 function renderUsersPage() {
-  return render(
-    <I18nProvider>
-      <ShellProvider>
-        <UsersPage />
-      </ShellProvider>
-    </I18nProvider>
-  );
+  return renderWithProviders(<UsersPage />);
 }
 
 /** Types a search term into a MemberPicker and picks the first result. */
@@ -274,7 +268,7 @@ describe("Users management page", () => {
     });
   });
 
-  it("runs the guided handover: successor first, then deactivation", async () => {
+  it("runs the guided three-step handover: successor, demote, deactivate", async () => {
     renderUsersPage();
 
     await waitFor(() =>
@@ -285,6 +279,7 @@ describe("Users management page", () => {
     fireEvent.click(within(menu).getByRole("button", { name: /Handover/i }));
     await screen.findByText(/Leadership handover — CHAIRPERSON/);
 
+    // Step 1: create successor
     fireEvent.change(screen.getByLabelText("Successor full name"), {
       target: { value: "Next Chair" },
     });
@@ -307,6 +302,13 @@ describe("Users management page", () => {
       });
     });
 
+    // Step 2: demote outgoing leader
+    fireEvent.click(await screen.findByRole("button", { name: "Demote outgoing leader" }));
+    await waitFor(() => {
+      expect(patchMock).toHaveBeenCalledWith("/users/u1", { role: "MEMBER_REGULAR" });
+    });
+
+    // Step 3: deactivate
     fireEvent.click(await screen.findByRole("button", { name: "Deactivate outgoing leader" }));
     await waitFor(() => {
       expect(postMock).toHaveBeenCalledWith("/users/u1/deactivate", {});

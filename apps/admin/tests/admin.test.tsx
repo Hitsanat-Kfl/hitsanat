@@ -1,11 +1,12 @@
 import { render, screen, waitFor } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
-import { AuthUserProvider } from "../features/auth";
-import { ChairpersonDashboardPage, DashboardRouter } from "../features/dashboard";
-import { I18nProvider, ShellProvider } from "../features/shell";
+import { AuthUserProvider } from "../src/features/authentication";
+import { ChairpersonDashboardPage, DashboardRouter } from "../src/widgets/dashboard";
+import { I18nProvider, ShellProvider } from "../src/widgets/shell";
+import { QueryTestProvider } from "./test-providers";
 
 // Mock the API client
-vi.mock("../lib/api-client", () => ({
+vi.mock("@/infrastructure/api/client", () => ({
   api: {
     get: vi.fn().mockImplementation((endpoint: string) => {
       if (endpoint.startsWith("/users")) {
@@ -47,11 +48,13 @@ function TestWrapper({
   user?: Parameters<typeof AuthUserProvider>[0]["user"];
 }) {
   return (
-    <I18nProvider>
-      <ShellProvider>
-        <AuthUserProvider user={user}>{children}</AuthUserProvider>
-      </ShellProvider>
-    </I18nProvider>
+    <QueryTestProvider>
+      <I18nProvider>
+        <ShellProvider>
+          <AuthUserProvider user={user}>{children}</AuthUserProvider>
+        </ShellProvider>
+      </I18nProvider>
+    </QueryTestProvider>
   );
 }
 

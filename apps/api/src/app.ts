@@ -20,6 +20,7 @@ import { planningRouter } from "./modules/planning/presentation/planning.router.
 import { publicRouter } from "./modules/public/presentation/public.router.js";
 import { reportsRouter } from "./modules/reports/presentation/reports.router.js";
 import { subDepartmentRouter } from "./modules/sub-department/presentation/sub-department.router.js";
+import { systemMetadataRouter } from "./modules/system-metadata/presentation/system-metadata.router.js";
 import { usersRouter } from "./modules/users/presentation/users.router.js";
 import { authRouter } from "./presentation/routes/auth.router.js";
 import { healthRouter } from "./presentation/routes/health.router.js";
@@ -29,6 +30,10 @@ import { breakGlassAuditMiddleware } from "./shared/middleware/break-glass-audit
 
 export function createApp(): Express {
   const app = express();
+
+  // FR-13.2 / break-glass: trust the first proxy hop so req.ip is the real
+  // client address behind Railway / reverse proxies (1 = one hop).
+  app.set("trust proxy", Number(process.env.TRUST_PROXY_HOPS ?? "1"));
 
   // Global Middleware
   app.use(helmet());
@@ -68,6 +73,9 @@ export function createApp(): Express {
 
   // System audit trail (SUPER_ADMIN & CHAIRPERSON only)
   app.use(`${env.API_PREFIX}/audit-logs`, auditRouter);
+
+  // Seed / migration status for the Super Admin dashboard (FR-13.4)
+  app.use(`${env.API_PREFIX}/system-metadata`, systemMetadataRouter);
 
   // Member routes
   app.use(`${env.API_PREFIX}/members`, memberRouter);

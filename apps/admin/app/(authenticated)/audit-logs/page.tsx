@@ -1,4 +1,4 @@
-import AuditLogsPage from "@/features/audit-logs/components/audit-logs-page";
+import AuditLogsPage from "@/features/audit-management/components/audit-logs-page";
 
 export const metadata = {
   title: "Audit Logs | Hitsanat Kifl",

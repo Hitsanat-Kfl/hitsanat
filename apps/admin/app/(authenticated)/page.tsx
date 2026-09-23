@@ -1,7 +1,7 @@
 "use client";
 
-import { DashboardRouter } from "@/features/dashboard";
-import { PageShell } from "@/features/shell";
+import { DashboardRouter } from "@/widgets/dashboard";
+import { PageShell } from "@/widgets/shell";
 
 export default function HomePage() {
   return (

@@ -5,7 +5,7 @@ import { useParams, useRouter } from "next/navigation";
 import { ScoreEntryForm } from "@/features/academic";
 import { ScoreSummary } from "@/features/academic";
 import { useScores } from "@/features/academic";
-import { PageShell } from "@/features/shell";
+import { PageShell } from "@/widgets/shell";
 
 export default function AssessmentDetailPage() {
   const params = useParams();

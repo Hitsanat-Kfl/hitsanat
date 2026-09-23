@@ -2,9 +2,9 @@
 
 import { Badge, Button, Card, CardContent } from "@repo/ui";
 import Link from "next/link";
-import { useAttendanceSessions } from "@/features/attendance";
-import { AlertBanner, PageEmpty, PageLoading, PageShell } from "@/features/shell";
-import type { SessionStatus } from "../../../lib/types";
+import { useAttendanceSessions } from "@/features/attendance-management";
+import { AlertBanner, PageEmpty, PageLoading, PageShell } from "@/widgets/shell";
+import type { SessionStatus } from "@/domains/definitions";
 
 const statusVariant: Record<SessionStatus, "default" | "secondary" | "destructive" | "outline"> = {
   Scheduled: "outline",

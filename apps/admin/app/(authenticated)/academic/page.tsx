@@ -2,7 +2,7 @@
 
 import { AssessmentList } from "@/features/academic";
 import { useAssessments } from "@/features/academic";
-import { PageShell } from "@/features/shell";
+import { PageShell } from "@/widgets/shell";
 
 export default function AcademicPage() {
   const { assessments, loading, error } = useAssessments();

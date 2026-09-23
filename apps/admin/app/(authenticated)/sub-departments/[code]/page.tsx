@@ -2,9 +2,9 @@
 
 import { Button, Spinner } from "@repo/ui";
 import { useParams, useRouter } from "next/navigation";
-import { PageShell } from "@/features/shell";
-import { RosterTable } from "@/features/sub-departments";
-import { useRoster } from "@/features/sub-departments";
+import { PageShell } from "@/widgets/shell";
+import { RosterTable } from "@/features/department-management";
+import { useRoster } from "@/features/department-management";
 
 const DEPT_NAMES: Record<string, { en: string; am: string }> = {
   TIMIHRT: { en: "Timihrt", am: "ትምህርት" },

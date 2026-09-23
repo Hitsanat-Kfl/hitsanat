@@ -1,8 +1,9 @@
 import { render, screen, waitFor } from "@testing-library/react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import { api } from "../lib/api-client";
-import { MezmurDashboardPage } from "../features/dashboard/components/mezmur-dashboard";
-import { I18nProvider, ShellProvider } from "../features/shell";
+import { api } from "../src/infrastructure/api/client";
+import { MezmurDashboardPage } from "../src/widgets/dashboard/components/mezmur-dashboard";
+import { I18nProvider, ShellProvider } from "../src/widgets/shell";
+import { QueryTestProvider, TestProviders } from "./test-providers";
 
 // Shared endpoint-keyed fixtures
 const fixtures = vi.hoisted(() => {
@@ -204,7 +205,7 @@ const fixtures = vi.hoisted(() => {
   };
 });
 
-vi.mock("../lib/api-client", () => ({
+vi.mock("../src/infrastructure/api/client", () => ({
   api: {
     get: vi
       .fn()
@@ -218,11 +219,9 @@ vi.mock("next/navigation", () => ({
 
 function renderDashboard() {
   return render(
-    <I18nProvider>
-      <ShellProvider>
-        <MezmurDashboardPage />
-      </ShellProvider>
-    </I18nProvider>
+    <TestProviders>
+      <MezmurDashboardPage />
+    </TestProviders>
   );
 }
 
@@ -405,11 +404,13 @@ describe("Mezmur Leader Dashboard (Phase 08)", () => {
     const { DashboardLocaleProvider } = await import("@repo/ui");
     function AmharicWrapper({ children }: { children: React.ReactNode }) {
       return (
-        <I18nProvider initialLocale="am">
-          <DashboardLocaleProvider locale="am">
-            <ShellProvider>{children}</ShellProvider>
-          </DashboardLocaleProvider>
-        </I18nProvider>
+        <QueryTestProvider>
+          <I18nProvider initialLocale="am">
+            <DashboardLocaleProvider locale="am">
+              <ShellProvider>{children}</ShellProvider>
+            </DashboardLocaleProvider>
+          </I18nProvider>
+        </QueryTestProvider>
       );
     }
 

@@ -39,7 +39,7 @@
 - **Account Provisioning Console:** Create, update, reset, deactivate, and reactivate leader accounts (BR-008, FR-13.6) with one-leadership-post validation (BR-009); guided handover and session revocation from `/users`.
 - **Leadership Roster Matrix:** All leadership posts (executive + per-sub-department) with BR-009 conflict highlighting.
 - **System Health & Audit:** API health (status/version/environment), audit log stream, role distribution, recently provisioned accounts.
-- *Planned:* seed/migration status panel (system_metadata table exists but is not yet surfaced).
+- *System Status panel:* seed/migration status from `GET /api/v1/system-metadata` (`schema_tag`, `seed_status`) alongside API health (FR-13.4).
 
 ### 1.5 Timihrt Leader Dashboard (`/timihrt`)
 - **Curriculum Roadmap:** Syllabus timeline for `Kutr 1` & `Kutr 2`.

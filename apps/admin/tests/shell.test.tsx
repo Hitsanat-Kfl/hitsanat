@@ -15,7 +15,8 @@ import {
   getPrimaryNavItems,
   mapSessionRolesToNavRoles,
   navigationConfig,
-} from "../features/shell";
+} from "../src/widgets/shell";
+import { QueryTestProvider } from "./test-providers";
 
 vi.mock("next/navigation", () => ({
   useRouter: () => ({ push: vi.fn(), replace: vi.fn() }),
@@ -30,9 +31,11 @@ function ShellTestWrapper({
   initialLocale?: "en" | "am";
 }) {
   return (
-    <I18nProvider initialLocale={initialLocale}>
-      <ShellProvider>{children}</ShellProvider>
-    </I18nProvider>
+    <QueryTestProvider>
+      <I18nProvider initialLocale={initialLocale}>
+        <ShellProvider>{children}</ShellProvider>
+      </I18nProvider>
+    </QueryTestProvider>
   );
 }
 
@@ -181,9 +184,11 @@ describe("MobileNav", () => {
 describe("AuthenticatedLayout / AppShell", () => {
   it("renders complete application frame with content", () => {
     render(
-      <AuthenticatedLayout roles={["super-admin"]} userName="Admin User" userRole="Super Admin">
-        <div data-testid="page-content">Operational Dashboard Content</div>
-      </AuthenticatedLayout>
+      <ShellTestWrapper>
+        <AuthenticatedLayout roles={["super-admin"]} userName="Admin User" userRole="Super Admin">
+          <div data-testid="page-content">Operational Dashboard Content</div>
+        </AuthenticatedLayout>
+      </ShellTestWrapper>
     );
 
     expect(screen.getByTestId("page-content")).toBeDefined();

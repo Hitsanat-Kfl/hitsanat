@@ -68,6 +68,9 @@ importers:
       '@repo/config':
         specifier: workspace:*
         version: link:../../packages/config
+      '@repo/permissions':
+        specifier: workspace:*
+        version: link:../../packages/permissions
       '@repo/schemas':
         specifier: workspace:*
         version: link:../../packages/schemas
@@ -389,15 +392,6 @@ importers:
       tsx:
         specifier: ^4.19.3
         version: 4.23.12
-      typescript:
-        specifier: ^5.7.3
-        version: 5.9.3
-
-  packages/design-tokens:
-    devDependencies:
-      '@repo/typescript-config':
-        specifier: workspace:*
-        version: link:../typescript-config
       typescript:
         specifier: ^5.7.3
         version: 5.9.3

@@ -152,37 +152,47 @@ apps/admin/
 │       ├── super-admin/
 │       ├── mezmur/
 │       └── settings/
-├── features/                       # Feature slices (primary code home)
-│   ├── auth/                       # Session user, RouteGuard helpers
-│   ├── shell/                      # Sidebar, header, nav-config, search, i18n
-│   ├── dashboard/                  # DashboardRouter + per-role dashboards
-│   │   └── components/
-│   │       ├── dashboard-router.tsx
-│   │       ├── super-admin-dashboard.tsx
-│   │       ├── chairperson-dashboard-page.tsx
-│   │       ├── sub-chairperson-dashboard.tsx
-│   │       ├── secretary-dashboard.tsx
-│   │       └── mezmur-dashboard.tsx
-│   ├── members/                    # Table, wizard, filters, profile
-│   ├── users/                      # CRUD, reset, handover, member picker
-│   ├── audit-logs/
-│   ├── permissions/
-│   ├── sub-departments/            # Roster, KPI, progress tracker
-│   ├── planning/                   # Matrix, distribution, weekly plans
-│   ├── reports/
-│   ├── academic/
-│   ├── events/
-│   ├── transport/
-│   └── settings/
-├── config/
-│   └── roles.ts                    # AdminRole union + ADMIN_ROLES
-├── lib/
-│   ├── api-client.ts               # Typed fetch to apps/api
-│   ├── types.ts
-│   └── supabase/client.ts          # Browser Supabase client
+├── src/                            # All application code (path alias @/* → ./src/*)
+│   ├── config/
+│   │   ├── roles.ts                # AdminRole union + ADMIN_ROLES
+│   │   ├── dashboard.ts            # Role-aware dashboard layouts
+│   │   └── navigation.ts           # Centralized nav (sidebar + role filter)
+│   ├── authorization/              # ADR-0007 portal-access helpers
+│   ├── domains/                    # Shared types (+ definitions.ts facade)
+│   ├── infrastructure/
+│   │   ├── api/client.ts           # Typed fetch to apps/api (/api/v1)
+│   │   └── auth/supabase-client.ts # Browser Supabase client
+│   ├── features/                   # Feature slices (primary code home)
+│   │   ├── authentication/         # Session user, RouteGuard helpers
+│   │   ├── member-management/      # Table, wizard, filters, profile
+│   │   ├── user-management/        # CRUD, reset, handover, member picker
+│   │   ├── child-management/
+│   │   ├── department-management/  # Roster, KPI, progress tracker
+│   │   ├── attendance-management/
+│   │   ├── event-management/
+│   │   ├── report-generation/
+│   │   ├── audit-management/
+│   │   ├── planning/
+│   │   ├── academic/
+│   │   ├── transport/
+│   │   ├── permissions/
+│   │   └── settings/
+│   ├── widgets/
+│   │   ├── shell/                  # AppShell, sidebar, header, search, i18n
+│   │   │   └── (nav re-exports from @/config/navigation)
+│   │   └── dashboard/              # DashboardRouter + per-role dashboards
+│   │       └── components/
+│   │           ├── dashboard-router.tsx
+│   │           ├── super-admin-dashboard.tsx
+│   │           ├── chairperson-dashboard-page.tsx
+│   │           ├── sub-chairperson-dashboard.tsx
+│   │           ├── secretary-dashboard.tsx
+│   │           └── mezmur-dashboard.tsx
+│   ├── shared/                     # Cross-cutting UI (when needed)
+│   └── providers/                  # App-level providers (when needed)
 ├── middleware.ts                   # Session refresh + login redirect
 ├── public/
-├── tests/                          # Vitest component tests
+├── tests/                          # Vitest component tests (import ../src/…)
 ├── components.json                 # shadcn config
 ├── next.config.ts
 ├── tailwind.config.ts
@@ -195,19 +205,21 @@ apps/admin/
 Each feature directory typically has:
 
 ```text
-features/<name>/
+src/features/<name>/
 ├── index.ts                 # Public exports
 ├── components/              # Presentational + container components
-├── hooks/                   # TanStack Query hooks (use-members, use-plans, …)
+├── hooks/                   # Data hooks (use-members, use-plans, …)
 └── (optional) config/       # Feature-local constants
 ```
 
 **Rules:**
 
 - Pages under `app/(authenticated)/…` stay thin: compose feature components.
-- Data fetching lives in `features/*/hooks` with TanStack Query keys.
-- Shared chrome (sidebar/header) lives only in `features/shell`.
+- Data fetching lives in `src/features/*/hooks` via `@/infrastructure/api/client`.
+- Shared chrome (sidebar/header) lives in `src/widgets/shell`; nav data lives in `src/config/navigation.ts`.
+- Portal-access checks live in `src/authorization` (ADR-0007) — do not fork them.
 - Role dashboard widgets should prefer `@repo/ui` dashboard primitives when possible.
+- Path alias: `@/*` → `apps/admin/src/*` (tsconfig + vitest).
 
 ---
 
@@ -275,9 +287,9 @@ Presentation-level only (API still enforces access):
 | Sub-department scoped | Leader / Sub-Leader / Secretary / Member per dept | One of: Timihrt, Mezmur, Kutitr, Ekd, Kinetibeb |
 | No portal access | `MEMBER_REGULAR` without leadership post | Portfolio + Telegram only |
 
-Session `globalRoles` use UPPER_SNAKE (`SUPER_ADMIN`); nav config maps them to hyphenated UI roles (`super-admin`) via `SESSION_ROLE_MAP` in `features/shell/nav-config.ts`.
+Session `globalRoles` use UPPER_SNAKE (`SUPER_ADMIN`); nav config maps them to hyphenated UI roles (`super-admin`) via `SESSION_ROLE_MAP` in `src/config/navigation.ts`.
 
-Admin UI role union (`config/roles.ts`):
+Admin UI role union (`src/config/roles.ts`):
 
 ```ts
 export const ADMIN_ROLES = [
@@ -340,7 +352,7 @@ Full matrix: `docs/requirements/roles-and-permissions.md` §3. Frontend highligh
 | Dashboard KPIs | User accounts (active/deactivated), leadership roster matrix, system health/API status, role distribution, recent accounts, activity feed |
 | Features | Create/edit/reactivate users, password reset, session revoke, leadership handover, audit filters + CSV, break-glass awareness (BYPASS_ACTION), static permission matrix |
 | Key FRs | FR-13.1–FR-13.13 |
-| Code | `features/dashboard/.../super-admin-dashboard.tsx`, `features/users/*`, `app/(authenticated)/super-admin`, `/users`, `/audit-logs`, `/permissions` |
+| Code | `src/widgets/dashboard/.../super-admin-dashboard.tsx`, `src/features/user-management/*`, `app/(authenticated)/super-admin`, `/users`, `/audit-logs`, `/permissions` |
 
 ### 6.2 Chairperson (`chairperson`) — `/chairperson` / role home
 

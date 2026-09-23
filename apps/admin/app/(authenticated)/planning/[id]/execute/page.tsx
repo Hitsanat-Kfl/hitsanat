@@ -7,7 +7,7 @@ import { ProgressRecordingForm } from "@/features/planning";
 import { useDistributionStatus } from "@/features/planning";
 import { usePlanDetail } from "@/features/planning";
 import { WeeklyPlanList } from "@/features/planning";
-import { PageShell } from "@/features/shell";
+import { PageShell } from "@/widgets/shell";
 
 export default function PlanExecutionPage() {
   const params = useParams();

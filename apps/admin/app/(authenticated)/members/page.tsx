@@ -1,8 +1,13 @@
 "use client";
 
 import { Button } from "@repo/ui";
-import { MemberFiltersBar, MemberPagination, MemberTable, useMembers } from "@/features/members";
-import { AlertBanner, PageShell } from "@/features/shell";
+import {
+  MemberFiltersBar,
+  MemberPagination,
+  MemberTable,
+  useMembers,
+} from "@/features/member-management";
+import { AlertBanner, PageShell } from "@/widgets/shell";
 
 export default function MemberListPage() {
   const { members, pagination, loading, error, filters, setFilters, refresh } = useMembers({

@@ -2138,6 +2138,126 @@ export const openApiSpec = {
         },
       },
     },
+    "/users": {
+      get: {
+        summary: "List user accounts",
+        description:
+          "Paginated user accounts with optional search, role, and lifecycle status filters (BR-008, FR-13.1, FR-13.6)",
+        tags: ["Users"],
+        parameters: [
+          { name: "page", in: "query", schema: { type: "integer" } },
+          { name: "limit", in: "query", schema: { type: "integer" } },
+          { name: "search", in: "query", schema: { type: "string" } },
+          { name: "role", in: "query", schema: { type: "string" } },
+          {
+            name: "status",
+            in: "query",
+            description: "Lifecycle status filter (ACTIVE or DEACTIVATED)",
+            schema: { type: "string", enum: ["ACTIVE", "DEACTIVATED"] },
+          },
+        ],
+        responses: {
+          "200": { description: "Paginated user accounts" },
+          "403": { description: "Forbidden (BR-008)" },
+        },
+      },
+      post: {
+        summary: "Create a user account",
+        description:
+          "Provision a new account in Supabase Auth and the local users table (BR-007/BR-008)",
+        tags: ["Users"],
+        responses: {
+          "201": { description: "User created" },
+          "409": { description: "Conflict (USER_EXISTS / BR-009)" },
+        },
+      },
+    },
+    "/users/stats": {
+      get: {
+        summary: "User account lifecycle statistics",
+        description:
+          "Authoritative total/active/deactivated counts and per-role distribution for the Super Admin dashboard (FR-13.4)",
+        tags: ["Users"],
+        responses: {
+          "200": { description: "Account statistics" },
+          "403": { description: "Forbidden (BR-008)" },
+        },
+      },
+    },
+    "/users/{id}": {
+      get: {
+        summary: "Get a user account",
+        tags: ["Users"],
+        parameters: [{ name: "id", in: "path", required: true, schema: { type: "string" } }],
+        responses: { "200": { description: "User account" } },
+      },
+      patch: {
+        summary: "Update a user account",
+        description: "Edit name, email, role, and member link; revalidates BR-007/BR-009 (FR-13.7)",
+        tags: ["Users"],
+        parameters: [{ name: "id", in: "path", required: true, schema: { type: "string" } }],
+        responses: { "200": { description: "User updated" } },
+      },
+    },
+    "/users/{id}/reset-password": {
+      post: {
+        summary: "Reset a user's password",
+        tags: ["Users"],
+        parameters: [{ name: "id", in: "path", required: true, schema: { type: "string" } }],
+        responses: { "200": { description: "Password reset" } },
+      },
+    },
+    "/users/{id}/deactivate": {
+      post: {
+        summary: "Deactivate a user account",
+        description: "Bans the Supabase Auth account (FR-13.1, FR-13.11 guard rails)",
+        tags: ["Users"],
+        parameters: [{ name: "id", in: "path", required: true, schema: { type: "string" } }],
+        responses: { "200": { description: "Account deactivated" } },
+      },
+    },
+    "/users/{id}/reactivate": {
+      post: {
+        summary: "Reactivate a user account",
+        description: "Unbans a deactivated account (FR-13.6)",
+        tags: ["Users"],
+        parameters: [{ name: "id", in: "path", required: true, schema: { type: "string" } }],
+        responses: { "200": { description: "Account reactivated" } },
+      },
+    },
+    "/users/{id}/revoke-sessions": {
+      post: {
+        summary: "Revoke live sessions for a user",
+        description: "Force sign-out of all live sessions via GoTrue admin logout (FR-13.13)",
+        tags: ["Users"],
+        parameters: [{ name: "id", in: "path", required: true, schema: { type: "string" } }],
+        responses: { "200": { description: "Sessions revoked" } },
+      },
+    },
+    "/audit-logs": {
+      get: {
+        summary: "List audit log entries",
+        description: "Administrative action trail with optional limit (FR-13.2)",
+        tags: ["Audit"],
+        parameters: [{ name: "limit", in: "query", schema: { type: "integer" } }],
+        responses: {
+          "200": { description: "Audit log entries" },
+          "403": { description: "Forbidden" },
+        },
+      },
+    },
+    "/system-metadata": {
+      get: {
+        summary: "List system metadata",
+        description:
+          "Seed/migration status key-value rows (schema_tag, seed_status) for the Super Admin dashboard (FR-13.4). SUPER_ADMIN only.",
+        tags: ["System"],
+        responses: {
+          "200": { description: "System metadata rows" },
+          "403": { description: "Forbidden (SUPER_ADMIN only)" },
+        },
+      },
+    },
     "/public/stats": {
       get: {
         summary: "Public ministry statistics",

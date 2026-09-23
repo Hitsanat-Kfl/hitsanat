@@ -151,13 +151,14 @@ Agreed in the September 2026 Super Admin review session; all items are now imple
 - ✅ **Account reactivation** — restore deactivated accounts (`POST /users/:id/reactivate`, `USER_REACTIVATED`)
 - ✅ **Edit user / role reassignment** — edit dialog on `PATCH /users/:id` reassigning leadership roles per BR-008, with BR-007/BR-009 revalidation
 - ✅ **Searchable member picker** — replaces raw member UUID entry for BR-007 member links
-- ✅ **Leadership handover workflow** — guided annual role-transfer sequence (successor-first)
+- ✅ **Leadership handover workflow** — guided annual role-transfer sequence (successor-first, three steps: create → demote → deactivate; FR-13.9)
 - ✅ **Audit log filters & CSV export** — action, date, and actor filtering with export
 - ✅ **Account self-protection** — no self-deactivation, no last-admin lockout
 - ✅ **Break-glass logging** — `BYPASS_ACTION` audit entries for all actions performed under the § 4.3 permission bypass
 - ✅ **Session revocation** — force sign-out of live sessions (`POST /users/:id/revoke-sessions`, `SESSIONS_REVOKED`)
+- ✅ **Account stats + seed status** — `GET /users/stats` powers the System Snapshot; `GET /system-metadata` surfaces seed/migration status (FR-13.4)
 
-**Remaining:** seed/migration status on the Super Admin dashboard (system_metadata table exists but unused); OD-05 permission-overrides decision still open.
+**Remaining:** none for this review batch. OD-05 permission-overrides is RESOLVED as Option A (static matrix + SUPER_ADMIN bypass; see `open-decisions.md`).
 
 ### 4.6 Sub-Chairperson Deputy Authority (ADR-0018)
 

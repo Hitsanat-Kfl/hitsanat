@@ -1,9 +1,9 @@
 "use client";
 
 import { Spinner } from "@repo/ui";
-import { PageShell } from "@/features/shell";
-import { SubDeptCard } from "@/features/sub-departments";
-import { useSubDepartments } from "@/features/sub-departments";
+import { PageShell } from "@/widgets/shell";
+import { SubDeptCard } from "@/features/department-management";
+import { useSubDepartments } from "@/features/department-management";
 
 export default function SubDepartmentListPage() {
   const { departments, loading, error } = useSubDepartments();
