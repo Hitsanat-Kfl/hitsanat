@@ -209,7 +209,7 @@ describe("DashboardRouter", () => {
     );
 
     await waitFor(() => {
-      expect(screen.getByText("Super Admin Dashboard")).toBeDefined();
+      expect(screen.getByText("System Overview")).toBeDefined();
     });
   });
 
