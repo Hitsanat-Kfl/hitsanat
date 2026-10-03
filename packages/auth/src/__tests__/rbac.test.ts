@@ -1,6 +1,7 @@
 import { readFileSync } from "node:fs";
 import { resolve } from "node:path";
 import { beforeEach, describe, expect, it, vi } from "vitest";
+import { requireScopePermission } from "../index.js";
 
 // The auth middleware imports @repo/database for resolveUserScopes — mock it.
 vi.mock("@repo/database", () => ({
@@ -121,7 +122,6 @@ describe("RBAC Middleware Behavior", () => {
   });
 
   it("should return 401 when sessionUser is missing in requireScopePermission", async () => {
-    const { requireScopePermission } = await import("../index.js");
     const middleware = requireScopePermission({ allowedGlobalRoles: ["CHAIRPERSON"] });
 
     middleware(mockReq as never, mockRes as never, mockNext);
@@ -131,7 +131,6 @@ describe("RBAC Middleware Behavior", () => {
   });
 
   it("should allow SUPER_ADMIN to bypass scope checks", async () => {
-    const { requireScopePermission } = await import("../index.js");
     const middleware = requireScopePermission({ allowedGlobalRoles: ["CHAIRPERSON"] });
 
     const req = {
@@ -153,7 +152,6 @@ describe("RBAC Middleware Behavior", () => {
   });
 
   it("should deny non-leadership access (ADR-0007)", async () => {
-    const { requireScopePermission } = await import("../index.js");
     const middleware = requireScopePermission({
       allowedGlobalRoles: ["CHAIRPERSON", "SECRETARY"],
     });
@@ -178,7 +176,6 @@ describe("RBAC Middleware Behavior", () => {
   });
 
   it("should deny role failure without resource/action (sync path)", async () => {
-    const { requireScopePermission } = await import("../index.js");
     const middleware = requireScopePermission({
       allowedGlobalRoles: ["SECRETARY"],
     });
@@ -224,7 +221,6 @@ describe("RBAC Middleware Behavior", () => {
         execute: vi.fn().mockResolvedValue([{ id: "g1" }]),
       } as never);
 
-      const { requireScopePermission } = await import("../index.js");
       const middleware = requireScopePermission({
         allowedGlobalRoles: ["SECRETARY"],
         resource: "members",
@@ -247,7 +243,6 @@ describe("RBAC Middleware Behavior", () => {
         execute: vi.fn().mockResolvedValue([]),
       } as never);
 
-      const { requireScopePermission } = await import("../index.js");
       const middleware = requireScopePermission({
         allowedGlobalRoles: ["SECRETARY"],
         resource: "members",
@@ -268,7 +263,6 @@ describe("RBAC Middleware Behavior", () => {
         execute: vi.fn().mockRejectedValue(new Error("db down")),
       } as never);
 
-      const { requireScopePermission } = await import("../index.js");
       const middleware = requireScopePermission({
         allowedGlobalRoles: ["SECRETARY"],
         resource: "members",
