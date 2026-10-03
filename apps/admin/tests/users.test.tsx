@@ -99,15 +99,39 @@ async function pickMember(searchTerm: string) {
   fireEvent.click(result);
 }
 
-/** Opens the ⋮ action menu for a given user and returns the dropdown container. */
+/** Opens the ⋮ action menu for a given user and returns the menu container. */
 function openRowMenu(userName: string) {
-  const menuButtons = screen.getAllByRole("button", { name: `Actions for ${userName}` });
-  fireEvent.click(menuButtons[0]);
-  // The dropdown is the next sibling element with a border and shadow.
-  const menuContainer = menuButtons[0]
-    .closest("div")
-    ?.querySelector('[class*="absolute"][class*="z-50"]');
-  return menuContainer as HTMLElement;
+  const desktopBtn = screen.queryByRole("button", { name: `Actions for ${userName}` });
+  if (desktopBtn) {
+    fireEvent.click(desktopBtn);
+    const dropdown = document.querySelector('[role="menu"]');
+    if (dropdown) return dropdown as HTMLElement;
+    fireEvent.click(desktopBtn);
+  }
+
+  const mobileBtn = screen.queryByRole("button", { name: `More actions for ${userName}` });
+  if (mobileBtn) {
+    fireEvent.click(mobileBtn);
+    const sheet = document.querySelector('[aria-label="More actions"]');
+    if (sheet) return sheet as HTMLElement;
+  }
+
+  throw new Error(`No action menu found for ${userName}`);
+}
+
+/** Finds a menu/sheet action by accessible name (menuitem in table, button in sheet). */
+function menuAction(container: HTMLElement, name: RegExp) {
+  return (
+    within(container).queryByRole("menuitem", { name }) ??
+    within(container).getByRole("button", { name })
+  );
+}
+
+/** Clicks the first page-level "Create User" header button (desktop) or "Create" (mobile). */
+async function openCreateUserDialog() {
+  const buttons = await screen.findAllByRole("button", { name: /^(Create User|Create)$/i });
+  fireEvent.click(buttons.find((b) => b.textContent?.includes("Create User")) ?? buttons[0]);
+  return screen.findByRole("dialog", { name: /Create User/i });
 }
 
 describe("Users management page", () => {
@@ -121,8 +145,10 @@ describe("Users management page", () => {
     renderUsersPage();
 
     await waitFor(() => {
-      expect(screen.getByText("User Accounts")).toBeDefined();
-      expect(screen.getByRole("button", { name: /Create User/i })).toBeDefined();
+      expect(screen.getAllByText("User Accounts").length).toBeGreaterThanOrEqual(1);
+      expect(
+        screen.getAllByRole("button", { name: /^(Create User|Create)$/i }).length
+      ).toBeGreaterThanOrEqual(1);
     });
   });
 
@@ -155,7 +181,7 @@ describe("Users management page", () => {
     );
     const menu = openRowMenu("Deactivated Leader");
 
-    const reactivate = within(menu).getByRole("button", { name: /Reactivate User/i });
+    const reactivate = menuAction(menu, /Reactivate/i);
     fireEvent.click(reactivate);
 
     await waitFor(() => {
@@ -171,7 +197,7 @@ describe("Users management page", () => {
     );
     const menu = openRowMenu("Super Admin");
 
-    const revokeButton = within(menu).getByRole("button", { name: /Revoke Sessions/i });
+    const revokeButton = menuAction(menu, /Revoke Sessions/i);
     fireEvent.click(revokeButton);
 
     await waitFor(() => {
@@ -182,8 +208,7 @@ describe("Users management page", () => {
   it("opens the create dialog and shows the BR-007 member-link validation", async () => {
     renderUsersPage();
 
-    fireEvent.click(await screen.findByRole("button", { name: /Create User/i }));
-    await screen.findByText("Create user account");
+    await openCreateUserDialog();
 
     fireEvent.change(screen.getByPlaceholderText("Full name"), {
       target: { value: "New Leader" },
@@ -197,7 +222,7 @@ describe("Users management page", () => {
     fireEvent.change(screen.getByDisplayValue("Select role"), {
       target: { value: "SECRETARY" },
     });
-    const submitButton = screen.getAllByRole("button", { name: "Create account" }).pop();
+    const submitButton = screen.getAllByRole("button", { name: "Create User" }).pop();
     if (submitButton) fireEvent.click(submitButton);
 
     expect(await screen.findByText(/Leadership roles require a member link/)).toBeDefined();
@@ -207,8 +232,7 @@ describe("Users management page", () => {
   it("links a member through the searchable picker and creates the account", async () => {
     renderUsersPage();
 
-    fireEvent.click(await screen.findByRole("button", { name: /Create User/i }));
-    await screen.findByText("Create user account");
+    await openCreateUserDialog();
 
     fireEvent.change(screen.getByPlaceholderText("Full name"), {
       target: { value: "New Leader" },
@@ -224,7 +248,8 @@ describe("Users management page", () => {
     });
     await pickMember("Linked");
 
-    const submitButton = screen.getAllByRole("button", { name: "Create account" }).pop();
+    const submitButtons = screen.getAllByRole("button", { name: "Create User" });
+    const submitButton = submitButtons.at(-1);
     if (submitButton) fireEvent.click(submitButton);
 
     await waitFor(() => {
@@ -247,15 +272,15 @@ describe("Users management page", () => {
     );
     const menu = openRowMenu("Super Admin");
 
-    fireEvent.click(within(menu).getByRole("button", { name: /Edit User/i }));
-    await screen.findByText("Edit user account");
+    fireEvent.click(menuAction(menu, /^Edit/i));
+    await screen.findByRole("dialog", { name: /Edit User/i });
 
     expect(await screen.findByText(/Linked Member One/)).toBeDefined();
 
     fireEvent.change(screen.getByPlaceholderText("Full name"), {
       target: { value: "Renamed Admin" },
     });
-    fireEvent.click(screen.getByRole("button", { name: "Save changes" }));
+    fireEvent.click(screen.getByRole("button", { name: "Save Changes" }));
 
     await waitFor(() => {
       expect(patchMock).toHaveBeenCalledWith("/users/u1", {
@@ -276,7 +301,7 @@ describe("Users management page", () => {
     );
     const menu = openRowMenu("Super Admin");
 
-    fireEvent.click(within(menu).getByRole("button", { name: /Handover/i }));
+    fireEvent.click(menuAction(menu, /Handover/i));
     await screen.findByText(/Leadership handover — CHAIRPERSON/);
 
     // Step 1: create successor

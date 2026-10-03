@@ -1,6 +1,7 @@
 import { useState, type ReactElement, type ReactNode } from "react";
 import { render, type RenderOptions, type RenderResult } from "@testing-library/react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { ToastProvider } from "@repo/ui";
 import { I18nProvider, ShellProvider } from "../src/widgets/shell";
 
 function createTestQueryClient(): QueryClient {
@@ -26,9 +27,11 @@ export function QueryTestProvider({ children }: { children: ReactNode }) {
 export function TestProviders({ children }: { children: ReactNode }) {
   return (
     <QueryTestProvider>
-      <I18nProvider>
-        <ShellProvider>{children}</ShellProvider>
-      </I18nProvider>
+      <ToastProvider>
+        <I18nProvider>
+          <ShellProvider>{children}</ShellProvider>
+        </I18nProvider>
+      </ToastProvider>
     </QueryTestProvider>
   );
 }

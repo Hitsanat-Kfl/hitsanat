@@ -11,9 +11,11 @@ import {
   TableHead,
   TableHeader,
   TableRow,
+  useToast,
 } from "@repo/ui";
 import { Download, RefreshCw } from "lucide-react";
-import { AlertBanner, PageLoading, PagePagination, PageShell } from "@/widgets/shell";
+import { useEffect } from "react";
+import { PageLoading, PagePagination, PageShell } from "@/widgets/shell";
 import { ActorPicker } from "./actor-picker";
 import {
   AUDIT_ACTION_FILTERS,
@@ -49,6 +51,11 @@ function actionBadgeVariant(action: string): "default" | "secondary" | "destruct
 export default function AuditLogsPage() {
   const { entries, pagination, filters, setFilters, loading, error, refresh, exportCsv } =
     useAuditLogEntries();
+  const { toast } = useToast();
+
+  useEffect(() => {
+    if (error) toast(error, "error");
+  }, [error, toast]);
 
   const totalPages = pagination?.totalPages ?? 1;
   const currentPage = pagination?.page ?? 1;
@@ -107,8 +114,6 @@ export default function AuditLogsPage() {
             className="sm:max-w-40"
           />
         </div>
-
-        {error && <AlertBanner message={error} />}
 
         {loading ? (
           <PageLoading aria-busy="true" />

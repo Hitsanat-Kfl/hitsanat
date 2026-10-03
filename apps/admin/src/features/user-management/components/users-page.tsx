@@ -1,10 +1,10 @@
 "use client";
 
-import { AlertDialog, Button, Input, Select, Skeleton } from "@repo/ui";
-import { Plus, X } from "lucide-react";
+import { AlertDialog, Button, Input, Select, Skeleton, useToast } from "@repo/ui";
+import { Plus, Search, X } from "lucide-react";
 import { useRouter } from "next/navigation";
-import { useMemo, useState } from "react";
-import { AlertBanner, PagePagination, PageShell } from "@/widgets/shell";
+import { useEffect, useMemo, useState } from "react";
+import { PagePagination, PageShell } from "@/widgets/shell";
 import { CreateUserDialog } from "./create-user-dialog";
 import { EditUserDialog } from "./edit-user-dialog";
 import { HandoverDialog } from "./handover-dialog";
@@ -24,109 +24,252 @@ const ROLE_FILTERS = [{ value: "", label: "All Roles" }].concat(
 );
 
 const STATUS_FILTERS = [
-  { value: "", label: "All Status" },
+  { value: "", label: "All Statuses" },
   { value: "ACTIVE", label: "Active" },
   { value: "DEACTIVATED", label: "Deactivated" },
 ];
 
-function AccountOverview({ users, loading }: { users: ManagedUser[]; loading: boolean }) {
-  const stats = useMemo(() => {
+const PAGE_DESCRIPTION =
+  "Manage user accounts, roles, organization assignments, and account access.";
+
+interface RegistryStats {
+  total: number;
+  active: number;
+  deactivated: number;
+  leadership: number;
+}
+
+function useRegistryStats(users: ManagedUser[]): RegistryStats {
+  return useMemo(() => {
     const total = users.length;
     const active = users.filter((u) => u.status === "ACTIVE").length;
     const deactivated = total - active;
     const leadership = users.filter((u) => LEADERSHIP_ROLE_SET.has(u.role)).length;
     return { total, active, deactivated, leadership };
   }, [users]);
+}
 
+function AccountRegistryBand({ stats, loading }: { stats: RegistryStats; loading: boolean }) {
+  const items = [
+    { label: "Total users", value: stats.total, hint: "All provisioned accounts" },
+    { label: "Active", value: stats.active, hint: "Can sign in now" },
+    { label: "Deactivated", value: stats.deactivated, hint: "Sign-in blocked" },
+    {
+      label: "Leadership",
+      value: stats.leadership,
+      hint: "Chairperson · Secretary · Super Admin",
+    },
+  ];
+
+  return (
+    <section
+      aria-label="Account registry summary"
+      className="mb-5 overflow-hidden rounded-lg border bg-white"
+    >
+      <div className="flex flex-col md:flex-row">
+        <div className="flex min-w-[168px] flex-col justify-center gap-0.5 border-b border-border bg-[#FAFBFC] px-5 py-4 md:border-b-0 md:border-r">
+          <span className="text-[11px] font-semibold uppercase tracking-[0.08em] text-[#5F0113]">
+            Account Registry
+          </span>
+          <small className="text-xs font-normal text-muted-foreground">Ministry directory</small>
+        </div>
+        <div className="grid flex-1 grid-cols-2 lg:grid-cols-4">
+          {items.map((item, index) => (
+            <div
+              key={item.label}
+              className={[
+                "relative flex flex-col justify-center gap-0.5 px-5 py-4",
+                index % 2 === 1 ? "border-l border-border" : "",
+                index >= 2 ? "border-t border-border lg:border-t-0" : "",
+                index === 2 ? "lg:border-l lg:border-border" : "",
+                index === 3 ? "lg:border-l lg:border-border" : "",
+              ]
+                .filter(Boolean)
+                .join(" ")}
+            >
+              {loading ? (
+                <>
+                  <Skeleton className="h-7 w-10" />
+                  <Skeleton className="mt-1 h-3.5 w-20" />
+                </>
+              ) : (
+                <>
+                  <div className="text-[28px] font-semibold leading-tight tracking-tight tabular-nums text-foreground">
+                    {item.value}
+                  </div>
+                  <div className="text-xs font-medium text-muted-foreground">{item.label}</div>
+                  <div className="mt-0.5 hidden text-[11px] text-[#98A2B3] xl:block">
+                    {item.hint}
+                  </div>
+                </>
+              )}
+            </div>
+          ))}
+        </div>
+      </div>
+    </section>
+  );
+}
+
+function AccountOverview({ stats, loading }: { stats: RegistryStats; loading: boolean }) {
   if (loading) {
     return (
       <div className="space-y-4">
-        <Skeleton className="h-4 w-24" />
-        <Skeleton className="h-8 w-12" />
-        <div className="border-t" />
-        <Skeleton className="h-4 w-16" />
-        <Skeleton className="h-8 w-12" />
-        <div className="border-t" />
-        <Skeleton className="h-4 w-20" />
-        <Skeleton className="h-8 w-8" />
-        <div className="border-t" />
-        <Skeleton className="h-4 w-20" />
-        <Skeleton className="h-8 w-8" />
+        {[0, 1, 2, 3].map((i) => (
+          <div key={i} className={i > 0 ? "border-t pt-4" : undefined}>
+            <Skeleton className="h-3 w-24" />
+            <Skeleton className="mt-2 h-7 w-10" />
+            <Skeleton className="mt-1 h-3 w-28" />
+          </div>
+        ))}
+        <div className="border-t pt-4">
+          <Skeleton className="h-3 w-28" />
+          <div className="mt-3 space-y-2">
+            <Skeleton className="h-4 w-full" />
+            <Skeleton className="h-4 w-full" />
+          </div>
+        </div>
       </div>
     );
   }
 
+  const activePct = stats.total > 0 ? Math.round((stats.active / stats.total) * 1000) / 10 : 0;
+
+  const items = [
+    { k: "Total users", v: stats.total, sub: "Across 5 sub-departments" },
+    { k: "Active", v: stats.active, sub: `${activePct}% of registry` },
+    { k: "Deactivated", v: stats.deactivated, sub: "Blocked from sign-in" },
+    { k: "Leadership", v: stats.leadership, sub: "Linked members (BR-007)" },
+  ];
+
   return (
-    <div className="space-y-4">
-      <div>
-        <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
-          Total Users
+    <div>
+      {items.map((item) => (
+        <div
+          key={item.k}
+          className="border-t border-border py-3.5 first:border-t-0 first:pt-0 last:pb-0"
+        >
+          <div className="text-[11px] font-semibold uppercase tracking-[0.05em] text-muted-foreground">
+            {item.k}
+          </div>
+          <div className="mt-1 text-2xl font-semibold tracking-tight tabular-nums text-foreground">
+            {item.v}
+          </div>
+          <div className="mt-0.5 text-xs text-muted-foreground">{item.sub}</div>
+        </div>
+      ))}
+
+      <div className="mt-1 border-t border-border pt-3.5">
+        <div className="text-[11px] font-semibold uppercase tracking-[0.05em] text-muted-foreground">
+          Account Status
+        </div>
+        <div className="mt-1">
+          <div className="flex items-center justify-between gap-3 py-2">
+            <span className="flex items-center gap-2 text-[13px] text-foreground">
+              <span className="h-2 w-2 rounded-full bg-[#16834A]" aria-hidden="true" />
+              Active
+            </span>
+            <span className="text-[13px] font-semibold tabular-nums text-foreground">
+              {stats.active}
+            </span>
+          </div>
+          <div className="flex items-center justify-between gap-3 border-t border-dashed border-border py-2">
+            <span className="flex items-center gap-2 text-[13px] text-foreground">
+              <span className="h-2 w-2 rounded-full bg-[#98A2B3]" aria-hidden="true" />
+              Deactivated
+            </span>
+            <span className="text-[13px] font-semibold tabular-nums text-foreground">
+              {stats.deactivated}
+            </span>
+          </div>
+        </div>
+        <p className="mt-2 text-[11px] leading-snug text-muted-foreground">
+          {stats.active} accounts · {stats.deactivated} deactivated
         </p>
-        <p className="mt-1 text-2xl font-semibold text-foreground">{stats.total}</p>
-      </div>
-      <div className="border-t" />
-      <div>
-        <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">Active</p>
-        <p className="mt-1 text-2xl font-semibold text-foreground">{stats.active}</p>
-      </div>
-      <div className="border-t" />
-      <div>
-        <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
-          Deactivated
-        </p>
-        <p className="mt-1 text-2xl font-semibold text-foreground">{stats.deactivated}</p>
-      </div>
-      <div className="border-t" />
-      <div>
-        <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
-          Leadership
-        </p>
-        <p className="mt-1 text-2xl font-semibold text-foreground">{stats.leadership}</p>
       </div>
     </div>
   );
 }
 
-function MobileOverview({ users, loading }: { users: ManagedUser[]; loading: boolean }) {
-  const stats = useMemo(() => {
-    const total = users.length;
-    const active = users.filter((u) => u.status === "ACTIVE").length;
-    const deactivated = total - active;
-    const leadership = users.filter((u) => LEADERSHIP_ROLE_SET.has(u.role)).length;
-    return { total, active, deactivated, leadership };
-  }, [users]);
+function MobileOverview({ stats, loading }: { stats: RegistryStats; loading: boolean }) {
+  const items = [
+    { label: "Total users", value: stats.total },
+    { label: "Active", value: stats.active },
+    { label: "Deactivated", value: stats.deactivated },
+    { label: "Leadership", value: stats.leadership },
+  ];
 
   if (loading) {
     return (
-      <div className="grid grid-cols-2 gap-px rounded-md border bg-border">
+      <div className="grid grid-cols-2 gap-px overflow-hidden rounded-lg border bg-border">
         {[0, 1, 2, 3].map((i) => (
           <div key={i} className="bg-white p-3">
             <Skeleton className="h-3 w-16" />
-            <Skeleton className="mt-1 h-6 w-8" />
+            <Skeleton className="mt-1.5 h-6 w-8" />
           </div>
         ))}
       </div>
     );
   }
 
-  const items = [
-    { label: "TOTAL USERS", value: stats.total },
-    { label: "ACTIVE", value: stats.active },
-    { label: "DEACTIVATED", value: stats.deactivated },
-    { label: "LEADERSHIP", value: stats.leadership },
-  ];
-
   return (
-    <div className="grid grid-cols-2 gap-px rounded-md border bg-border">
+    <div className="grid grid-cols-2 gap-px overflow-hidden rounded-lg border bg-border">
       {items.map((item) => (
         <div key={item.label} className="bg-white p-3">
-          <p className="text-[10px] font-medium uppercase tracking-wide text-muted-foreground">
+          <p className="text-[10px] font-semibold uppercase tracking-wide text-muted-foreground">
             {item.label}
           </p>
-          <p className="mt-0.5 text-lg font-semibold text-foreground">{item.value}</p>
+          <p className="mt-1 text-xl font-semibold tabular-nums text-foreground">{item.value}</p>
         </div>
       ))}
     </div>
+  );
+}
+
+function PageHeader({
+  onCreate,
+  compact = false,
+}: {
+  onCreate: () => void;
+  compact?: boolean;
+}) {
+  if (compact) {
+    return (
+      <div className="mb-3.5 flex items-start justify-between gap-3">
+        <div className="min-w-0">
+          <p className="mb-0.5 text-xs font-medium text-muted-foreground">Administration</p>
+          <h1 className="text-[20px] font-semibold tracking-[-0.02em] text-foreground">
+            User Accounts
+          </h1>
+        </div>
+        <Button
+          onClick={onCreate}
+          className="h-10 shrink-0 rounded-lg bg-[#5F0113] px-3 text-[13px] text-white hover:bg-[#4A010F]"
+        >
+          <Plus className="h-4 w-4" aria-hidden="true" />
+          Create
+        </Button>
+      </div>
+    );
+  }
+
+  return (
+    <header className="mb-4 flex items-start justify-between gap-4">
+      <div className="min-w-0">
+        <p className="text-xs font-medium text-muted-foreground">Administration</p>
+        <h1 className="mt-1 text-2xl font-semibold tracking-tight text-foreground">
+          User Accounts
+        </h1>
+        <p className="mt-1 text-sm text-muted-foreground">{PAGE_DESCRIPTION}</p>
+      </div>
+      <Button
+        onClick={onCreate}
+        className="h-10 shrink-0 rounded-lg bg-[#5F0113] px-4 text-sm font-medium text-white hover:bg-[#4A010F]"
+      >
+        <Plus className="h-4 w-4" aria-hidden="true" />
+        Create User
+      </Button>
+    </header>
   );
 }
 
@@ -138,6 +281,7 @@ function MobileOverview({ users, loading }: { users: ManagedUser[]; loading: boo
  */
 export default function UsersPage() {
   const router = useRouter();
+  const { toast } = useToast();
   const {
     users,
     pagination,
@@ -145,7 +289,6 @@ export default function UsersPage() {
     error,
     filters,
     setFilters,
-    refresh,
     createUser,
     resetPassword,
     deactivate,
@@ -159,52 +302,59 @@ export default function UsersPage() {
   const [deactivateTarget, setDeactivateTarget] = useState<ManagedUser | null>(null);
   const [editTarget, setEditTarget] = useState<ManagedUser | null>(null);
   const [handoverTarget, setHandoverTarget] = useState<ManagedUser | null>(null);
-  const [notice, setNotice] = useState<string | null>(null);
 
+  const stats = useRegistryStats(users);
   const hasActiveFilters =
     Boolean(filters.search) || Boolean(filters.role) || Boolean(filters.status);
 
+  useEffect(() => {
+    if (error) toast(error, "error");
+  }, [error, toast]);
+
   const handleCreate = async (payload: Parameters<typeof createUser>[0]) => {
     await createUser(payload);
-    setNotice(`Account created — ${payload.email} can now sign in with the temporary password.`);
+    toast(
+      `Account created — ${payload.email} can now sign in with the temporary password.`,
+      "success"
+    );
   };
 
   const handleResetPassword = async (newPassword: string) => {
     if (!resetTarget) return;
     await resetPassword(resetTarget.id, newPassword);
-    setNotice(`Password reset — a temporary password was set for ${resetTarget.email}.`);
+    toast(`Password reset — a temporary password was set for ${resetTarget.email}.`, "success");
     setResetTarget(null);
   };
 
   const handleDeactivate = async (user: ManagedUser) => {
     try {
       await deactivate(user.id);
-      setNotice(`Account deactivated — ${user.email} can no longer sign in.`);
+      toast(`Account deactivated — ${user.email} can no longer sign in.`, "success");
     } catch (err) {
-      setNotice(err instanceof Error ? err.message : "Deactivation failed.");
+      toast(err instanceof Error ? err.message : "Deactivation failed.", "error");
     }
   };
 
   const handleUpdate = async (userId: string, payload: UpdateUserPayload) => {
     await updateUser(userId, payload);
-    setNotice("Account updated.");
+    toast("Account updated.", "success");
   };
 
   const handleReactivate = async (user: ManagedUser) => {
     try {
       await reactivate(user.id);
-      setNotice(`Account reactivated — ${user.email} can sign in again.`);
+      toast(`Account reactivated — ${user.email} can sign in again.`, "success");
     } catch (err) {
-      setNotice(err instanceof Error ? err.message : "Reactivation failed.");
+      toast(err instanceof Error ? err.message : "Reactivation failed.", "error");
     }
   };
 
   const handleRevokeSessions = async (user: ManagedUser) => {
     try {
       await revokeSessions(user.id);
-      setNotice(`All live sessions for ${user.email} were revoked.`);
+      toast(`All live sessions for ${user.email} were revoked.`, "success");
     } catch (err) {
-      setNotice(err instanceof Error ? err.message : "Session revocation failed.");
+      toast(err instanceof Error ? err.message : "Session revocation failed.", "error");
     }
   };
 
@@ -216,106 +366,114 @@ export default function UsersPage() {
   const currentPage = pagination?.page ?? 1;
   const totalUsers = pagination?.total ?? users.length;
 
-  return (
-    <PageShell
-      breadcrumbs={[{ label: "Home", href: "/" }, { label: "Users" }]}
-      title="User Accounts"
-      description="Manage system accounts, roles and access"
-      actions={
-        <Button onClick={() => setCreateOpen(true)}>
-          <Plus className="h-4 w-4" aria-hidden="true" />
-          Create User
-        </Button>
-      }
+  const buildSearchField = (placeholder: string) => (
+    <div className="relative w-full sm:max-w-xs">
+      <Search
+        className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-[#98A2B3]"
+        aria-hidden="true"
+      />
+      <Input
+        value={filters.search ?? ""}
+        onChange={(e) => setFilters({ ...filters, search: e.target.value || undefined, page: 1 })}
+        placeholder={placeholder}
+        type="search"
+        aria-label="Search users"
+        className="bg-white pl-9 shadow-none"
+      />
+    </div>
+  );
+
+  const roleSelect = (
+    <Select
+      value={filters.role ?? ""}
+      onChange={(e) => setFilters({ ...filters, role: e.target.value || undefined, page: 1 })}
+      aria-label="Filter by role"
+      className="w-full bg-white sm:w-[150px]"
     >
+      {ROLE_FILTERS.map((option) => (
+        <option key={option.value} value={option.value}>
+          {option.label}
+        </option>
+      ))}
+    </Select>
+  );
+
+  const statusSelect = (
+    <Select
+      value={filters.status ?? ""}
+      onChange={(e) =>
+        setFilters({
+          ...filters,
+          status: (e.target.value as "ACTIVE" | "DEACTIVATED") || undefined,
+          page: 1,
+        })
+      }
+      aria-label="Filter by status"
+      className="w-full bg-white sm:w-[150px]"
+    >
+      {STATUS_FILTERS.map((option) => (
+        <option key={option.value} value={option.value}>
+          {option.label}
+        </option>
+      ))}
+    </Select>
+  );
+
+  const clearFilters = hasActiveFilters ? (
+    <Button
+      variant="ghost"
+      size="sm"
+      onClick={() => setFilters({ page: filters.page })}
+      className="h-10 gap-1 px-2 text-muted-foreground"
+    >
+      <X className="h-3.5 w-3.5" aria-hidden="true" />
+      Clear filters
+    </Button>
+  ) : null;
+
+  const mobileFilters = (
+    <div className="flex flex-col gap-2.5">
+      {buildSearchField("Search name or email...")}
+      <div className="grid grid-cols-2 gap-2.5">
+        {roleSelect}
+        {statusSelect}
+      </div>
+      {clearFilters}
+    </div>
+  );
+
+  const desktopFilters = (
+    <div className="mb-3.5 flex flex-wrap items-center gap-2.5">
+      {buildSearchField("Search users...")}
+      {roleSelect}
+      {statusSelect}
+      {clearFilters}
+    </div>
+  );
+
+  return (
+    <PageShell breadcrumbs={[{ label: "Administration" }, { label: "User Accounts" }]}>
       <div className="space-y-4">
-        {notice && (
-          <output className="flex items-center justify-between rounded-md bg-emerald-50 p-3 text-sm text-emerald-800 dark:bg-emerald-950 dark:text-emerald-200">
-            <span>{notice}</span>
-            <button
-              type="button"
-              onClick={() => setNotice(null)}
-              className="ml-3 shrink-0 underline underline-offset-2"
-              aria-label="Dismiss notification"
-            >
-              Dismiss
-            </button>
-          </output>
-        )}
-
-        {error && <AlertBanner message={error} />}
-
-        {/* Mobile: single-column layout */}
+        {/* Mobile */}
         <div className="space-y-4 lg:hidden">
-          <MobileOverview users={users} loading={loading} />
+          <PageHeader onCreate={() => setCreateOpen(true)} compact />
+          <MobileOverview stats={stats} loading={loading} />
 
           <div>
-            <h2 className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
+            <h2 className="text-xs font-semibold uppercase tracking-[0.05em] text-muted-foreground">
               User Directory
             </h2>
-            <p className="mt-1 text-sm text-muted-foreground">{totalUsers} users</p>
+            <p className="mb-3 mt-1 text-[13px] text-muted-foreground">
+              {loading ? "Loading accounts…" : `${totalUsers} users`}
+            </p>
           </div>
 
-          <div className="flex flex-col gap-3">
-            <Input
-              value={filters.search ?? ""}
-              onChange={(e) =>
-                setFilters({ ...filters, search: e.target.value || undefined, page: 1 })
-              }
-              placeholder="Search name or email..."
-              type="search"
-              aria-label="Search users"
-            />
-            <div className="flex gap-3">
-              <Select
-                value={filters.role ?? ""}
-                onChange={(e) =>
-                  setFilters({ ...filters, role: e.target.value || undefined, page: 1 })
-                }
-                aria-label="Filter by role"
-                className="flex-1"
-              >
-                {ROLE_FILTERS.map((option) => (
-                  <option key={option.value} value={option.value}>
-                    {option.label}
-                  </option>
-                ))}
-              </Select>
-              <Select
-                value={filters.status ?? ""}
-                onChange={(e) =>
-                  setFilters({
-                    ...filters,
-                    status: (e.target.value as "ACTIVE" | "DEACTIVATED") || undefined,
-                    page: 1,
-                  })
-                }
-                aria-label="Filter by status"
-                className="flex-1"
-              >
-                {STATUS_FILTERS.map((option) => (
-                  <option key={option.value} value={option.value}>
-                    {option.label}
-                  </option>
-                ))}
-              </Select>
-            </div>
-            {hasActiveFilters && (
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={() => setFilters({ page: filters.page })}
-                className="self-start gap-1"
-              >
-                <X className="h-3 w-3" aria-hidden="true" />
-                Clear filters
-              </Button>
-            )}
-          </div>
+          {mobileFilters}
 
           <UserCards
             users={users}
             loading={loading}
+            hasActiveFilters={hasActiveFilters}
             onView={handleView}
             onResetPassword={(user) => setResetTarget(user)}
             onDeactivate={(user) => setDeactivateTarget(user)}
@@ -326,116 +484,83 @@ export default function UsersPage() {
           />
 
           {pagination && (
-            <div className="flex items-center justify-between text-sm text-muted-foreground">
+            <div className="flex items-center justify-between gap-3 text-sm text-muted-foreground">
               <span>{totalUsers} account(s)</span>
-              <PagePagination
-                page={currentPage}
-                totalPages={totalPages}
-                onPageChange={(page) => setFilters({ ...filters, page })}
-              />
+              <div className="flex items-center gap-2">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  disabled={currentPage <= 1}
+                  onClick={() => setFilters({ ...filters, page: currentPage - 1 })}
+                >
+                  Prev
+                </Button>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  disabled={currentPage >= totalPages}
+                  onClick={() => setFilters({ ...filters, page: currentPage + 1 })}
+                >
+                  Next
+                </Button>
+              </div>
             </div>
           )}
         </div>
 
-        {/* Desktop: 3/9 layout */}
-        <div className="hidden lg:grid lg:grid-cols-12 lg:gap-6">
-          {/* Left: Account Overview — 3 columns */}
-          <div className="col-span-3">
-            <h2 className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
-              Account Overview
-            </h2>
-            <div className="mt-3 rounded-md border bg-white p-4">
-              <AccountOverview users={users} loading={loading} />
-            </div>
-          </div>
+        {/* Desktop */}
+        <div className="hidden lg:block">
+          <PageHeader onCreate={() => setCreateOpen(true)} />
+          <AccountRegistryBand stats={stats} loading={loading} />
 
-          {/* Right: User Directory — 9 columns */}
-          <div className="col-span-9 space-y-4">
-            <div>
-              <h2 className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
-                User Directory
+          <div className="grid grid-cols-12 gap-6 items-start">
+            <section className="col-span-3 min-w-0">
+              <h2 className="mb-2.5 text-xs font-semibold uppercase tracking-[0.06em] text-muted-foreground">
+                Account Overview
               </h2>
-              <p className="mt-1 text-sm text-muted-foreground">{totalUsers} users</p>
-            </div>
-
-            <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
-              <Input
-                value={filters.search ?? ""}
-                onChange={(e) =>
-                  setFilters({ ...filters, search: e.target.value || undefined, page: 1 })
-                }
-                placeholder="Search users..."
-                type="search"
-                aria-label="Search users"
-                className="sm:max-w-xs"
-              />
-              <Select
-                value={filters.role ?? ""}
-                onChange={(e) =>
-                  setFilters({ ...filters, role: e.target.value || undefined, page: 1 })
-                }
-                aria-label="Filter by role"
-                className="sm:max-w-48"
-              >
-                {ROLE_FILTERS.map((option) => (
-                  <option key={option.value} value={option.value}>
-                    {option.label}
-                  </option>
-                ))}
-              </Select>
-              <Select
-                value={filters.status ?? ""}
-                onChange={(e) =>
-                  setFilters({
-                    ...filters,
-                    status: (e.target.value as "ACTIVE" | "DEACTIVATED") || undefined,
-                    page: 1,
-                  })
-                }
-                aria-label="Filter by status"
-                className="sm:max-w-48"
-              >
-                {STATUS_FILTERS.map((option) => (
-                  <option key={option.value} value={option.value}>
-                    {option.label}
-                  </option>
-                ))}
-              </Select>
-              {hasActiveFilters && (
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={() => setFilters({ page: filters.page })}
-                  className="gap-1"
-                >
-                  <X className="h-3 w-3" aria-hidden="true" />
-                  Clear filters
-                </Button>
-              )}
-            </div>
-
-            <UserTable
-              users={users}
-              loading={loading}
-              onView={handleView}
-              onResetPassword={(user) => setResetTarget(user)}
-              onDeactivate={(user) => setDeactivateTarget(user)}
-              onEdit={(user) => setEditTarget(user)}
-              onReactivate={handleReactivate}
-              onRevokeSessions={handleRevokeSessions}
-              onHandover={(user) => setHandoverTarget(user)}
-            />
-
-            {pagination && (
-              <div className="flex items-center justify-between text-sm text-muted-foreground">
-                <span>{totalUsers} account(s)</span>
-                <PagePagination
-                  page={currentPage}
-                  totalPages={totalPages}
-                  onPageChange={(page) => setFilters({ ...filters, page })}
-                />
+              <div className="rounded-lg border bg-white p-4">
+                <AccountOverview stats={stats} loading={loading} />
               </div>
-            )}
+            </section>
+
+            <section className="col-span-9 min-w-0">
+              <div className="mb-3">
+                <h2 className="text-xs font-semibold uppercase tracking-[0.06em] text-muted-foreground">
+                  User Directory
+                </h2>
+                <p className="mt-1 text-[13px] text-muted-foreground">
+                  {loading ? "Loading accounts…" : `${totalUsers} users · ${users.length} shown`}
+                </p>
+              </div>
+
+              {desktopFilters}
+
+              <UserTable
+                users={users}
+                loading={loading}
+                hasActiveFilters={hasActiveFilters}
+                onView={handleView}
+                onResetPassword={(user) => setResetTarget(user)}
+                onDeactivate={(user) => setDeactivateTarget(user)}
+                onEdit={(user) => setEditTarget(user)}
+                onReactivate={handleReactivate}
+                onRevokeSessions={handleRevokeSessions}
+                onHandover={(user) => setHandoverTarget(user)}
+              />
+
+              {pagination && (
+                <div className="mt-3 flex items-center justify-between gap-3 text-[13px] text-muted-foreground">
+                  <span>
+                    {totalUsers} account(s) · Page {currentPage} of {totalPages}
+                  </span>
+                  <PagePagination
+                    page={currentPage}
+                    totalPages={totalPages}
+                    onPageChange={(page) => setFilters({ ...filters, page })}
+                  />
+                </div>
+              )}
+            </section>
           </div>
         </div>
       </div>

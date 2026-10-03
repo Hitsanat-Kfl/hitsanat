@@ -51,6 +51,7 @@ interface ToasterProps {
 function Toaster({ toasts, dismiss }: ToasterProps) {
   return (
     <div
+      role="region"
       aria-live="polite"
       aria-label="Notifications"
       className="fixed inset-x-0 top-0 z-[100] flex flex-col items-center gap-2 p-4 sm:items-end sm:p-6"

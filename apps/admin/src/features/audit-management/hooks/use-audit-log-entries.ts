@@ -135,3 +135,44 @@ export function useAuditLogEntries(initialLimit = PAGE_SIZE): UseAuditLogEntries
     exportCsv,
   };
 }
+
+interface UseUserActivityResult {
+  entries: AuditLogEntry[];
+  loading: boolean;
+  error: string | null;
+  refresh: () => void;
+}
+
+/**
+ * The audit trail rows where this account was the actor (`operatorId`).
+ *
+ * Reuses the audit API's existing operator filter — the same parameter the
+ * Audit Logs page uses through {@link useAuditLogEntries} — so the account
+ * dossier and the audit trail always agree on what happened.
+ */
+export function useUserActivity(operatorId: string | null, limit = 10): UseUserActivityResult {
+  const query = useQuery({
+    queryKey: ["audit-logs", "actor", operatorId, limit],
+    enabled: Boolean(operatorId),
+    queryFn: async () => {
+      const response = await api.get<
+        ApiResponse<AuditLogEntry[]> & { pagination?: AuditLogPagination }
+      >(`/audit-logs?${buildQuery({ operatorId: operatorId ?? undefined }, limit)}`);
+      return response?.data ?? [];
+    },
+    retry: (failureCount, error) => {
+      const code = (error as { error?: { code?: string } })?.error?.code;
+      if (code === "FORBIDDEN") return false;
+      return failureCount < 1;
+    },
+  });
+
+  return {
+    entries: query.data ?? [],
+    loading: query.isPending || query.isFetching,
+    error: query.isError ? auditErrorMessage(query.error) : null,
+    refresh: () => {
+      void query.refetch();
+    },
+  };
+}

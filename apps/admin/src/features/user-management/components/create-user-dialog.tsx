@@ -11,8 +11,8 @@ import {
   FormField,
   Input,
   Select,
-  Spinner,
 } from "@repo/ui";
+import { X } from "lucide-react";
 import { useState } from "react";
 import { type CreateUserPayload, LEADERSHIP_ROLE_SET } from "../hooks/use-users";
 import { MemberPicker, type PickedMember } from "./member-picker";
@@ -92,112 +92,143 @@ export function CreateUserDialog({ open, onOpenChange, onCreate }: CreateUserDia
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-h-[90vh] overflow-y-auto">
-        <DialogHeader>
-          <DialogTitle>Create user account</DialogTitle>
-          <DialogDescription>
-            Credentials are provisioned in the auth system and the account is mirrored locally.
-          </DialogDescription>
-        </DialogHeader>
-
-        <form onSubmit={handleSubmit} className="space-y-4" noValidate>
-          <FormField label="Full name" required>
-            <Input
-              value={name}
-              onChange={(e) => setName(e.target.value)}
-              placeholder="Full name"
-              autoComplete="off"
-            />
-          </FormField>
-
-          <FormField label="Email" required>
-            <Input
-              type="email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              placeholder="name@hitsanat.org"
-              autoComplete="off"
-            />
-          </FormField>
-
-          <FormField
-            label="Temporary password"
-            required
-            helperText="Minimum 8 characters. The user should change it after first sign-in."
-          >
-            <Input
-              type="password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              placeholder="Temporary password"
-              autoComplete="new-password"
-            />
-          </FormField>
-
-          <FormField
-            label="Role"
-            required
-            error={formError?.startsWith("Leadership") ? formError : undefined}
-            helperText={requiresMember ? undefined : "Leadership roles require a member link."}
-          >
-            <Select
-              value={role}
-              onChange={(e) => setRole(e.target.value)}
-              placeholder="Select role"
-            >
-              {ROLE_OPTIONS.map((option) => (
-                <option key={option.value} value={option.value}>
-                  {option.label}
-                </option>
-              ))}
-            </Select>
-          </FormField>
-
-          <FormField
-            label="Linked member"
-            required={requiresMember}
-            helperText={
-              requiresMember
-                ? "Required for leadership roles (BR-007). Search by name or phone."
-                : "Optional — link this account to a registered member."
-            }
-          >
-            <MemberPicker value={member} onChange={setMember} />
-          </FormField>
-
-          {member && (
-            <FormField
-              label="Sub-departments"
-              helperText="Optional — assign this account to one or more sub-departments."
-            >
-              <SubDepartmentPicker
-                value={subDepartmentIds}
-                onChange={setSubDepartmentIds}
-                disabled={submitting}
-              />
-            </FormField>
-          )}
-
-          {formError && !formError.startsWith("Leadership") && (
-            <p role="alert" className="text-sm text-destructive">
-              {formError}
-            </p>
-          )}
-
-          <DialogFooter>
-            <Button
+      <DialogContent
+        showClose={false}
+        className="h-[100dvh] max-h-[100dvh] w-full rounded-none border-0 p-0 sm:h-auto sm:max-h-[90vh] sm:w-full sm:max-w-lg sm:rounded-xl sm:border sm:p-6"
+      >
+        <button
+          type="button"
+          onClick={() => onOpenChange(false)}
+          aria-label="Close"
+          className="absolute right-4 top-4 hidden h-6 w-6 place-items-center rounded-sm text-muted-foreground opacity-70 transition-opacity hover:opacity-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring sm:grid"
+        >
+          <X className="h-4 w-4" aria-hidden="true" />
+        </button>
+        <div className="flex h-full flex-col">
+          <header className="flex shrink-0 items-center gap-2 border-b border-white/10 bg-[#5F0113] px-4 py-3 text-white sm:hidden">
+            <button
               type="button"
-              variant="outline"
               onClick={() => onOpenChange(false)}
-              disabled={submitting}
+              aria-label="Cancel"
+              className="-ml-2 grid h-10 w-10 place-items-center rounded-lg text-white/90 hover:bg-white/10 hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/40"
             >
-              Cancel
-            </Button>
-            <Button type="submit" loading={submitting}>
-              Create account
-            </Button>
-          </DialogFooter>
-        </form>
+              <X className="h-5 w-5" aria-hidden="true" />
+            </button>
+            <span className="text-base font-semibold">Create User</span>
+          </header>
+
+          <div className="min-h-0 flex-1 overflow-y-auto p-5 sm:p-0">
+            <DialogHeader className="hidden sm:flex">
+              <DialogTitle>Create User</DialogTitle>
+              <DialogDescription>
+                Credentials are provisioned in the auth system and the account is mirrored locally.
+              </DialogDescription>
+            </DialogHeader>
+
+            <p className="mb-4 text-sm text-muted-foreground sm:hidden">
+              Credentials are provisioned in the auth system and the account is mirrored locally.
+            </p>
+
+            <form onSubmit={handleSubmit} className="space-y-4" noValidate>
+              <FormField label="Full name" required>
+                <Input
+                  value={name}
+                  onChange={(e) => setName(e.target.value)}
+                  placeholder="Full name"
+                  autoComplete="off"
+                />
+              </FormField>
+
+              <FormField label="Email" required>
+                <Input
+                  type="email"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  placeholder="name@hitsanat.org"
+                  autoComplete="off"
+                />
+              </FormField>
+
+              <FormField
+                label="Temporary password"
+                required
+                helperText="Minimum 8 characters. The user should change it after first sign-in."
+              >
+                <Input
+                  type="password"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  placeholder="Temporary password"
+                  autoComplete="new-password"
+                />
+              </FormField>
+
+              <FormField
+                label="Role"
+                required
+                error={formError?.startsWith("Leadership") ? formError : undefined}
+                helperText={requiresMember ? undefined : "Leadership roles require a member link."}
+              >
+                <Select
+                  value={role}
+                  onChange={(e) => setRole(e.target.value)}
+                  placeholder="Select role"
+                >
+                  {ROLE_OPTIONS.map((option) => (
+                    <option key={option.value} value={option.value}>
+                      {option.label}
+                    </option>
+                  ))}
+                </Select>
+              </FormField>
+
+              <FormField
+                label="Linked member"
+                required={requiresMember}
+                helperText={
+                  requiresMember
+                    ? "Required for leadership roles (BR-007). Search by name or phone."
+                    : "Optional — link this account to a registered member."
+                }
+              >
+                <MemberPicker value={member} onChange={setMember} />
+              </FormField>
+
+              {member && (
+                <FormField
+                  label="Sub-departments"
+                  helperText="Optional — assign this account to one or more sub-departments."
+                >
+                  <SubDepartmentPicker
+                    value={subDepartmentIds}
+                    onChange={setSubDepartmentIds}
+                    disabled={submitting}
+                  />
+                </FormField>
+              )}
+
+              {formError && !formError.startsWith("Leadership") && (
+                <p role="alert" className="text-sm text-destructive">
+                  {formError}
+                </p>
+              )}
+
+              <DialogFooter>
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={() => onOpenChange(false)}
+                  disabled={submitting}
+                >
+                  Cancel
+                </Button>
+                <Button type="submit" loading={submitting} className="sm:w-auto">
+                  Create User
+                </Button>
+              </DialogFooter>
+            </form>
+          </div>
+        </div>
       </DialogContent>
     </Dialog>
   );

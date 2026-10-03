@@ -1,6 +1,6 @@
 "use client";
 
-import { Button, Input } from "@repo/ui";
+import { Button, Input, useToast } from "@repo/ui";
 import { cn } from "@repo/ui/lib/utils";
 import {
   Bell,
@@ -170,6 +170,7 @@ function PasswordInput({
 export default function SettingsPage() {
   const { locale, setLocale, t } = useI18n();
   const router = useRouter();
+  const { toast } = useToast();
 
   const [userId, setUserId] = React.useState<string>("");
   const [profileName, setProfileName] = React.useState("");
@@ -188,13 +189,8 @@ export default function SettingsPage() {
   const [twoFactor, setTwoFactor] = React.useState(false);
   const [sessionTimeout, setSessionTimeout] = React.useState("30");
 
-  const [notice, setNotice] = React.useState<{ type: "success" | "error"; message: string } | null>(
-    null
-  );
-
   const showNotice = (type: "success" | "error", message: string) => {
-    setNotice({ type, message });
-    setTimeout(() => setNotice(null), 3000);
+    toast(message, type);
   };
 
   // Load current user profile
@@ -278,19 +274,6 @@ export default function SettingsPage() {
               : "Manage your profile, preferences, and security settings."}
           </p>
         </header>
-
-        {notice && (
-          <div
-            className="mb-4 rounded-md border px-3 py-2 text-[12px] font-medium"
-            style={{
-              borderColor: notice.type === "success" ? T.success : T.destructive,
-              backgroundColor: notice.type === "success" ? T.successLight : T.destructiveLight,
-              color: notice.type === "success" ? T.success : T.destructive,
-            }}
-          >
-            {notice.message}
-          </div>
-        )}
 
         <div className="space-y-4">
           {/* Profile */}

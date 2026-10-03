@@ -183,6 +183,7 @@ export function useUsers(initialFilters: UserFilters = {}): UseUsersResult {
     mutationFn: async (userId: string) => {
       await api.post(`/users/${userId}/revoke-sessions`, {});
     },
+    onSuccess: () => invalidateUsers(queryClient),
   });
 
   const createUser = useCallback(
@@ -270,11 +271,146 @@ export function useUsers(initialFilters: UserFilters = {}): UseUsersResult {
   };
 }
 
+export interface UserMutations {
+  /** PE-02 / FR-13.7: PATCH /users/:id */
+  updateUser: (payload: UpdateUserPayload) => Promise<void>;
+  /** BR-008: POST /users/:id/reset-password */
+  resetPassword: (newPassword: string) => Promise<void>;
+  /** FR-13.6: POST /users/:id/deactivate */
+  deactivate: () => Promise<void>;
+  /** PE-01: POST /users/:id/reactivate */
+  reactivate: () => Promise<void>;
+  /** PE-08: POST /users/:id/revoke-sessions */
+  revokeSessions: () => Promise<void>;
+  /** Refresh the account record (and the directory list) in place. */
+  invalidate: () => Promise<void>;
+}
+
+/**
+ * Mutations scoped to a single account record.
+ *
+ * Every success path invalidates the `["users"]` key so both the
+ * `useUser(id)` detail query and the directory list refresh together —
+ * status, role and available actions stay in sync after each action.
+ */
+export function useUserMutations(userId: string | null): UserMutations {
+  const queryClient = useQueryClient();
+
+  const invalidate = useCallback(
+    () => queryClient.invalidateQueries({ queryKey: ["users"] }),
+    [queryClient]
+  );
+
+  const updateMutation = useMutation({
+    mutationFn: async (payload: UpdateUserPayload) => {
+      if (!userId) throw new Error("No user selected.");
+      await api.patch(`/users/${userId}`, payload);
+    },
+    onSuccess: () => {
+      void invalidate();
+    },
+  });
+
+  const resetPasswordMutation = useMutation({
+    mutationFn: async (newPassword: string) => {
+      if (!userId) throw new Error("No user selected.");
+      await api.post(`/users/${userId}/reset-password`, { newPassword });
+    },
+  });
+
+  const deactivateMutation = useMutation({
+    mutationFn: async () => {
+      if (!userId) throw new Error("No user selected.");
+      await api.post(`/users/${userId}/deactivate`, {});
+    },
+    onSuccess: () => {
+      void invalidate();
+    },
+  });
+
+  const reactivateMutation = useMutation({
+    mutationFn: async () => {
+      if (!userId) throw new Error("No user selected.");
+      await api.post(`/users/${userId}/reactivate`, {});
+    },
+    onSuccess: () => {
+      void invalidate();
+    },
+  });
+
+  const revokeSessionsMutation = useMutation({
+    mutationFn: async () => {
+      if (!userId) throw new Error("No user selected.");
+      await api.post(`/users/${userId}/revoke-sessions`, {});
+    },
+    onSuccess: () => {
+      void invalidate();
+    },
+  });
+
+  return {
+    updateUser: async (payload) => {
+      try {
+        await updateMutation.mutateAsync(payload);
+      } catch (err) {
+        throw new Error(userActionErrorMessage(err));
+      }
+    },
+    resetPassword: async (newPassword) => {
+      try {
+        await resetPasswordMutation.mutateAsync(newPassword);
+      } catch (err) {
+        throw new Error(userActionErrorMessage(err));
+      }
+    },
+    deactivate: async () => {
+      try {
+        await deactivateMutation.mutateAsync();
+      } catch (err) {
+        throw new Error(userActionErrorMessage(err));
+      }
+    },
+    reactivate: async () => {
+      try {
+        await reactivateMutation.mutateAsync();
+      } catch (err) {
+        throw new Error(userActionErrorMessage(err));
+      }
+    },
+    revokeSessions: async () => {
+      try {
+        await revokeSessionsMutation.mutateAsync();
+      } catch (err) {
+        throw new Error(userActionErrorMessage(err));
+      }
+    },
+    invalidate,
+  };
+}
+
 interface UseUserResult {
   user: ManagedUser | null;
   loading: boolean;
   error: string | null;
+  /** True when the API answered `NOT_FOUND` — drives the dedicated
+   *  "User not found" state instead of the generic error banner. */
+  notFound: boolean;
   refresh: () => void;
+}
+
+/**
+ * Detects the PE-02 "not found" answer for `GET /users/:id`.
+ *
+ * The API throws the parsed failure body, so we accept every shape that
+ * travels over the wire: `{ status: 404 }`, `{ error: { code } }`, or a
+ * RFC-9457 `type` URL.
+ */
+function isNotFound(err: unknown): boolean {
+  if (!err || typeof err !== "object") return false;
+  const record = err as { status?: unknown; type?: unknown; error?: { code?: unknown } };
+  if (record.status === 404) return true;
+  if (record.error?.code === "NOT_FOUND") return true;
+  return typeof record.type === "string" && record.type.includes("not-found");
 }
 
 export function useUser(id: string | null): UseUserResult {
@@ -288,15 +424,25 @@ export function useUser(id: string | null): UseUserResult {
   });
 
   if (!id) {
-    return { user: null, loading: false, error: "No user ID provided.", refresh: () => {} };
+    return {
+      user: null,
+      loading: false,
+      error: "No user ID provided.",
+      notFound: false,
+      refresh: () => {},
+    };
   }
+
+  const failed = query.isError;
 
   return {
     user: query.data ?? null,
-    loading: query.isPending || query.isFetching,
-    error: query.isError
-      ? queryErrorMessage(query.error, userActionErrorMessage(query.error))
-      : null,
+    // Only report loading before first paint — a background refetch (e.g.
+    // after an administrative action) must not flash the skeleton over
+    // data that is already on screen.
+    loading: query.isPending || (query.isFetching && !query.data),
+    error: failed ? queryErrorMessage(query.error, userActionErrorMessage(query.error)) : null,
+    notFound: failed && isNotFound(query.error),
     refresh: () => {
       void query.refetch();
     },
