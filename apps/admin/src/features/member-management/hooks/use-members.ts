@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { keepPreviousData, useQuery } from "@tanstack/react-query";
-import { type PaginatedResponse, api } from "@/infrastructure/api/client";
+import { type ApiResponse, type PaginatedResponse, api } from "@/infrastructure/api/client";
 import { queryErrorMessage } from "@/infrastructure/query/query-errors";
 import type { Member, MemberFilters } from "@/domains/definitions";
 
@@ -48,5 +48,34 @@ export function useMembers(initialFilters: MemberFilters = {}): UseMembersResult
     refresh: () => {
       void query.refetch();
     },
+  };
+}
+
+interface UseMemberResult {
+  member: Member | null;
+  loading: boolean;
+  error: string | null;
+}
+
+/**
+ * Resolves a single member by id via the existing `GET /members/:id`
+ * endpoint. Used to show the human-readable name behind a user account's
+ * `memberId` link. Failures are surfaced but never block the caller — the
+ * user detail page degrades to showing the raw member id.
+ */
+export function useMember(id: string | null): UseMemberResult {
+  const query = useQuery({
+    queryKey: ["member", id],
+    enabled: Boolean(id),
+    queryFn: async () => {
+      const response = await api.get<ApiResponse<Member>>(`/members/${id}`);
+      return response.data;
+    },
+  });
+
+  return {
+    member: query.data ?? null,
+    loading: query.isPending,
+    error: query.isError ? queryErrorMessage(query.error, "Failed to fetch member") : null,
   };
 }

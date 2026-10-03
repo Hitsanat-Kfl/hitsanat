@@ -23,14 +23,7 @@ import {
   type PickedMember,
 } from "./member-picker";
 import { SubDepartmentPicker } from "./sub-department-picker";
-
-const ROLE_OPTIONS = [
-  { value: "SECRETARY", label: "Secretary" },
-  { value: "SUB_CHAIRPERSON", label: "Sub-Chairperson" },
-  { value: "CHAIRPERSON", label: "Chairperson" },
-  { value: "SUPER_ADMIN", label: "Super Admin" },
-  { value: "MEMBER_REGULAR", label: "Regular Member" },
-];
+import { firstEditUserError, ROLE_OPTIONS, validateEditUser } from "./user-shared";
 
 interface EditUserDialogProps {
   user: ManagedUser;
@@ -90,12 +83,9 @@ export function EditUserDialog({ user, onOpenChange, onUpdate }: EditUserDialogP
     event.preventDefault();
     setFormError(null);
 
-    if (!name.trim() || !email.trim()) {
-      setFormError("Name and email are required.");
-      return;
-    }
-    if (requiresMember && !member) {
-      setFormError("Leadership roles require a member link (BR-007).");
+    const validationError = firstEditUserError(validateEditUser({ name, email, role, member }));
+    if (validationError) {
+      setFormError(validationError);
       return;
     }
 
@@ -121,7 +111,7 @@ export function EditUserDialog({ user, onOpenChange, onUpdate }: EditUserDialogP
     <Dialog open onOpenChange={onOpenChange}>
       <DialogContent className="max-h-[90vh] overflow-y-auto">
         <DialogHeader>
-          <DialogTitle>Edit user account</DialogTitle>
+          <DialogTitle>Edit User</DialogTitle>
           <DialogDescription>
             Changes to role and member link are re-validated against BR-007 and BR-009.
           </DialogDescription>
@@ -207,7 +197,7 @@ export function EditUserDialog({ user, onOpenChange, onUpdate }: EditUserDialogP
               Cancel
             </Button>
             <Button type="submit" loading={submitting}>
-              Save changes
+              Save Changes
             </Button>
           </DialogFooter>
         </form>

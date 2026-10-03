@@ -1,445 +1,248 @@
 "use client";
 
-import { Avatar, Badge, Button, Skeleton, StatusBadge } from "@repo/ui";
-import { ArrowLeft, Key, Pencil, RefreshCw, ShieldOff, UserX } from "lucide-react";
+import { canManageAccounts } from "@/authorization";
+import { useAuthUser } from "@/features/authentication";
+import { useMember } from "@/features/member-management/hooks/use-members";
+import { api } from "@/infrastructure/api/client";
+import { PageShell } from "@/widgets/shell";
+import { AlertDialog, EmptyState, ErrorState, useToast } from "@repo/ui";
+import { ArrowLeft, ArrowRightLeft, KeyRound, RefreshCw, ShieldOff, UserX } from "lucide-react";
 import Link from "next/link";
 import { useParams } from "next/navigation";
-import { useState } from "react";
-import { AlertBanner, PageShell } from "@/widgets/shell";
-import { EditUserDialog } from "./edit-user-dialog";
-import { HandoverDialog } from "./handover-dialog";
-import { ResetPasswordDialog } from "./reset-password-dialog";
-import { TemporaryGrantsSection } from "./temporary-grants";
+import { type ReactNode, useState } from "react";
 import {
   LEADERSHIP_ROLE_SET,
   type ManagedUser,
   type UpdateUserPayload,
   useUser,
+  useUserMutations,
 } from "../hooks/use-users";
+import { EditUserDialog } from "./edit-user-dialog";
+import { HandoverDialog } from "./handover-dialog";
+import { ResetPasswordDialog } from "./reset-password-dialog";
+import { TemporaryGrantsSection } from "./temporary-grants";
+import { UserAdminActions, buildAdminActions } from "./user-admin-actions";
+import {
+  DetailSkeleton,
+  type OverflowItem,
+  OverflowMenu,
+  PageHeading,
+  PageTopBar,
+  UserProfileHeader,
+} from "./user-detail-identity";
+import { UserDetailsTabs } from "./user-details-tabs";
+import { UserQuickInfo } from "./user-quick-info";
 
-function formatDate(value: string): string {
-  const parsed = new Date(value);
-  return Number.isNaN(parsed.getTime())
-    ? "—"
-    : parsed.toLocaleDateString("en-ET", {
-        month: "short",
-        day: "numeric",
-        year: "numeric",
-      });
-}
+const PAGE_DESCRIPTION =
+  "View and manage user information, account status and administrative actions.";
 
-function formatDateTime(value: string): string {
-  const parsed = new Date(value);
-  return Number.isNaN(parsed.getTime())
-    ? "—"
-    : parsed.toLocaleDateString("en-ET", {
-        month: "long",
-        day: "numeric",
-        year: "numeric",
-      });
-}
-
-function InfoRow({ label, children }: { label: string; children: React.ReactNode }) {
+/** Escape hatch back to the directory — a plain link, not a nested button. */
+function BackToAccounts() {
   return (
-    <div className="py-3 first:pt-0 last:pb-0">
-      <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">{label}</p>
-      <div className="mt-1">{children}</div>
-    </div>
+    <Link
+      href="/users"
+      className="inline-flex min-h-[44px] items-center gap-2 rounded-md border border-input bg-background px-4 text-sm font-medium text-foreground shadow-sm transition-colors hover:bg-accent hover:text-accent-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background"
+    >
+      <ArrowLeft className="h-4 w-4" aria-hidden="true" />
+      Back to User Accounts
+    </Link>
   );
 }
 
-function DetailSkeleton() {
+function RecordShell({ children }: { children: ReactNode }) {
   return (
-    <div className="space-y-6">
-      {/* Desktop */}
-      <div className="hidden lg:grid lg:grid-cols-12 lg:gap-6">
-        <div className="col-span-3 space-y-4">
-          <Skeleton className="h-20 w-20 rounded-full" />
-          <Skeleton className="h-5 w-32" />
-          <Skeleton className="h-4 w-40" />
-          <Skeleton className="h-5 w-16" />
-          <Skeleton className="h-4 w-24" />
-          <div className="border-t" />
-          <Skeleton className="h-3 w-20" />
-          <Skeleton className="h-4 w-24" />
-          <Skeleton className="h-3 w-28" />
-          <Skeleton className="h-4 w-20" />
-        </div>
-        <div className="col-span-9 space-y-6">
-          {[0, 1, 2, 3].map((i) => (
-            <div key={i} className="space-y-3">
-              <Skeleton className="h-4 w-32" />
-              <Skeleton className="h-4 w-48" />
-              <Skeleton className="h-4 w-36" />
-              {i < 3 && <div className="border-t" />}
-            </div>
-          ))}
-        </div>
-      </div>
-      {/* Mobile */}
-      <div className="space-y-4 lg:hidden">
-        <div className="flex flex-col items-center space-y-3 py-4">
-          <Skeleton className="h-20 w-20 rounded-full" />
-          <Skeleton className="h-5 w-32" />
-          <Skeleton className="h-4 w-40" />
-          <Skeleton className="h-5 w-16" />
-          <Skeleton className="h-4 w-24" />
-        </div>
-        {[0, 1, 2, 3].map((i) => (
-          <div key={i} className="space-y-3 rounded-md border p-4">
-            <Skeleton className="h-4 w-32" />
-            <Skeleton className="h-4 w-48" />
-            <Skeleton className="h-4 w-36" />
-          </div>
-        ))}
-      </div>
-    </div>
+    <PageShell>
+      <div className="px-0.5 md:px-2 lg:px-3">{children}</div>
+    </PageShell>
   );
 }
 
-function UserDetail({ user }: { user: ManagedUser }) {
+export default function UserDetailPage() {
+  const params = useParams();
+  const id = (params?.id as string | undefined) ?? null;
+  const { user, loading, error, notFound, refresh } = useUser(id);
+  const authUser = useAuthUser();
+  const canManage = canManageAccounts(authUser?.globalRoles ?? []);
+  const { toast } = useToast();
+
+  const { member, loading: memberLoading, error: memberError } = useMember(user?.memberId ?? null);
+  const mutations = useUserMutations(user?.id ?? null);
+
   const [editOpen, setEditOpen] = useState(false);
   const [resetOpen, setResetOpen] = useState(false);
   const [handoverOpen, setHandoverOpen] = useState(false);
+  const [revokeOpen, setRevokeOpen] = useState(false);
   const [deactivateTarget, setDeactivateTarget] = useState<ManagedUser | null>(null);
-  const [notice, setNotice] = useState<string | null>(null);
 
-  const deactivated = user.status === "DEACTIVATED";
-  const isLeadership = LEADERSHIP_ROLE_SET.has(user.role);
-  const subDept = user.subDepartments.length > 0 ? user.subDepartments[0] : null;
+  const openEdit = () => setEditOpen(true);
+  const openReset = () => setResetOpen(true);
+  const openHandover = () => setHandoverOpen(true);
+  const openRevoke = () => setRevokeOpen(true);
 
-  const handleUpdate = async (_userId: string, _payload: UpdateUserPayload) => {
-    setNotice("Account updated.");
-    setEditOpen(false);
+  // The dialogs catch these rejections and surface them inline, so the
+  // handlers only own the success path.
+  const handleUpdate = async (_userId: string, payload: UpdateUserPayload) => {
+    await mutations.updateUser(payload);
+    toast("Account updated.", "success");
   };
 
-  const handleResetPassword = async (_newPassword: string) => {
-    setNotice(`Password reset for ${user.email}.`);
-    setResetOpen(false);
+  const handleResetPassword = async (newPassword: string) => {
+    await mutations.resetPassword(newPassword);
+    toast(`Password reset for ${user?.email ?? "this account"}.`, "success");
+  };
+
+  const handleRevokeSessions = async () => {
+    try {
+      await mutations.revokeSessions();
+      toast(`All live sessions for ${user?.email ?? "this account"} were revoked.`, "success");
+    } catch (err) {
+      toast(err instanceof Error ? err.message : "Session revocation failed.", "error");
+    }
   };
 
   const handleDeactivate = async () => {
     try {
-      const { api: apiClient } = await import("@/infrastructure/api/client");
-      await apiClient.post(`/users/${user.id}/deactivate`, {});
-      setNotice(`Account deactivated — ${user.email} can no longer sign in.`);
+      await mutations.deactivate();
+      toast(
+        `Account deactivated — ${user?.email ?? "this account"} can no longer sign in.`,
+        "success"
+      );
       setDeactivateTarget(null);
     } catch (err) {
-      setNotice(err instanceof Error ? err.message : "Deactivation failed.");
+      toast(err instanceof Error ? err.message : "Deactivation failed.", "error");
     }
   };
 
   const handleReactivate = async () => {
     try {
-      const { api: apiClient } = await import("@/infrastructure/api/client");
-      await apiClient.post(`/users/${user.id}/reactivate`, {});
-      setNotice(`Account reactivated — ${user.email} can sign in again.`);
+      await mutations.reactivate();
+      toast(`Account reactivated — ${user?.email ?? "this account"} can sign in again.`, "success");
     } catch (err) {
-      setNotice(err instanceof Error ? err.message : "Reactivation failed.");
+      toast(err instanceof Error ? err.message : "Reactivation failed.", "error");
     }
   };
 
-  const handleRevokeSessions = async () => {
-    try {
-      const { api: apiClient } = await import("@/infrastructure/api/client");
-      await apiClient.post(`/users/${user.id}/revoke-sessions`, {});
-      setNotice(`All live sessions for ${user.email} were revoked.`);
-    } catch (err) {
-      setNotice(err instanceof Error ? err.message : "Session revocation failed.");
-    }
-  };
+  const overflowItems: OverflowItem[] = user
+    ? [
+        { label: "Reset Password", icon: KeyRound, onClick: openReset },
+        ...(LEADERSHIP_ROLE_SET.has(user.role)
+          ? [{ label: "Transfer Leadership", icon: ArrowRightLeft, onClick: openHandover }]
+          : []),
+        { label: "Revoke Sessions", icon: ShieldOff, onClick: openRevoke },
+        user.status === "DEACTIVATED"
+          ? { label: "Reactivate", icon: RefreshCw, onClick: () => void handleReactivate() }
+          : {
+              label: "Deactivate",
+              icon: UserX,
+              destructive: true,
+              onClick: () => setDeactivateTarget(user),
+            },
+      ]
+    : [];
+
+  const overflow =
+    canManage && overflowItems.length > 0 ? <OverflowMenu items={overflowItems} /> : undefined;
+
+  if (loading) {
+    return (
+      <RecordShell>
+        <PageTopBar />
+        <PageHeading description={PAGE_DESCRIPTION} />
+        <DetailSkeleton />
+      </RecordShell>
+    );
+  }
+
+  if (notFound) {
+    return (
+      <RecordShell>
+        <PageTopBar />
+        <PageHeading description={PAGE_DESCRIPTION} />
+        <div className="mx-auto max-w-xl py-4">
+          <EmptyState
+            title="User Not Found"
+            description="The requested account could not be found."
+            action={<BackToAccounts />}
+          />
+        </div>
+      </RecordShell>
+    );
+  }
+
+  if (error || !user) {
+    return (
+      <RecordShell>
+        <PageTopBar />
+        <PageHeading description={PAGE_DESCRIPTION} />
+        <div className="mx-auto max-w-xl py-4">
+          <ErrorState
+            title="Unable to load user"
+            message={error ?? "The requested user account is unavailable."}
+            onRetry={refresh}
+            retryText="Try Again"
+          />
+          <div className="flex justify-center">
+            <BackToAccounts />
+          </div>
+        </div>
+      </RecordShell>
+    );
+  }
+
+  const actions = buildAdminActions({
+    user,
+    onEdit: openEdit,
+    onResetPassword: openReset,
+    onHandover: openHandover,
+    onRevokeSessions: openRevoke,
+    onDeactivate: () => setDeactivateTarget(user),
+    onReactivate: () => void handleReactivate(),
+  });
 
   return (
-    <PageShell
-      breadcrumbs={[
-        { label: "Home", href: "/" },
-        { label: "Users", href: "/users" },
-        { label: user.name },
-      ]}
-      title="User Details"
-      description="Manage account information, access and security"
-      actions={
-        <Button onClick={() => setEditOpen(true)}>
-          <Pencil className="h-4 w-4" aria-hidden="true" />
-          Edit User
-        </Button>
-      }
-    >
-      <div className="space-y-4">
-        {notice && (
-          <output className="flex items-center justify-between rounded-md bg-emerald-50 p-3 text-sm text-emerald-800 dark:bg-emerald-950 dark:text-emerald-200">
-            <span>{notice}</span>
-            <button
-              type="button"
-              onClick={() => setNotice(null)}
-              className="ml-3 shrink-0 underline underline-offset-2"
-              aria-label="Dismiss notification"
-            >
-              Dismiss
-            </button>
-          </output>
+    <RecordShell>
+      <PageTopBar overflow={overflow} />
+      <PageHeading description={PAGE_DESCRIPTION} />
+
+      <div className="grid grid-cols-1 gap-4 md:gap-5 lg:grid-cols-12 lg:gap-5">
+        <div className="lg:col-span-7 xl:col-span-4">
+          <UserProfileHeader
+            user={user}
+            canManage={canManage}
+            onEdit={openEdit}
+            overflow={overflow}
+          />
+        </div>
+
+        <div className="lg:col-span-5 xl:col-span-3">
+          <UserQuickInfo user={user} />
+        </div>
+
+        {canManage && (
+          <div className="lg:col-span-12 xl:col-span-4 xl:col-start-9">
+            <UserAdminActions actions={actions} />
+          </div>
         )}
+      </div>
 
-        {/* Mobile layout */}
-        <div className="space-y-4 lg:hidden">
-          {/* Mobile header */}
-          <div className="flex flex-col items-center space-y-3 py-4">
-            <Avatar
-              src={user.image ?? undefined}
-              name={user.name}
-              size="xl"
-              showStatus
-              status={deactivated ? "offline" : "online"}
-            />
-            <div className="text-center">
-              <p className="text-lg font-semibold text-foreground">{user.name}</p>
-              <p className="text-sm text-muted-foreground">{user.email}</p>
-            </div>
-            <div className="flex items-center gap-2">
-              <StatusBadge status={deactivated ? "inactive" : "active"} size="sm" />
-              <span className="text-sm text-muted-foreground">
-                {user.role.replaceAll("_", " ")}
-                {subDept && ` · ${subDept.code}`}
-              </span>
-            </div>
-          </div>
+      <UserDetailsTabs
+        user={user}
+        member={member}
+        memberLoading={memberLoading}
+        memberError={memberError}
+        canManage={canManage}
+        onEdit={openEdit}
+        onLinkMember={openEdit}
+      />
 
-          {/* Account Information */}
-          <Section title="Account Information">
-            <InfoRow label="Name">{user.name}</InfoRow>
-            <InfoRow label="Email">{user.email}</InfoRow>
-            <InfoRow label="Email Verification">
-              {user.emailVerified ? (
-                <span className="flex items-center gap-1 text-sm text-foreground">
-                  <span className="text-emerald-600">✓</span> Verified
-                </span>
-              ) : (
-                <span className="text-sm text-muted-foreground">Not verified</span>
-              )}
-            </InfoRow>
-            <InfoRow label="Created">{formatDateTime(user.createdAt)}</InfoRow>
-          </Section>
-
-          {/* Role & Organization */}
-          <Section title="Role & Organization">
-            <InfoRow label="Role">
-              <Badge variant="secondary">{user.role.replaceAll("_", " ")}</Badge>
-            </InfoRow>
-            {subDept && (
-              <InfoRow label="Sub-department">
-                <span className="text-sm text-foreground">{subDept.code}</span>
-              </InfoRow>
-            )}
-            {user.memberId && (
-              <InfoRow label="Linked Member">
-                <span className="text-sm text-foreground">
-                  {user.name} · {user.memberId.slice(0, 8)}…
-                </span>
-              </InfoRow>
-            )}
-          </Section>
-
-          {/* Security */}
-          <Section title="Security">
-            <InfoRow label="Password">
-              <div className="flex items-center justify-between">
-                <span className="text-sm tracking-widest text-muted-foreground">••••••••••••</span>
-                <Button variant="ghost" size="sm" onClick={() => setResetOpen(true)}>
-                  <Key className="h-4 w-4" aria-hidden="true" />
-                  Reset Password
-                </Button>
-              </div>
-            </InfoRow>
-            <InfoRow label="Sessions">
-              <div className="flex items-center justify-between">
-                <span className="text-sm text-muted-foreground">Active sessions</span>
-                <Button variant="ghost" size="sm" onClick={() => void handleRevokeSessions()}>
-                  <ShieldOff className="h-4 w-4" aria-hidden="true" />
-                  Revoke Sessions
-                </Button>
-              </div>
-            </InfoRow>
-          </Section>
-
-          {/* Administrative Actions */}
-          <Section title="Administrative Actions">
-            <div className="space-y-3">
-              {isLeadership && (
-                <Button
-                  variant="outline"
-                  className="w-full justify-start"
-                  onClick={() => setHandoverOpen(true)}
-                >
-                  <UserX className="h-4 w-4" aria-hidden="true" />
-                  Handover Leadership
-                </Button>
-              )}
-              {deactivated ? (
-                <Button
-                  variant="outline"
-                  className="w-full justify-start"
-                  onClick={() => void handleReactivate()}
-                >
-                  <RefreshCw className="h-4 w-4" aria-hidden="true" />
-                  Reactivate Account
-                </Button>
-              ) : (
-                <Button
-                  variant="outline"
-                  className="w-full justify-start text-destructive hover:text-destructive"
-                  onClick={() => setDeactivateTarget(user)}
-                >
-                  <ShieldOff className="h-4 w-4" aria-hidden="true" />
-                  Deactivate Account
-                </Button>
-              )}
-            </div>
-          </Section>
-        </div>
-
-        {/* Desktop layout */}
-        <div className="hidden lg:grid lg:grid-cols-12 lg:gap-6">
-          {/* Left: User Profile — 3 columns */}
-          <div className="col-span-3">
-            <h2 className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
-              User Profile
-            </h2>
-            <div className="mt-3 rounded-md border bg-white p-4">
-              <div className="flex flex-col items-center space-y-3">
-                <Avatar
-                  src={user.image ?? undefined}
-                  name={user.name}
-                  size="xl"
-                  showStatus
-                  status={deactivated ? "offline" : "online"}
-                />
-                <div className="text-center">
-                  <p className="text-base font-semibold text-foreground">{user.name}</p>
-                  <p className="text-sm text-muted-foreground">{user.email}</p>
-                </div>
-                <div className="flex items-center gap-2">
-                  <StatusBadge status={deactivated ? "inactive" : "active"} size="sm" />
-                </div>
-                <p className="text-sm text-muted-foreground">{user.role.replaceAll("_", " ")}</p>
-                {subDept && <p className="text-sm text-muted-foreground">{subDept.code}</p>}
-              </div>
-
-              <div className="mt-4 border-t pt-4 space-y-3">
-                {user.memberId && (
-                  <div>
-                    <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
-                      Member ID
-                    </p>
-                    <p className="mt-0.5 text-sm text-foreground">{user.memberId.slice(0, 8)}…</p>
-                  </div>
-                )}
-                <div>
-                  <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
-                    Account Created
-                  </p>
-                  <p className="mt-0.5 text-sm text-foreground">{formatDate(user.createdAt)}</p>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          {/* Right: Detail sections — 9 columns */}
-          <div className="col-span-9 space-y-6">
-            {/* Account Information */}
-            <Section title="Account Information">
-              <InfoRow label="Name">{user.name}</InfoRow>
-              <InfoRow label="Email">{user.email}</InfoRow>
-              <InfoRow label="Email Verified">
-                {user.emailVerified ? (
-                  <span className="flex items-center gap-1 text-sm text-foreground">
-                    <span className="text-emerald-600">✓</span> Verified
-                  </span>
-                ) : (
-                  <span className="text-sm text-muted-foreground">Not verified</span>
-                )}
-              </InfoRow>
-              <InfoRow label="Created">{formatDateTime(user.createdAt)}</InfoRow>
-            </Section>
-
-            {/* Role & Organization */}
-            <Section title="Role & Organization">
-              <InfoRow label="Role">
-                <Badge variant="secondary">{user.role.replaceAll("_", " ")}</Badge>
-              </InfoRow>
-              {subDept && (
-                <InfoRow label="Sub-departments">
-                  <Badge variant="outline">{subDept.code}</Badge>
-                </InfoRow>
-              )}
-              {user.memberId && (
-                <InfoRow label="Linked Member">
-                  <div>
-                    <p className="text-sm text-foreground">{user.name}</p>
-                    <p className="text-xs text-muted-foreground">{user.memberId.slice(0, 8)}…</p>
-                  </div>
-                </InfoRow>
-              )}
-            </Section>
-
-            {/* Security */}
-            <Section title="Security">
-              <InfoRow label="Password">
-                <div className="flex items-center justify-between">
-                  <span className="text-sm tracking-widest text-muted-foreground">
-                    ••••••••••••
-                  </span>
-                  <Button variant="ghost" size="sm" onClick={() => setResetOpen(true)}>
-                    <Key className="h-4 w-4" aria-hidden="true" />
-                    Reset Password
-                  </Button>
-                </div>
-              </InfoRow>
-              <InfoRow label="Active Sessions">
-                <div className="flex items-center justify-between">
-                  <span className="text-sm text-muted-foreground">—</span>
-                  <Button variant="ghost" size="sm" onClick={() => void handleRevokeSessions()}>
-                    <ShieldOff className="h-4 w-4" aria-hidden="true" />
-                    Revoke Sessions
-                  </Button>
-                </div>
-              </InfoRow>
-            </Section>
-
-            {/* Administrative Actions */}
-            <Section title="Administrative Actions">
-              <div className="flex flex-wrap gap-3">
-                {isLeadership && (
-                  <Button variant="outline" onClick={() => setHandoverOpen(true)}>
-                    <UserX className="h-4 w-4" aria-hidden="true" />
-                    Handover Leadership
-                  </Button>
-                )}
-                {deactivated ? (
-                  <Button variant="outline" onClick={() => void handleReactivate()}>
-                    <RefreshCw className="h-4 w-4" aria-hidden="true" />
-                    Reactivate Account
-                  </Button>
-                ) : (
-                  <Button
-                    variant="outline"
-                    className="text-destructive hover:text-destructive"
-                    onClick={() => setDeactivateTarget(user)}
-                  >
-                    <ShieldOff className="h-4 w-4" aria-hidden="true" />
-                    Deactivate Account
-                  </Button>
-                )}
-              </div>
-            </Section>
-          </div>
-        </div>
-
-        {/* BR-035: temporary grants — full width, Super Admin only (renders null otherwise). */}
+      {/* BR-035: temporary grants — full width, Super Admin only (null otherwise). */}
+      <div className="mt-4 md:mt-5">
         <TemporaryGrantsSection userId={user.id} />
       </div>
 
-      {/* Dialogs */}
-      <EditUserDialog user={user} onOpenChange={setEditOpen} onUpdate={handleUpdate} />
+      {editOpen && (
+        <EditUserDialog user={user} onOpenChange={setEditOpen} onUpdate={handleUpdate} />
+      )}
 
       {resetOpen && (
         <ResetPasswordDialog
@@ -458,126 +261,51 @@ function UserDetail({ user }: { user: ManagedUser }) {
             if (!open) setHandoverOpen(false);
           }}
           onCreateSuccessor={async (payload) => {
-            const { api: apiClient } = await import("@/infrastructure/api/client");
-            await apiClient.post("/users", payload);
-            setNotice("Successor account created.");
+            await api.post("/users", payload);
+            toast("Successor account created.", "success");
           }}
           onDemoteOutgoing={async (userId) => {
-            const { api: apiClient } = await import("@/infrastructure/api/client");
-            await apiClient.patch(`/users/${userId}`, { role: "MEMBER_REGULAR" });
-            setNotice("Outgoing leader demoted to regular member.");
+            await api.patch(`/users/${userId}`, { role: "MEMBER_REGULAR" });
+            toast("Outgoing leader demoted to regular member.", "success");
           }}
           onDeactivateOutgoing={async (userId) => {
-            const { api: apiClient } = await import("@/infrastructure/api/client");
-            await apiClient.post(`/users/${userId}/deactivate`, {});
-            setNotice("Outgoing leader deactivated.");
+            await api.post(`/users/${userId}/deactivate`, {});
+            toast("Outgoing leader deactivated.", "success");
             setHandoverOpen(false);
           }}
         />
       )}
 
+      {revokeOpen && (
+        <AlertDialog
+          open
+          onOpenChange={(open) => {
+            if (!open) setRevokeOpen(false);
+          }}
+          onConfirm={() => {
+            void handleRevokeSessions();
+          }}
+          title={`Revoke sessions for ${user.name}?`}
+          description="Every active session for this account will be invalidated immediately. The user will have to sign in again on all devices. The account itself stays active."
+          confirmText="Revoke Sessions"
+        />
+      )}
+
       {deactivateTarget && (
-        <DeactivateConfirm
-          user={deactivateTarget}
+        <AlertDialog
+          open
           onOpenChange={(open) => {
             if (!open) setDeactivateTarget(null);
           }}
-          onConfirm={handleDeactivate}
+          onConfirm={() => {
+            void handleDeactivate();
+          }}
+          variant="destructive"
+          title={`Deactivate ${deactivateTarget.name}?`}
+          description={`${deactivateTarget.email} will be blocked from signing in immediately. This does not delete the account.`}
+          confirmText="Deactivate"
         />
       )}
-    </PageShell>
-  );
-}
-
-function Section({ title, children }: { title: string; children: React.ReactNode }) {
-  return (
-    <div className="rounded-md border bg-white p-4">
-      <h3 className="text-xs font-medium uppercase tracking-wide text-muted-foreground">{title}</h3>
-      <div className="mt-3 divide-y">{children}</div>
-    </div>
-  );
-}
-
-interface DeactivateConfirmProps {
-  user: ManagedUser;
-  onConfirm: () => Promise<void>;
-  onOpenChange: (open: boolean) => void;
-}
-
-function DeactivateConfirm({ user, onConfirm, onOpenChange }: DeactivateConfirmProps) {
-  return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
-      <div className="mx-4 w-full max-w-md rounded-lg bg-white p-6 shadow-lg">
-        <h3 className="text-lg font-semibold text-foreground">Deactivate {user.name}?</h3>
-        <p className="mt-2 text-sm text-muted-foreground">
-          {user.email} will be blocked from signing in immediately. This does not delete the
-          account.
-        </p>
-        <div className="mt-6 flex justify-end gap-3">
-          <Button variant="outline" onClick={() => onOpenChange(false)}>
-            Cancel
-          </Button>
-          <Button
-            variant="destructive"
-            onClick={() => {
-              void onConfirm();
-            }}
-          >
-            Deactivate
-          </Button>
-        </div>
-      </div>
-    </div>
-  );
-}
-
-export default function UserDetailPage() {
-  const params = useParams();
-  const id = params?.id as string | undefined;
-  const { user, loading, error } = useUser(id ?? null);
-
-  return (
-    <PageShell
-      breadcrumbs={[
-        { label: "Home", href: "/" },
-        { label: "Users", href: "/users" },
-        { label: "Details" },
-      ]}
-    >
-      <div className="space-y-4">
-        <Link
-          href="/users"
-          className="inline-flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground"
-        >
-          <ArrowLeft className="h-4 w-4" aria-hidden="true" />
-          User Accounts
-        </Link>
-
-        {loading && <DetailSkeleton />}
-
-        {error && !loading && (
-          <div className="space-y-4">
-            <AlertBanner message={error} />
-            <Button variant="outline" asChild>
-              <Link href="/users">Back to User Accounts</Link>
-            </Button>
-          </div>
-        )}
-
-        {!loading && !error && !user && (
-          <div className="py-12 text-center">
-            <p className="text-sm font-medium text-foreground">User not found</p>
-            <p className="mt-1 text-sm text-muted-foreground">
-              The requested user account could not be found.
-            </p>
-            <Button variant="outline" className="mt-4" asChild>
-              <Link href="/users">Back to User Accounts</Link>
-            </Button>
-          </div>
-        )}
-
-        {!loading && !error && user && <UserDetail user={user} />}
-      </div>
-    </PageShell>
+    </RecordShell>
   );
 }

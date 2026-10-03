@@ -30,10 +30,10 @@ export function MainContent({ children, className, ...props }: MainContentProps)
     <main
       className={cn(
         "flex-1 overflow-y-auto overflow-x-hidden focus:outline-none",
-        // Reference geometry §7/§28: ~20px content gutters at desktop, 16px
-        // on mobile, fluid width (no centered max-w container). pb-20 clears
-        // the fixed mobile bottom nav (h-16).
-        "px-4 py-4 md:px-5 md:py-5 pb-20 md:pb-5",
+        // Reference geometry §7/§28: ~20px content gutters at desktop, 14px
+        // on mobile (matches design m-body), fluid width (no centered max-w
+        // container). pb-20 clears the fixed mobile bottom nav (h-16).
+        "px-3.5 py-4 md:px-5 md:py-5 pb-20 md:pb-5",
         className
       )}
       tabIndex={-1}

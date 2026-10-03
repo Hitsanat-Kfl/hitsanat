@@ -1,9 +1,9 @@
 "use client";
 
 import { ActionType, MAX_GRANT_DURATION_DAYS, ResourceType } from "@repo/permissions";
-import { Badge, Button, FormField, Input, Select, Spinner } from "@repo/ui";
+import { Badge, Button, FormField, Input, Select, Spinner, useToast } from "@repo/ui";
 import { Clock, KeyRound, ShieldAlert } from "lucide-react";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useAuthUser } from "@/features/authentication";
 import {
   grantStatus,
@@ -185,25 +185,29 @@ function GrantForm({ userId, onCreate, creating }: GrantFormProps) {
  */
 export function TemporaryGrantsSection({ userId }: { userId: string }) {
   const authUser = useAuthUser();
+  const { toast } = useToast();
   const isSuperAdmin = authUser?.globalRoles.includes("SUPER_ADMIN") ?? false;
   const { grants, loading, error, createGrant, revokeGrant, creating, revoking } =
     usePermissionGrants(isSuperAdmin ? userId : null);
-  const [notice, setNotice] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (error) toast(error, "error");
+  }, [error, toast]);
 
   if (!isSuperAdmin) return null;
 
   const handleRevoke = async (grantId: string) => {
     try {
       await revokeGrant(grantId);
-      setNotice("Grant revoked.");
+      toast("Grant revoked.", "success");
     } catch (err) {
-      setNotice(err instanceof Error ? err.message : "Revocation failed.");
+      toast(err instanceof Error ? err.message : "Revocation failed.", "error");
     }
   };
 
   const handleCreate = async (payload: Parameters<typeof createGrant>[0]) => {
     await createGrant(payload);
-    setNotice("Temporary grant created.");
+    toast("Temporary grant created.", "success");
   };
 
   return (
@@ -224,30 +228,10 @@ export function TemporaryGrantsSection({ userId }: { userId: string }) {
         </div>
       </div>
 
-      {notice && (
-        <output className="mt-3 flex items-center justify-between rounded-md bg-emerald-50 p-3 text-sm text-emerald-800">
-          <span>{notice}</span>
-          <button
-            type="button"
-            onClick={() => setNotice(null)}
-            className="ml-3 shrink-0 underline underline-offset-2"
-            aria-label="Dismiss notification"
-          >
-            Dismiss
-          </button>
-        </output>
-      )}
-
       {loading && (
         <div className="mt-4 flex items-center gap-2 text-sm text-muted-foreground">
           <Spinner className="h-4 w-4" /> Loading grants…
         </div>
-      )}
-
-      {error && (
-        <p role="alert" className="mt-3 text-sm text-destructive">
-          {error}
-        </p>
       )}
 
       {!loading && !error && grants.length === 0 && (

@@ -17,6 +17,15 @@ export const LEADERSHIP_ROLES = [
   "SECRETARY",
 ] as const;
 
+/**
+ * Global roles allowed to manage user accounts (FR-13.1 / BR-008).
+ * Mirrors the `allowedGlobalRoles` of the users API router — the API
+ * stays the authorization authority; this only drives UI visibility.
+ */
+export const ACCOUNT_MANAGER_ROLES = ["SUPER_ADMIN", "CHAIRPERSON"] as const;
+
+export type AccountManagerRole = (typeof ACCOUNT_MANAGER_ROLES)[number];
+
 /** Executive roles that receive a role dashboard on the home page. */
 export const EXECUTIVE_DASHBOARD_ROLES = [
   "SUPER_ADMIN",
@@ -42,6 +51,14 @@ export function isExecutiveDashboardRole(role: string): role is ExecutiveDashboa
 
 export function hasGlobalLeadership(globalRoles: string[]): boolean {
   return globalRoles.some((role) => isLeadershipRole(role));
+}
+
+/**
+ * Frontend visibility check for user-account management actions.
+ * Never a security boundary: every request still passes through the API.
+ */
+export function canManageAccounts(globalRoles: string[]): boolean {
+  return globalRoles.some((role) => (ACCOUNT_MANAGER_ROLES as readonly string[]).includes(role));
 }
 
 export function hasSubDeptLeadership(

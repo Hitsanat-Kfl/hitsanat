@@ -8,6 +8,7 @@ interface DialogContextValue {
 }
 
 const DialogContext = React.createContext<DialogContextValue | null>(null);
+const DialogTitleIdContext = React.createContext<string | undefined>(undefined);
 
 function useDialog() {
   const context = React.useContext(DialogContext);
@@ -69,6 +70,10 @@ const DialogContent = React.forwardRef<HTMLDivElement, DialogContentProps>(
   ({ className, children, showClose = true, ...props }, ref) => {
     const { open, onOpenChange } = useDialog();
     const contentRef = React.useRef<HTMLDivElement>(null);
+    const generatedTitleId = React.useId();
+    const labelledBy = props["aria-labelledby"];
+    const titleId = typeof labelledBy === "string" ? labelledBy : generatedTitleId;
+    const { "aria-labelledby": _ariaLabelledBy, ...restProps } = props;
 
     React.useEffect(() => {
       if (!open) return;
@@ -111,6 +116,7 @@ const DialogContent = React.forwardRef<HTMLDivElement, DialogContentProps>(
             // biome-ignore lint/a11y/useSemanticElements: Dialog uses portal-based rendering, not native dialog element
             role="dialog"
             aria-modal="true"
+            aria-labelledby={titleId}
             data-state={open ? "open" : "closed"}
             className={cn(
               "relative z-50 w-full max-w-lg rounded-t-xl border bg-background p-6 shadow-lg",
@@ -119,9 +125,11 @@ const DialogContent = React.forwardRef<HTMLDivElement, DialogContentProps>(
               className
             )}
             tabIndex={-1}
-            {...props}
+            {...restProps}
           >
-            {children}
+            <DialogTitleIdContext.Provider value={titleId}>
+              {children}
+            </DialogTitleIdContext.Provider>
 
             {showClose && (
               <button
@@ -158,13 +166,17 @@ const DialogHeader = React.forwardRef<HTMLDivElement, React.HTMLAttributes<HTMLD
 DialogHeader.displayName = "DialogHeader";
 
 const DialogTitle = React.forwardRef<HTMLHeadingElement, React.HTMLAttributes<HTMLHeadingElement>>(
-  ({ className, ...props }, ref) => (
-    <h2
-      ref={ref}
-      className={cn("text-lg font-semibold leading-none tracking-tight", className)}
-      {...props}
-    />
-  )
+  ({ className, id, ...props }, ref) => {
+    const contextId = React.useContext(DialogTitleIdContext);
+    return (
+      <h2
+        ref={ref}
+        id={id ?? contextId}
+        className={cn("text-lg font-semibold leading-none tracking-tight", className)}
+        {...props}
+      />
+    );
+  }
 );
 DialogTitle.displayName = "DialogTitle";
 

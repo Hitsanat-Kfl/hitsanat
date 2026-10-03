@@ -10,7 +10,7 @@ import {
 import type { PermissionGrantRepository } from "../../src/modules/permission-grants/domain/repositories/permission-grant.repository.js";
 import type { PermissionGrant } from "@repo/permissions";
 
-const NOW = new Date("2026-09-23T12:00:00.000Z");
+const NOW = new Date();
 
 function makeGrant(overrides: Partial<PermissionGrant> = {}): PermissionGrant {
   return {

@@ -1,4 +1,5 @@
 import type { Metadata, Viewport } from "next";
+import { ToastProvider } from "@repo/ui";
 import { QueryProvider } from "@/providers";
 import "./globals.css";
 
@@ -20,7 +21,9 @@ export default function RootLayout({
   return (
     <html lang="am" suppressHydrationWarning>
       <body className="min-h-screen bg-background font-sans antialiased">
-        <QueryProvider>{children}</QueryProvider>
+        <QueryProvider>
+          <ToastProvider>{children}</ToastProvider>
+        </QueryProvider>
       </body>
     </html>
   );
